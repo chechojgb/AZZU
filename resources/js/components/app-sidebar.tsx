@@ -14,8 +14,8 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Home',
-        href: '/',
+        title: 'Tabla de agentes',
+        href: '/showTableAgents',
         icon: LayoutGrid,
     },
 ];

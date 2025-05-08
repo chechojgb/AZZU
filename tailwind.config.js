@@ -10,6 +10,7 @@ export default {
         './resources/views/**/*.blade.php',
         './resources/js/**/*.jsx',
         './resources/js/**/*.tsx',
+        './node_modules/flowbite/**/*.js',
     ],
 
     theme: {
@@ -26,5 +27,8 @@ export default {
         },
     },
 
-    plugins: [forms],
+    plugins: [
+        forms,
+        tailwindcss(),
+    ],
 };
