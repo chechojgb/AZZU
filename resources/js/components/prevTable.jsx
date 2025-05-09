@@ -36,13 +36,14 @@ function PrevTable() {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map(p => <tr className="border-b border-gray-300 dark:border-gray-600" key={p.extension}>
-                                <td className="px-4 py-2">{p.member.nombre}</td>
-                                <td className="px-4 py-2">{p.extension}</td>
-                                <td className="px-4 py-2">{p.accountcode}</td>
-                                <td className="px-4 py-2 text-green-600 dark:text-green-400">● Activo ({p.member.estado})</td>
-                                </tr>)}
-
+                            {data.map(p => (
+                                <tr className="border-b border-gray-300 dark:border-gray-600" key={p.extension}>
+                                    <td className="px-4 py-2">{p.member?.nombre || 'Sin usuario'}</td>
+                                    <td className="px-4 py-2">{p.extension}</td>
+                                    <td className="px-4 py-2">{p.accountcode}</td>
+                                    <td className="px-4 py-2 text-green-600 dark:text-green-400">● Activo ({p.member?.estado || 'Desconocido'})</td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
