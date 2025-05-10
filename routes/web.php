@@ -20,6 +20,9 @@ Route::get('perfil', function () {
 Route::get('showTableAgents', function () {
     return Inertia::render('showTableAgents');
 })->name('showTableAgents');
+Route::get('editAgent', function () {
+    return Inertia::render('editAgent');
+})->name('editAgent');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
