@@ -1,3 +1,5 @@
+import { Link } from "@inertiajs/react";
+
 const AgentModalContent = ({ agent, onClose }) => (
     <>
       <div className="flex items-center gap-4 mb-4">
@@ -8,7 +10,7 @@ const AgentModalContent = ({ agent, onClose }) => (
         </div>
         <div className="ml-auto text-right">
           <p className="text-green-600 dark:text-green-400 text-sm font-semibold">{agent.member?.estado}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-300">{agent.time}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-300">{agent.accountcode}</p>
         </div>
       </div>
   
@@ -24,8 +26,8 @@ const AgentModalContent = ({ agent, onClose }) => (
         </div>
       </div>
   
-      <div onClick={onClose} className="pt-4 text-sm text-indigo-600 dark:text-indigo-400 font-semibold cursor-pointer hover:underline">
-        Realizar control
+      <div  className="pt-4 text-sm text-indigo-600 dark:text-indigo-400 font-semibold cursor-pointer hover:underline">
+        <Link href={route('editAgent')}  >Administrar</Link>
       </div>
     </>
   );

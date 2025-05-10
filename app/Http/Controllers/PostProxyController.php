@@ -9,15 +9,16 @@ use Illuminate\Http\JsonResponse;
 class PostProxyController extends Controller
 {
 
-    public function index(): JsonResponse
+    public function index($area): JsonResponse
     {
-        // Simulación de datos de prueba
-        return response()->json([
-            'queue'     => rand(4, 10),
-            'available' => rand(2, 6),
-            'onCall'    => rand(1, 4),
-            'paused'    => rand(0, 3),
-        ]);
+        $response = Http::get("http://10.57.251.181:3003/area/{$area}/estado");
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos'], 500);
+        }
+
+        $data = $response->json();
+
+        return response()->json($data);
     }
 
     public function usersTable($area): JsonResponse
@@ -59,16 +60,16 @@ class PostProxyController extends Controller
         return response()->json($data);
     }
 
-    private function randomTimeBetween(int $minSeconds, int $maxSeconds): string
-    {
-        $seconds = rand($minSeconds, $maxSeconds);
-        return gmdate("H:i:s", $seconds);
-    }
+    // private function randomTimeBetween(int $minSeconds, int $maxSeconds): string
+    // {
+    //     $seconds = rand($minSeconds, $maxSeconds);
+    //     return gmdate("H:i:s", $seconds);
+    // }
 
 
     public function getOverview()
     {
-        $response = Http::get('http://10.57.251.181:3001/extensions/overview');
+        $response = Http::get('http://10.57.251.181:3004/extensions/overview');
 
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);

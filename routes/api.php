@@ -9,6 +9,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('/stats', [PostProxyController::class, 'index']);
+Route::get('/stats/{area}', [PostProxyController::class, 'index']);
 Route::get('/agents/{area}', [PostProxyController::class, 'usersTable']);
 Route::get('/getOverview', [PostProxyController::class, 'getOverview']);
