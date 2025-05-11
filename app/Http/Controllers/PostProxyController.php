@@ -60,16 +60,52 @@ class PostProxyController extends Controller
         return response()->json($data);
     }
 
-    // private function randomTimeBetween(int $minSeconds, int $maxSeconds): string
-    // {
-    //     $seconds = rand($minSeconds, $maxSeconds);
-    //     return gmdate("H:i:s", $seconds);
-    // }
+    public function userData($extension): JsonResponse
+    {
+        $response = Http::get("http://10.57.251.181:3005/extension/info?ext={$extension}");
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos'], 500);
+        }
+
+        $data = $response->json();
+
+        $texto = $data['member'] ?? $data['member2'] ?? null;
+
+        if ($texto) {
+            // Extraer nombre
+            $nombre = explode(' ', $texto)[0];
+
+            // Extraer estado (Busy, In call, etc.)
+            preg_match_all('/\((.*?)\)/', $texto, $matches);
+            $estado = null;
+            $pausa = null;
+
+            foreach ($matches[1] as $match) {
+                if (str_contains($match, 'paused')) {
+                    $pausa = $match; // ej: paused:ACW was 2108 secs ago
+                }
+                if (in_array($match, ['Busy', 'On Hold', 'In call', 'Ringing', 'Not in use'])) {
+                    $estado = $match;
+                }
+            }
+
+            $data['member'] = [
+                'nombre' => $nombre,
+                'estado' => $estado,
+                'pausa' => $pausa,
+            ];
+        }
+
+        return response()->json($data);
+    }
+
+    
+
 
 
     public function getOverview()
     {
-        $response = Http::get('http://10.57.251.181:3004/extensions/overview');
+        $response = Http::get('http://10.57.251.181:3007/extensions/overview');
 
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
@@ -107,5 +143,35 @@ class PostProxyController extends Controller
         return response()->json($data);
     }
 
+
+    public function chanelHangup(Request $request)
+    {
+        $channel = $request->input('channel');
+
+        $response = Http::post('http://10.57.251.181:3000/channel/hangup', [
+            'channel' => $channel
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Canal colgado correctamente']);
+        }
+
+        return response()->json(['error' => 'No se pudo colgar el canal'], 500);
+    }
+
+        public function pausedExtension(Request $request)
+    {
+        $extension = $request->input('extension');
+
+        $response = Http::post('http://10.57.251.181:3000/channel/hangup', [
+            'channel' => $extension
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Extension pausada correctamente']);
+        }
+
+        return response()->json(['error' => 'No se pudo colgar el canal'], 500);
+    }
 
 }

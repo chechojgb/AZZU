@@ -119,6 +119,7 @@ const AgentPanel = () => {
                         <DropdownItem onClick={() => { startPolling('Tramites'); setOperation('Tramites'); }}>Tramites</DropdownItem>
                         <DropdownItem onClick={() => { startPolling('Retencion'); setOperation('Retencion'); }}>Retención</DropdownItem>
                         <DropdownItem onClick={() => { startPolling('Movil'); setOperation('Movil'); }}>Móvil</DropdownItem>
+                        <DropdownItem onClick={() => { startPolling('Pruebas'); setOperation('Pruebas'); }}>Pruebas</DropdownItem>
                     </Dropdown>
                     </div>
                     <div className="flex-1 flex justify-center">
