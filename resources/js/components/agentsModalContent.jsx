@@ -1,15 +1,16 @@
 import { Link } from "@inertiajs/react";
+import {getStatusClass, getStatusBorderClass, getStatusBgClass} from '@/utils/statusStyles'
 
 const AgentModalContent = ({ agent, onClose }) => (
     <>
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-white text-lg font-semibold">👤</div>
+        <div className={`w-12 h-12 rounded-full ${getStatusBgClass(agent.member?.estado)} flex items-center justify-center text-white text-lg font-semibold`}>👤</div>
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{agent.member.nombre}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">1.1.1.1</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400"></p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-green-600 dark:text-green-400 text-sm font-semibold">{agent.member?.estado}</p>
+          <p className={`${getStatusClass(agent.member?.estado)}  text-sm font-semibold`}>{agent.member?.estado}</p>
           <p className="text-xs text-gray-500 dark:text-gray-300">{agent.accountcode}</p>
         </div>
       </div>
@@ -27,7 +28,7 @@ const AgentModalContent = ({ agent, onClose }) => (
       </div>
   
       <div  className="pt-4 text-sm text-indigo-600 dark:text-indigo-400 font-semibold cursor-pointer hover:underline">
-        <Link href={route('editAgent')}  >Administrar</Link>
+        <Link href={route('editAgent', agent.extension)}>Administrar</Link>
       </div>
     </>
   );
