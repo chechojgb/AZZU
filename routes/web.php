@@ -20,9 +20,22 @@ Route::get('perfil', function () {
 Route::get('showTableAgents', function () {
     return Inertia::render('showTableAgents');
 })->name('showTableAgents');
-Route::get('editAgent', function () {
-    return Inertia::render('editAgent');
+Route::get('editAgent/{agent}', function ($agent) {
+    return Inertia::render('editAgent', [
+        'agent' => $agent
+    ]);
 })->name('editAgent');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+
+
+
+Route::get('/escuchar', function () {
+    $ext = request('ext', '7001'); // extensión por defecto
+    $comando = "asterisk -x \"channel originate SIP/5300 extension 12453143{$ext}@from-internal\"";
+    $output = shell_exec($comando);
+    return response()->json(['status' => 'OK', 'output' => $output])
+                     ->header('Access-Control-Allow-Origin', '*');
+});
