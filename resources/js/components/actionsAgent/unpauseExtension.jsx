@@ -1,7 +1,7 @@
 
-export default async function PauseExtension(extension) {
+export default async function UnpauseExtension(extension) {
   try {
-    const response = await fetch('/api/pause-extension', {
+    const response = await fetch('/api/unpause-extension', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
