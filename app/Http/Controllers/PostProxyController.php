@@ -60,44 +60,53 @@ class PostProxyController extends Controller
         return response()->json($data);
     }
 
-    public function userData($extension): JsonResponse
-    {
-        $response = Http::get("http://10.57.251.181:3005/extension/info?ext={$extension}");
-        if (!$response->successful()) {
-            return response()->json(['error' => 'No se pudo obtener los datos'], 500);
+public function userData($extension): JsonResponse
+{
+    $response = Http::get("http://10.57.251.181:3005/extension/info?ext={$extension}");
+    if (!$response->successful()) {
+        return response()->json(['error' => 'No se pudo obtener los datos'], 500);
+    }
+
+    $data = $response->json();
+
+    $texto = $data['member'] ?? $data['member2'] ?? null;
+
+    if ($texto) {
+        $nombre = explode(' ', $texto)[0];
+        preg_match_all('/\((.*?)\)/', $texto, $matches);
+        $estado = null;
+        $pausa = null;
+
+        foreach ($matches[1] as $match) {
+            if (str_contains($match, 'paused')) {
+                $pausa = $match;
+            }
+            if (in_array($match, ['Busy', 'On Hold', 'In call', 'Ringing', 'Not in use'])) {
+                $estado = $match;
+            }
         }
 
-        $data = $response->json();
-
-        $texto = $data['member'] ?? $data['member2'] ?? null;
-
-        if ($texto) {
-            // Extraer nombre
-            $nombre = explode(' ', $texto)[0];
-
-            // Extraer estado (Busy, In call, etc.)
-            preg_match_all('/\((.*?)\)/', $texto, $matches);
-            $estado = null;
-            $pausa = null;
-
-            foreach ($matches[1] as $match) {
+        // Si no encontramos la pausa en el primer texto, revisamos member2
+        if (!$pausa && isset($data['member2'])) {
+            preg_match_all('/\((.*?)\)/', $data['member2'], $matches2);
+            foreach ($matches2[1] as $match) {
                 if (str_contains($match, 'paused')) {
-                    $pausa = $match; // ej: paused:ACW was 2108 secs ago
-                }
-                if (in_array($match, ['Busy', 'On Hold', 'In call', 'Ringing', 'Not in use'])) {
-                    $estado = $match;
+                    $pausa = $match;
+                    break;
                 }
             }
-
-            $data['member'] = [
-                'nombre' => $nombre,
-                'estado' => $estado,
-                'pausa' => $pausa,
-            ];
         }
 
-        return response()->json($data);
+        $data['member'] = [
+            'nombre' => $nombre,
+            'estado' => $estado,
+            'pausa' => $pausa,
+        ];
     }
+
+    return response()->json($data);
+}
+
 
     
 
@@ -159,19 +168,87 @@ class PostProxyController extends Controller
         return response()->json(['error' => 'No se pudo colgar el canal'], 500);
     }
 
-        public function pausedExtension(Request $request)
+    public function pauseExtension(Request $request): JsonResponse
     {
         $extension = $request->input('extension');
 
-        $response = Http::post('http://10.57.251.181:3000/channel/hangup', [
-            'channel' => $extension
+        if (!$extension) {
+            return response()->json(['error' => 'Extensión no proporcionada'], 400);
+        }
+
+        $interface = "SIP/{$extension}";
+        $queues = [];
+        for ($i = 1; $i <= 120; $i++) {
+            $queues[] = 'Q' . str_pad($i, 3, '0', STR_PAD_LEFT);
+        }
+        $paused = 1;
+        $reason = 'ACW';
+
+        $response = Http::post('http://10.57.251.181:3000/queue/pause', [
+            'queues' => $queues,
+            'interface' => $interface,
+            'paused' => $paused,
+            'reason' => $reason,
         ]);
 
         if ($response->successful()) {
-            return response()->json(['message' => 'Extension pausada correctamente']);
+            return response()->json(['message' => 'Agente pausado correctamente']);
         }
 
-        return response()->json(['error' => 'No se pudo colgar el canal'], 500);
+        return response()->json(['error' => 'No se pudo pausar al agente'], 500);
+    }
+
+
+    public function unpauseExtension(Request $request): JsonResponse
+    {
+        $extension = $request->input('extension');
+
+        if (!$extension) {
+            return response()->json(['error' => 'Extensión no proporcionada'], 400);
+        }
+
+        $interface = "SIP/{$extension}";
+        $queues = [];
+        for ($i = 1; $i <= 120; $i++) {
+            $queues[] = 'Q' . str_pad($i, 3, '0', STR_PAD_LEFT);
+        }
+        $paused = 0;
+        $reason = 'ACW';
+
+        $response = Http::post('http://10.57.251.181:3000/queue/pause', [
+            'queues' => $queues,
+            'interface' => $interface,
+            'paused' => $paused,
+            'reason' => $reason,
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Agente despausado correctamente']);
+        }
+
+        return response()->json(['error' => 'No se pudo pausar al agente'], 500);
+    }
+
+    public function channelTransfer(Request $request): JsonResponse
+    {
+        $channel = $request->input('channel');
+        $destiny = $request->input('destiny');
+
+        if (!$channel || !$destiny) {
+            return response()->json(['error' => 'Extensión no proporcionada'], 400);
+        }
+
+
+        $response = Http::post('http://10.57.251.181:3006/transferir', [
+            'canal' => $channel,
+            'destino' => $destiny,
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Llamada transferida correctamente']);
+        }
+
+        return response()->json(['error' => 'No se pudo transferir la llamada'], 500);
     }
 
 }
