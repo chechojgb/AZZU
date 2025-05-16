@@ -30,7 +30,7 @@ export default function useAdminButtons({ data, handlers }) {
       bg: 'hover:bg-blue-50 dark:hover:bg-blue-400/60',
       border: 'border-blue-200 dark:border-black',
       onClick: () => handlers.modal,
-      disabledIf: (c) => c.paused,
+      disabledIf: (c) => c.notCall,
     },
     {
       label: 'Pausar agente',

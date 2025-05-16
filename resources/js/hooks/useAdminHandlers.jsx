@@ -2,6 +2,7 @@ import { useState } from 'react';
 import hangupChannel from '@/components/actionsAgent/deleteCall';
 import PausedExtension from '@/components/actionsAgent/pausedExtension';
 import UnpauseExtension from '@/components/actionsAgent/unpauseExtension';
+import TransferCall from '@/components/actionsAgent/transferCall';
 
 export default function useAdminHandlers(data) {
   const [toast, setToast] = useState({ show: false, success: true, message: '' });
@@ -26,11 +27,11 @@ export default function useAdminHandlers(data) {
     showToast(result);
   };
 
-  const handleTransfer = async () => {
-    const result = await UnpauseExtension(data?.extension);
+  const handleTransfer = async (destino) => {
+    const result = await TransferCall({ canal: data?.canalRelacionado, destino });
     showToast(result);
   };
 
 
-  return { handleHangup, handlePause, handleUnpause, toast };
+  return { handleHangup, handlePause, handleUnpause,handleTransfer, toast };
 }
