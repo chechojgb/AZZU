@@ -2,8 +2,8 @@ import React from "react";
 import { useState } from "react";
 import AgentModalWrapper from '@/components/agentsModalWrapper';
 
-function TransferModal ({hideModal, handleTransfer}){
-    const [selectedQueue, setSelectedQueue] = useState(null)
+function TransferModal ({hideModal, handlers}){
+    const [selectedOperation, setSelectedOperation] = useState(null)
     return(
         <>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Transferir llamada</h3>
@@ -18,9 +18,9 @@ function TransferModal ({hideModal, handleTransfer}){
                 {['Tramites', 'Soporte', 'Movil', 'Retencion', 'Pruebas'].map((area) => (
                   <button
                     key={area}
-                    onClick={() => setSelectedQueue(area)} // Define esta función en tu estado
+                    onClick={() => setSelectedOperation(area)} 
                     className={`w-full py-2 px-3 text-sm rounded-md font-medium border dark:border-gray-600 transition ${
-                      selectedQueue === area
+                      selectedOperation === area
                         ? 'bg-indigo-600 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
@@ -40,11 +40,11 @@ function TransferModal ({hideModal, handleTransfer}){
               </button>
               <button
                 onClick={() => {
-                  handleTransfer(selectedQueue);
+                  handlers.handleTransfer(selectedOperation);
                   hideModal();
                 }}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium"
-                disabled={!selectedQueue}
+                disabled={!selectedOperation}
               >
                 Confirmar
               </button>

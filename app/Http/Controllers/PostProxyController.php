@@ -231,17 +231,16 @@ public function userData($extension): JsonResponse
 
     public function channelTransfer(Request $request): JsonResponse
     {
-        $channel = $request->input('channel');
-        $destiny = $request->input('destiny');
+        $channel = $request->input('canal');
+        $destino = $request->input('destino'); // ← este nombre es el correcto
 
-        if (!$channel || !$destiny) {
-            return response()->json(['error' => 'Extensión no proporcionada'], 400);
+        if (!$channel || !$destino) {
+            return response()->json(['error' => 'Todos los datos no fueron proporcionados'], 400);
         }
-
 
         $response = Http::post('http://10.57.251.181:3006/transferir', [
             'canal' => $channel,
-            'destino' => $destiny,
+            'destino' => $destino, // ← debe mantenerse igual que en Postman
         ]);
 
         if ($response->successful()) {
@@ -250,5 +249,7 @@ public function userData($extension): JsonResponse
 
         return response()->json(['error' => 'No se pudo transferir la llamada'], 500);
     }
+
+
 
 }
