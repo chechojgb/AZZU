@@ -43,7 +43,7 @@ export default function AdminActions({ data }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {/*1.1 MAPEO DE BOTONES */}
         {actions.map((action, index) => {
-          const disabled = isUnspecified || action.disabledIf(conditions);
+          const disabled =  isUnspecified || action.disabledIf(conditions);
           return (
             <AdminActionButton
               key={index}
@@ -77,10 +77,7 @@ export default function AdminActions({ data }) {
         <AgentModalWrapper closeModal={hideModal}>
           <TransferModal
             hideModal={hideModal}
-            handleTransfer={(queue) => {
-              console.log('Transferir a:', queue);
-              hideModal(); // También puedes cerrarlo aquí
-            }}
+            handlers={handlers}
           />
         </AgentModalWrapper>
       )}
