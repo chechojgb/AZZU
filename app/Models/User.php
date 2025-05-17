@@ -6,9 +6,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\AreaRoleUser;
+use App\Models\Area;
+use App\Models\Role;
 
 class User extends Authenticatable
 {
+
+
+    public function areaRoles()
+    {
+        return $this->hasMany(AreaRoleUser::class);
+    }
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'roles');
+    }
+
+    // Áreas a las que pertenece el usuario
+    public function areas(): BelongsToMany
+    {
+        return $this->belongsToMany(Area::class);
+    }
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
