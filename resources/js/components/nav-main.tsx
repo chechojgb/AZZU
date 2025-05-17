@@ -2,6 +2,7 @@ import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, Sideba
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import DarkModeDash from './dark-modeDash';
+import SidebarDropdown from './SidebarDropdown';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
@@ -10,19 +11,20 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
             <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
             <SidebarMenu>
                 <DarkModeDash/>
-                {items.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton  
-                            asChild isActive={item.href === page.url}
-                            tooltip={{ children: item.title }}
-                        >
-                            <Link href={item.href} prefetch>
-                                {item.icon && <item.icon />}
-                                <span>{item.title}</span>
+                {items.map((item) =>
+                    item.children ? (
+                        <SidebarDropdown key={item.title} item={item} currentPath={page.url} />
+                    ) : (
+                        <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild isActive={item.href === page.url}>
+                            <Link href={item.href}>
+                            {item.icon && <item.icon />}
+                            <span>{item.title}</span>
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
-                ))}
+                        </SidebarMenuItem>
+                    )
+                )}
             </SidebarMenu>
         </SidebarGroup>
     );
