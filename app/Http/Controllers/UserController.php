@@ -13,9 +13,11 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with(['areaRoles.role', 'areaRoles.area'])->get();
+        // $users = User::with(['areaRoles.role', 'areaRoles.area'])->get();
 
-        return view('admin.users.index', compact('users'));
+        // return view('admin.users.index', compact('users'));
+
+        return User::all();  
     }
 
     /**

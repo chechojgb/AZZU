@@ -31,7 +31,7 @@ const mainNavItems: NavItem[] = [
         title: 'Areas',
         href: '/Areas',
         children: [
-        { title: 'Administrar', href: '/users' },
+        { title: 'Administrar', href: '/areas' },
         { title: 'Agregar', href: '/users/create' }
         ],
         icon: Tags,

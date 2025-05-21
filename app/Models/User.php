@@ -23,7 +23,6 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'roles');
     }
-
     // Áreas a las que pertenece el usuario
     public function areas(): BelongsToMany
     {
