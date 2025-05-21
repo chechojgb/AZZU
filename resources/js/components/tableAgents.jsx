@@ -123,15 +123,25 @@ const AgentPanel = () => {
                     </Dropdown>
                     </div>
                     <div className="flex-1 flex justify-center">
-                        <div className="grid grid-cols-6 gap-6">
-                            {Object.entries(stats).map(([key, value]) => (
-                                <div key={key} className="text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 shadow">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{key}</p>
-                                    <p className={`text-lg font-semibold cursor-pointer ${getStatusClass(key)}`} onClick={() => key === 'total' ? setSearch('') : setSearch(key)} >{value}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+  <div className="grid grid-cols-3 [@media(min-width:1200px)]:grid-cols-6 gap-4">
+    {Object.entries(stats).map(([key, value]) => (
+      <div
+        key={key}
+        className="text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+                   rounded-xl px-4 py-2 shadow"
+      >
+        <p className="text-xs text-gray-500 dark:text-gray-400">{key}</p>
+        <p
+          className={`text-lg font-semibold cursor-pointer ${getStatusClass(key)}`}
+          onClick={() => key === 'total' ? setSearch('') : setSearch(key)}
+        >
+          {value}
+        </p>
+      </div>
+    ))}
+  </div>
+</div>
+
                     <div className="relative">
                         <input
                             type="text"
