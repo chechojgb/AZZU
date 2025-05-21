@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -26,10 +27,24 @@ Route::get('editAgent/{agent}', function ($agent) {
     ]);
 })->name('editAgent');
 
+
+Route::get('editAgent/{agent}', function ($agent) {
+    return Inertia::render('editAgent', [
+        'agent' => $agent
+    ]);
+})->name('editAgent');
+
+Route::get('users', function () {
+    return Inertia::render('users/index');
+})->name('users');
+Route::get('users/create', function () {
+    return Inertia::render('users/create');
+})->name('users-create');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
-
+Route::get('users/index', [UserController::class, 'index'])->name('user_index');
 
 
 Route::get('/escuchar', function () {
