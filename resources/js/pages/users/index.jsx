@@ -28,6 +28,9 @@ export default function Users() {
 
   if (loading) return <p className="p-4">Cargando usuarios...</p>;
 
+  // console.log(users);
+  
+
 
 
   return (
