@@ -45,6 +45,8 @@ require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
 Route::get('users/index', [UserController::class, 'index'])->name('user_index');
+Route::get('users/creates', [UserController::class, 'create'])->name('user_creates');
+Route::post('users.store', [UserController::class, 'store'])->name('users.store');
 
 
 Route::get('/escuchar', function () {

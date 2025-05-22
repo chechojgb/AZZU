@@ -7,17 +7,30 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Area;
 use App\Models\AreaRoleUser;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 
 class UserController extends Controller
 {
     public function index()
     {
-        // $users = User::with(['areaRoles.role', 'areaRoles.area'])->get();
+        $users = User::with(['areaRoles.role', 'areaRoles.area'])->get();
 
-        // return view('admin.users.index', compact('users'));
+        $result = $users->map(function ($user) {
+            $roles = $user->areaRoles->pluck('role.name')->unique()->values();
+            $areas = $user->areaRoles->pluck('area.name')->unique()->values();
 
-        return User::all();  
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'rol' => $roles->first(), // Si solo tiene uno, o puedes usar join(", ", $roles->toArray())
+                'areas' => $areas,
+            ];
+        });
+
+        return response()->json($result);
     }
 
     /**
@@ -25,9 +38,18 @@ class UserController extends Controller
      */
     public function create()
     {
-        $areas = Area::all();
-        $roles = Role::all();
-        return view('admin.users.create', compact('areas', 'roles'));
+    $roles = \App\Models\Role::select('name')->get();
+    $areas = \App\Models\Area::select('name')->get();
+
+    Log::info('📦 Roles y Áreas cargadas:', [
+        'roles' => $roles->pluck('name'),
+        'areas' => $areas->pluck('name'),
+    ]);
+
+    return response()->json([
+        'roles' => $roles,
+        'areas' => $areas,
+    ]);
     }
 
     /**
@@ -40,6 +62,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
             'role' => 'required',
+            'areas' => $request->role === 'Supervisor' ? 'required|array|min:1' : 'nullable|array',
         ]);
 
         // Crear usuario
@@ -84,7 +107,11 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Usuario creado correctamente.');
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Usuario creado correctamente.']);
+        } else {
+            return redirect()->back()->with('success', 'Usuario creado correctamente.');
+        }
     }
 
     /**
