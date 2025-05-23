@@ -47,6 +47,9 @@ require __DIR__.'/auth.php';
 Route::get('users/index', [UserController::class, 'index'])->name('user_index');
 Route::get('users/creates', [UserController::class, 'create'])->name('user_creates');
 Route::post('users.store', [UserController::class, 'store'])->name('users.store');
+Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+
 
 
 Route::get('/escuchar', function () {
