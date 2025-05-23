@@ -15,8 +15,13 @@ class UserController extends Controller
 {
     public function index()
     {
+        // Contar cuántas áreas existen en total
+        $totalAreas = \App\Models\Area::count();
+
+        // Cargar los usuarios con relaciones
         $users = User::with(['areaRoles.role', 'areaRoles.area'])->get();
 
+        // Formatear cada usuario
         $result = $users->map(function ($user) {
             $roles = $user->areaRoles->pluck('role.name')->unique()->values();
             $areas = $user->areaRoles->pluck('area.name')->unique()->values();
@@ -25,12 +30,16 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'rol' => $roles->first(), // Si solo tiene uno, o puedes usar join(", ", $roles->toArray())
-                'areas' => $areas,
+                'rol' => $roles->first(),
+                'areas' => $areas, 
             ];
         });
 
-        return response()->json($result);
+        // Incluir el total de áreas global
+        return response()->json([
+            'users' => $result,
+            'totalAreas' => $totalAreas,
+        ]);
     }
 
     /**
@@ -134,9 +143,23 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit($id)
     {
-        //
+        $user = User::with(['areaRoles.role', 'areaRoles.area'])->findOrFail($id);
+        $areas = Area::all();
+        $userRole = optional(optional($user->areaRoles->first())->role)->name;
+        $checkedAreas = $user->areaRoles->pluck('area_id')->toArray();
+
+        return Inertia::render('users/edit', [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email ,
+                'role' => $userRole ,
+                'checkedAreas' => $checkedAreas,
+            ],
+            'areas' => $areas,
+        ]);
     }
 
     /**
@@ -145,40 +168,35 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string|exists:roles,name',
             'areas' => 'array',
             'areas.*' => 'integer|exists:areas,id',
         ]);
-    
-        // 1. Actualizar datos básicos
+
         $user->name = $request->name;
         $user->email = $request->email;
-    
+
         if ($request->filled('password')) {
             $user->password = bcrypt($request->password);
         }
-    
+
         $user->save();
-    
-        // 2. Obtener el rol por nombre
+
         $role = Role::where('name', $request->role)->firstOrFail();
-    
-        // 3. Eliminar asignaciones anteriores del usuario en area_role_users
+
         AreaRoleUser::where('user_id', $user->id)->delete();
-    
-        // 4. Determinar áreas a asignar
+
         $areas = [];
-    
+
         if (in_array($role->name, ['Admin', 'Soporte'])) {
-            $areas = Area::pluck('id')->toArray(); // Todas las áreas
+            $areas = Area::pluck('id')->toArray();
         } elseif ($role->name === 'Supervisor') {
             $areas = $request->areas ?? [];
         }
-    
-        // 5. Crear las nuevas asignaciones
+
         foreach ($areas as $areaId) {
             AreaRoleUser::create([
                 'user_id' => $user->id,
@@ -186,8 +204,12 @@ class UserController extends Controller
                 'area_id' => $areaId,
             ]);
         }
-    
-        return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Usuario actualizado correctamente.']);
+        }
+
+        return redirect()->back()->with('success', 'Usuario actualizado correctamente.');
     }
     
 

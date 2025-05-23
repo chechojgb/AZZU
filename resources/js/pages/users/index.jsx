@@ -12,12 +12,14 @@ const breadcrumbs = [
 
 export default function Users() {
   const [users, setUsers] = useState([]);
+  const [totalAreas, setTotalAreas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios.get('users/index')
       .then(res => {
-        setUsers(res.data);
+        setUsers(res.data.users);
+        setTotalAreas(res.data.totalAreas)
         setLoading(false);
       })
       .catch(err => {
@@ -30,7 +32,7 @@ export default function Users() {
 
   // console.log(users);
   
-
+  console.log(totalAreas)
 
 
   return (
@@ -54,7 +56,7 @@ export default function Users() {
                   </TableRow>
                 </TableHead>
                 <TableBody className="divide-y">
-                  <UsersList users={users} />
+                  <UsersList users={users} totalAreas={totalAreas}/>
                 </TableBody>
               </Table>
             </div>
