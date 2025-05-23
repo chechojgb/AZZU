@@ -3,7 +3,7 @@ import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 
-const breadcrumbs = [{ title: 'Usuarios activos', href: '/users' }];
+const breadcrumbs = [{ title: 'Registrar usuarios', href: '/users/create' }];
 
 export default function UsersCreate() {
   const [form, setForm] = useState({
