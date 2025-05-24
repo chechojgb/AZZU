@@ -11,15 +11,39 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, TableProperties, SquareUserRound, Tags } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
+        {
+        title: 'MysoulBoard',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Tabla de agentes',
+        href: '/showTableAgents',
+        icon: TableProperties,
+    },
+        {
+        title: 'Usuarios',
+        href: '/users',
+        children: [
+        { title: 'Administrar', href: '/users' },
+        { title: 'Agregar', href: '/users/create' }
+        ],
+        icon: SquareUserRound,
+    },
+        {
+        title: 'Areas',
+        href: '/Areas',
+        children: [
+        { title: 'Administrar', href: '/areas' },
+        { title: 'Agregar', href: '/areas/create' }
+        ],
+        icon: Tags,
     },
 ];
 
