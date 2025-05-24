@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
-
 const breadcrumbs = [{ title: 'Registrar usuarios', href: '/users/create' }];
+import { useState, useEffect } from 'react';
+import { Toast, Button, TextInput, Label, Checkbox } from 'flowbite-react';
+import { HiCheck, HiX } from 'react-icons/hi';
+import { Head } from '@inertiajs/react';
+import axios from 'axios';
+import FromCreate from '@/components/formCreate';
+import AppLayout from '@/layouts/app-layout';
+import RegisterCard from '@/components/userRegisterCard';
 
 export default function UsersCreate() {
   const [form, setForm] = useState({
@@ -17,19 +20,7 @@ export default function UsersCreate() {
 
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState('');
-  const [roles, setRoles] = useState([]);
-  const [areas, setAreas] = useState([]);
 
-  useEffect(() => {
-    axios.get('/users/creates') // Endpoint que devuelve roles y áreas
-      .then(res => {
-        setRoles(res.data.roles || []);
-        setAreas(res.data.areas || []);
-      })
-      .catch(err => {
-        console.error('Error al cargar roles/áreas:', err);
-      });
-  }, []);
 
   
 
@@ -46,6 +37,12 @@ export default function UsersCreate() {
     }
   };
 
+  const [toast, setToast] = useState({
+    show: false,
+    success: false,
+    message: '',
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrors({});
@@ -53,7 +50,12 @@ export default function UsersCreate() {
 
     axios.post('/users.store', form)
       .then((res) => {
-        setSuccess(res.data.message || 'Usuario creado correctamente.');
+        setToast({
+          show: true,
+          success: true,
+          message: res.data?.message || 'Usuario registrado correctamente.',
+        });
+        setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
         setForm({
           name: '',
           email: '',
@@ -64,90 +66,42 @@ export default function UsersCreate() {
         });
       })
       .catch((err) => {
-        if (err.response.status === 422) {
+        if (err.response && err.response.status === 422) {
           setErrors(err.response.data.errors);
+          setToast({
+            show: true,
+            success: false,
+            message: 'Ocurrió un error al registrar el usuario.',
+          });
+          setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
         }
       });
   };
+  
 
   const isSupervisor = form.role === 'Supervisor';
 
-  return (
+  return  (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Dashboard" />
+      <Head title="Registrar usuario" />
 
-      <div className="flex flex-col gap-4 p-4">
-        {/* Título principal */}
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 border shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Usuarios</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Crea y administra los usuarios del sistema desde aquí.</p>
+      {toast.show && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Toast>
+            <div className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+              toast.success ? 'bg-green-100 text-green-500' : 'bg-red-100 text-red-500'
+            }`}>
+              {toast.success ? <HiCheck className="h-5 w-5" /> : <HiX className="h-5 w-5" />}
+            </div>
+            <div className="ml-3 text-sm font-normal">{toast.message}</div>
+          </Toast>
         </div>
+      )}
 
-        {/* Formulario */}
-        <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow border">
-          <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Registrar Usuario</h1>
-
-          {success && <div className="mb-4 text-green-600">{success}</div>}
-
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
-              <input name="name" value={form.name} onChange={handleChange}
-                className="w-full mt-1 rounded-md p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-              {errors.name && <p className="text-sm text-red-600">{errors.name[0]}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo electrónico</label>
-              <input name="email" type="email" value={form.email} onChange={handleChange}
-                className="w-full mt-1 rounded-md p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-              {errors.email && <p className="text-sm text-red-600">{errors.email[0]}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</label>
-              <input name="password" type="password" value={form.password} onChange={handleChange}
-                className="w-full mt-1 rounded-md p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-              {errors.password && <p className="text-sm text-red-600">{errors.password[0]}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar contraseña</label>
-              <input name="password_confirmation" type="password" value={form.password_confirmation} onChange={handleChange}
-                className="w-full mt-1 rounded-md p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de usuario</label>
-              <select name="role" value={form.role} onChange={handleChange}
-                className="w-full mt-1 rounded-md p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                <option value="">Seleccione un tipo</option>
-                {roles.map(role => (
-                  <option key={role.name} value={role.name}>{role.name}</option>
-                ))}
-              </select>
-              {errors.role && <p className="text-sm text-red-600">{errors.role[0]}</p>}
-            </div>
-
-            {isSupervisor && (
-              <div className="pt-4 border-t">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Áreas del supervisor</label>
-                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                  {areas.map(area => (
-                    <div key={area.name}>
-                      <input type="checkbox" name="areas" value={area.name} id={area.name}
-                        checked={form.areas.includes(area.name)} onChange={handleChange} />
-                      <label htmlFor={area.name} className="ml-2">{area.name}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded shadow">
-              Guardar usuario
-            </button>
-          </form>
+      <div className="p-6 max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+        <FromCreate submit={handleSubmit} form={form} change={handleChange} errors={errors} isSupervisor={isSupervisor}/>
+        <div className='className="min-h-screen   flex items-center justify-center py-12 px-4"'>
+          <RegisterCard form={form} supervisor={isSupervisor}/>
         </div>
       </div>
     </AppLayout>
