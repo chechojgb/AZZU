@@ -23,11 +23,6 @@ function ContentTableAgents({ data, search, openModal, getStatusClass }) {
         cell: info => info.getValue(),
         },
         {
-        accessorKey: 'ip',
-        header: 'IP',
-        cell: info => info.getValue(),
-        },
-        {
         accessorKey: 'member.estado',
         header: 'Estado',
         cell: info => (

@@ -9,6 +9,7 @@ use App\Models\Area;
 use App\Models\AreaRoleUser;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 
 class UserController extends Controller
@@ -219,5 +220,28 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         //
+    }
+
+    public function data()
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            // Ensure $user is an Eloquent model instance
+            $user = User::with('areaRoles.area')->find($user->id);
+
+            $operations = $user->areaRoles->map(fn($ar) => $ar->area->name)
+                                        ->unique()
+                                        ->values();
+
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'operations' => $operations,
+            ]);
+        } else {
+            return response()->json(['error' => 'No authenticated user.'], 401);
+        }
     }
 }

@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\AreaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -34,21 +37,37 @@ Route::get('editAgent/{agent}', function ($agent) {
     ]);
 })->name('editAgent');
 
+
+
+
+
+
+// USUARIOS
 Route::get('users', function () {
     return Inertia::render('users/index');
 })->name('users');
 Route::get('users/create', function () {
     return Inertia::render('users/create');
 })->name('users-create');
-
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
-
 Route::get('users/index', [UserController::class, 'index'])->name('user_index');
 Route::get('users/creates', [UserController::class, 'create'])->name('user_creates');
 Route::post('users.store', [UserController::class, 'store'])->name('users.store');
 Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
 Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+Route::get('/user/data', [UserController::class, 'data']);
+
+// AREAS
+Route::get('areas', function () {
+    return Inertia::render('areas/index');
+})->name('areas');
+Route::get('areas/create', function () {
+    return Inertia::render('areas/create');
+})->name('areas-create');
+Route::get('areas/index', [AreaController::class, 'index'])->name('user_index');
+Route::post('areas.store', [AreaController::class, 'store'])->name('areas.store');
+Route::get('/areas/{id}/show', [AreaController::class, 'show']);
+Route::put('/areas/{id}/edit', [AreaController::class, 'update']);
+
 
 
 

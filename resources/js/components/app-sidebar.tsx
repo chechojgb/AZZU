@@ -28,11 +28,10 @@ const mainNavItems: NavItem[] = [
         icon: SquareUserRound,
     },
         {
-        title: 'Areas',
-        href: '/Areas',
+        title: 'Operaciones',
+        href: '/Operaciones',
         children: [
         { title: 'Administrar', href: '/areas' },
-        { title: 'Agregar', href: '/areas/create' }
         ],
         icon: Tags,
     },

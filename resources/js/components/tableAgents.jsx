@@ -4,6 +4,7 @@ import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-rea
 import AgentModalWrapper from '@/components/agentsModalWrapper';
 import AgentModalContent from '@/components/agentsModalContent';
 import ContentTableAgents from '@/components/contentTableAgents';
+import axios from 'axios';
 
 const AgentPanel = () => {
     const [modalOpen, setModalOpen] = useState(false);
@@ -89,15 +90,25 @@ const AgentPanel = () => {
 
     const customTheme = {
         root: {
-          base: 'relative inline-block text-left',
+            base: 'relative inline-block text-left',
         },
         floating: {
-          target: 'bg-blue-400 hover:bg-blue-500/80 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:border-gray-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center z-50',
-          item: {
-            base: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white w-full text-left z-50',
-          },
+            target: 'bg-blue-400 hover:bg-blue-500/80 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400 dark:border-gray-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center z-50',
+            item: {
+                base: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white w-full text-left z-50',
+            },
         },
     };
+    
+    
+    const [userOps, setUserOps] = useState([]);
+    useEffect(() => {
+    axios.get('/user/data')
+        .then(res => setUserOps(res.data.operations))
+        .catch(err => console.error('Error cargando operaciones', err));
+    }, []);
+    console.log('Operaciones asignadas:',userOps);
+    
 
     return (
         <div className="mt-4 relative overflow-x-auto shadow-md sm:rounded-sm ml-4 mb-16">
@@ -115,32 +126,32 @@ const AgentPanel = () => {
                     <div className="relative">
                         
                     <Dropdown label="Selecciona la operación" theme={customTheme}>
-                        <DropdownItem onClick={() => { startPolling('Soporte'); setOperation('Soporte'); }}>Soporte</DropdownItem>
-                        <DropdownItem onClick={() => { startPolling('Tramites'); setOperation('Tramites'); }}>Tramites</DropdownItem>
-                        <DropdownItem onClick={() => { startPolling('Retencion'); setOperation('Retencion'); }}>Retención</DropdownItem>
-                        <DropdownItem onClick={() => { startPolling('Movil'); setOperation('Movil'); }}>Móvil</DropdownItem>
-                        <DropdownItem onClick={() => { startPolling('Pruebas'); setOperation('Pruebas'); }}>Pruebas</DropdownItem>
+                    {userOps.map((op) => (
+                        <DropdownItem key={op} onClick={() => { startPolling(op); setOperation(op); }}>
+                        {op}
+                        </DropdownItem>
+                    ))}
                     </Dropdown>
                     </div>
                     <div className="flex-1 flex justify-center">
-  <div className="grid grid-cols-3 [@media(min-width:1200px)]:grid-cols-6 gap-4">
-    {Object.entries(stats).map(([key, value]) => (
-      <div
-        key={key}
-        className="text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
-                   rounded-xl px-4 py-2 shadow"
-      >
-        <p className="text-xs text-gray-500 dark:text-gray-400">{key}</p>
-        <p
-          className={`text-lg font-semibold cursor-pointer ${getStatusClass(key)}`}
-          onClick={() => key === 'total' ? setSearch('') : setSearch(key)}
-        >
-          {value}
-        </p>
-      </div>
-    ))}
-  </div>
-</div>
+                        <div className="grid grid-cols-3 [@media(min-width:1200px)]:grid-cols-6 gap-4">
+                            {Object.entries(stats).map(([key, value]) => (
+                            <div
+                                key={key}
+                                className="text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+                                        rounded-xl px-4 py-2 shadow"
+                            >
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{key}</p>
+                                <p
+                                className={`text-lg font-semibold cursor-pointer ${getStatusClass(key)}`}
+                                onClick={() => key === 'total' ? setSearch('') : setSearch(key)}
+                                >
+                                {value}
+                                </p>
+                            </div>
+                            ))}
+                        </div>
+                        </div>
 
                     <div className="relative">
                         <input
