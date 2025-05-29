@@ -53,7 +53,7 @@ export default function Welcome() {
                                 <h1 className="text-4xl font-bold text-black sm:text-6xl lg:text-7xl dark:text-white">
                                     ¡Bienvenido al Control de Agentes!
                                     <div className="relative inline-flex">
-                                        <span className="absolute inset-x-0 bottom-0 border-b-[30px] border-[#00acc1]"></span>
+                                        <span className="absolute inset-x-0 bottom-0 border-b-[30px] border-purple-light-20"></span>
                                         <h1 className="relative text-4xl font-bold text-black sm:text-6xl lg:text-7xl dark:text-white">
                                             MySoulBoard.
                                         </h1>

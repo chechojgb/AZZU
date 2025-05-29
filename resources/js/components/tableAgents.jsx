@@ -114,7 +114,7 @@ const AgentPanel = () => {
         <div className="mt-4 relative overflow-x-auto shadow-md sm:rounded-sm ml-4 mb-16">
             
             <div className="flex px-4 py-2  dark:bg-gray-800">
-                <a href="/table/agents" className="text-blue-600 dark:text-blue-400">Tablas</a>
+                <a href="/table/agents" className="text-purple-light-20">Tablas</a>
                 <span className="mx-2 text-gray-500">/</span>
                 <span>Agentes</span>
                 <span className="mx-2 text-gray-500">{operation ? `/` : ''}</span>

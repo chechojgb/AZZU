@@ -159,3 +159,21 @@
         @apply bg-background text-foreground;
     }
 }
+
+
+.text-purple-light-20 {
+  color: rgba(147, 51, 234, 1);
+}
+
+.bg-purple-light-20 {
+    background-color: rgba(147, 51, 234, 1);
+}
+
+.hover-bg-purple-light-20:hover {
+  background-color: rgb(132, 29, 228);
+}
+
+
+.border-purple-light-20 {
+    border-color: rgb(167, 105, 224);
+}

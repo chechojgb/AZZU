@@ -46,7 +46,7 @@ export default function UsersList({ users, totalAreas }) {
           )}
         </TableCell>
           <TableCell>
-            <Link href={route('users.edit', user.id)} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">
+            <Link href={route('users.edit', user.id)} className="font-medium text-purple-light-20 hover:underline ">
                 Editar
             </Link>
           </TableCell>

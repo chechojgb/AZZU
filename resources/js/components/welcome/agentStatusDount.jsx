@@ -15,7 +15,7 @@ const data = {
       label: 'Llamadas',
       data: [124, 32, 18],
       backgroundColor: [
-        'rgba(99, 102, 241, 0.8)',
+        'rgba(147, 51, 234, 1)',
         'rgba(16, 185, 129, 0.8)',
         'rgba(239, 68, 68, 0.8)'
       ],

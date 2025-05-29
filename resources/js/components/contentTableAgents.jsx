@@ -7,6 +7,7 @@ import {
   getFilteredRowModel,
 } from '@tanstack/react-table';
 import { useState, useMemo } from 'react';
+import ButtonPurple from './buttonPurple';
 
 function ContentTableAgents({ data, search, openModal, getStatusClass }) {
   const [sorting, setSorting] = useState([]);
@@ -50,13 +51,7 @@ function ContentTableAgents({ data, search, openModal, getStatusClass }) {
         id: 'admin',
         header: 'Administrar',
         cell: info => (
-            <button
-            onClick={() => openModal(info.row.original)}
-            className="text-gray-700 bg-blue-100 hover:bg-blue-200 font-medium rounded-lg text-sm px-4 py-2 cursor-pointer"
-            >
-            Acciones
-            </button>
-            
+            <ButtonPurple content="Acciones" onClick={() => openModal(info.row.original)}/>  
         ),
         },
     ], [getStatusClass, openModal]);

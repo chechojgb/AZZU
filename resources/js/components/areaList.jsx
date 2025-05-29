@@ -16,7 +16,7 @@ export default function AreaList({ areas, openModal }) {
           <TableCell>{area.created_at}</TableCell>
           <TableCell>{area.updated_at || 'Sin rol'}</TableCell>
           <TableCell>
-            <button  className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 cursor-pointer" onClick={()=> openModal(area.id)}>
+            <button  className="font-medium text-purple-light-20 hover:underline cursor-pointer" onClick={()=> openModal(area.id)}>
                 Editar
             </button>
           </TableCell>
