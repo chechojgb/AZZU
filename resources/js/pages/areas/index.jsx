@@ -74,7 +74,7 @@ export default function Areas() {
         
         <UserInfoList data={areas}/>
         <div className="min-h-[100vh] md:min-h-min">
-            <Button className='bg-cyan-600  dark:bg-cyan-500 mb-4 ' onClick={() => openModal()}>
+            <Button className='bg-purple-light-20 mb-4 ' onClick={() => openModal()}>
                 <ClipboardList  />
                 Crear nueva area
             </Button>
