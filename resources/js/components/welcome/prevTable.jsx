@@ -2,6 +2,7 @@ import { Link } from "@inertiajs/react";
 import ButtonLarge from "@/components/button";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import ButtonPurple from "@/components/buttonPurple";
 
 function PrevTable() {
     const [data, setData] = useState([]);
@@ -27,7 +28,7 @@ function PrevTable() {
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Agentes activos</h2>
                 <Link href={route('showTableAgents')}>
-                <ButtonLarge content="Ver tabla completa" />
+                    <ButtonPurple content='Ver tabla completa'/>
                 </Link>
             </div>
 

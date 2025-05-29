@@ -38,7 +38,7 @@ export default function AgentRankingWidget() {
                 </p>
               </div>
             </div>
-            <p className="font-semibold text-indigo-600">{agente.llamadas} llamadas</p>
+            <p  className="font-semibold text-purple-light-20">{agente.llamadas} llamadas</p>
           </li>
         ))}
       </ul>
