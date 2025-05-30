@@ -38,6 +38,17 @@ Route::get('editAgent/{agent}', function ($agent) {
 })->name('editAgent');
 
 
+//DATA INFORME
+Route::get('showAgentRankingState', function () {
+    return Inertia::render('agentState');
+})->name('showAgentRankingState');
+Route::get('showCallState', function () {
+    return Inertia::render('callState');
+})->name('showCallState');
+Route::get('showOperationState', function () {
+    return Inertia::render('operationState');
+})->name('showOperationState');
+
 
 
 

@@ -1,3 +1,5 @@
+import { Link } from "@inertiajs/react";
+
 const agentes = [
   { nombre: 'Ana P.', llamadas: 47, promedio: '2:38', rank: 1 },
   { nombre: 'Luis G.', llamadas: 44, promedio: '2:51', rank: 2 },
@@ -20,7 +22,9 @@ export default function AgentRankingWidget() {
     <div className="absolute inset-0 p-6 flex flex-col justify-between">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ranking de Agentes</h3>
-        <span className="text-sm text-gray-500">Hoy</span>
+        <span className="text-sm text-gray-500">
+          <Link className='text-purple-light-20' href={route('showAgentRankingState')}>Hoy</Link>
+        </span>
       </div>
 
       <ul className="space-y-3 text-sm text-gray-800 dark:text-gray-200">
