@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, TableProperties, SquareUserRound, Tags } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, TableProperties, SquareUserRound, Tags,BarChartBig, BookHeadphones, HeadphonesIcon} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -18,6 +18,21 @@ const mainNavItems: NavItem[] = [
         href: '/showTableAgents',
         icon: TableProperties,
     },
+    {
+        title: 'estado de operaciones',
+        href: '/showOperationState',
+        icon: BarChartBig,
+    },
+    {
+        title: 'Ranking de agentes',
+        href: '/showAgentRankingState',
+        icon: HeadphonesIcon,
+    },
+    {
+        title: 'Estado de las llamadas',
+        href: '/showCallState',
+        icon: BookHeadphones,
+    },
         {
         title: 'Usuarios',
         href: '/users',
@@ -27,7 +42,7 @@ const mainNavItems: NavItem[] = [
         ],
         icon: SquareUserRound,
     },
-        {
+    {
         title: 'Operaciones',
         href: '/Operaciones',
         children: [

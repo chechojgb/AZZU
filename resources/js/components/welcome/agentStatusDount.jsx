@@ -1,4 +1,5 @@
 import { Doughnut } from 'react-chartjs-2';
+import { Link } from "@inertiajs/react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -41,7 +42,9 @@ export default function AgentStatusDonut() {
     <div className="absolute inset-0 p-6 flex flex-col justify-between">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Estado de Llamadas</h3>
-        <span className="text-sm text-gray-500">Hoy</span>
+        <span className="text-sm text-gray-500">
+          <Link className='text-purple-light-20' href={route('showCallState')}>Hoy</Link>
+        </span>
       </div>
 
       <div className="flex items-center justify-center h-[60%]">
