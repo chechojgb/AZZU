@@ -4,6 +4,7 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\PostProxyController;
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
@@ -89,3 +90,6 @@ Route::get('/escuchar', function () {
     return response()->json(['status' => 'OK', 'output' => $output])
                      ->header('Access-Control-Allow-Origin', '*');
 });
+
+Route::get('/getDonutCalls', [PostProxyController::class, 'getDonutCalls']);
+Route::get('/getAgentRanking', [PostProxyController::class, 'rankingCalls']);

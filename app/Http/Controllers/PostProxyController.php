@@ -4,7 +4,13 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Models\Role;
+use App\Models\Area;
+use App\Models\AreaRoleUser;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class PostProxyController extends Controller
 {
@@ -60,57 +66,52 @@ class PostProxyController extends Controller
         return response()->json($data);
     }
 
-public function userData($extension): JsonResponse
-{
-    $response = Http::get("http://10.57.251.181:3005/extension/info?ext={$extension}");
-    if (!$response->successful()) {
-        return response()->json(['error' => 'No se pudo obtener los datos'], 500);
-    }
-
-    $data = $response->json();
-
-    $texto = $data['member'] ?? $data['member2'] ?? null;
-
-    if ($texto) {
-        $nombre = explode(' ', $texto)[0];
-        preg_match_all('/\((.*?)\)/', $texto, $matches);
-        $estado = null;
-        $pausa = null;
-
-        foreach ($matches[1] as $match) {
-            if (str_contains($match, 'paused')) {
-                $pausa = $match;
-            }
-            if (in_array($match, ['Busy', 'On Hold', 'In call', 'Ringing', 'Not in use'])) {
-                $estado = $match;
-            }
+    public function userData($extension): JsonResponse
+    {
+        $response = Http::get("http://10.57.251.181:3005/extension/info?ext={$extension}");
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
 
-        // Si no encontramos la pausa en el primer texto, revisamos member2
-        if (!$pausa && isset($data['member2'])) {
-            preg_match_all('/\((.*?)\)/', $data['member2'], $matches2);
-            foreach ($matches2[1] as $match) {
+        $data = $response->json();
+
+        $texto = $data['member'] ?? $data['member2'] ?? null;
+
+        if ($texto) {
+            $nombre = explode(' ', $texto)[0];
+            preg_match_all('/\((.*?)\)/', $texto, $matches);
+            $estado = null;
+            $pausa = null;
+
+            foreach ($matches[1] as $match) {
                 if (str_contains($match, 'paused')) {
                     $pausa = $match;
-                    break;
+                }
+                if (in_array($match, ['Busy', 'On Hold', 'In call', 'Ringing', 'Not in use'])) {
+                    $estado = $match;
                 }
             }
+
+            // Si no encontramos la pausa en el primer texto, revisamos member2
+            if (!$pausa && isset($data['member2'])) {
+                preg_match_all('/\((.*?)\)/', $data['member2'], $matches2);
+                foreach ($matches2[1] as $match) {
+                    if (str_contains($match, 'paused')) {
+                        $pausa = $match;
+                        break;
+                    }
+                }
+            }
+
+            $data['member'] = [
+                'nombre' => $nombre,
+                'estado' => $estado,
+                'pausa' => $pausa,
+            ];
         }
 
-        $data['member'] = [
-            'nombre' => $nombre,
-            'estado' => $estado,
-            'pausa' => $pausa,
-        ];
+        return response()->json($data);
     }
-
-    return response()->json($data);
-}
-
-
-    
-
-
 
     public function getOverview()
     {
@@ -151,7 +152,6 @@ public function userData($extension): JsonResponse
 
         return response()->json($data);
     }
-
 
     public function chanelHangup(Request $request)
     {
@@ -249,6 +249,121 @@ public function userData($extension): JsonResponse
 
         return response()->json(['error' => 'No se pudo transferir la llamada'], 500);
     }
+
+    public function getDonutCalls()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'No authenticated user.'], 401);
+        }
+
+        $user = User::with('areaRoles.area')->find($user->id);
+
+        $operationNames = $user->areaRoles->map(fn($ar) => $ar->area->name)
+                                        ->unique()
+                                        ->values();
+
+        // Mapeo de nombre de operación a su operation_id real
+        $operationMap = [
+            'Soporte' => 1,
+            'Tramites' => 2,
+            'Movil' => 3,
+            'Retencion' => 5,
+            'Pruebas' => 18,
+        ];
+
+        // Elegir la primera operación válida encontrada
+        $selectedOperation = null;
+        foreach ($operationNames as $name) {
+            if (isset($operationMap[$name])) {
+                $selectedOperation = $operationMap[$name];
+                break;
+            }
+        }
+
+        $selectedOperationName = null;
+        foreach ($operationNames as $name) {
+            if (isset($operationMap[$name])) {
+            $selectedOperationName = $name;
+            break;
+            }
+        }
+
+        if (!$selectedOperation) {
+            return response()->json(['error' => 'No se encontró operación válida para este usuario.'], 422);
+        }
+        $response = Http::get("http://10.57.251.181:3011/api/llamadas/hoy?operation_id={$selectedOperation}");
+
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
+        }
+
+        // Retornar tanto los datos de la API como el selectedOperation
+        return response()->json([
+            'data' => $response->json(),
+            'selectedOperation' => $selectedOperationName,
+        ]);
+    }
+
+    public function rankingCalls()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'No authenticated user.'], 401);
+        }
+
+        $user = User::with('areaRoles.area')->find($user->id);
+
+        $operationNames = $user->areaRoles->map(fn($ar) => $ar->area->name)
+                                        ->unique()
+                                        ->values();
+
+        // Mapeo de nombre de operación a su operation_id real
+        $operationMap = [
+            'Soporte' => 1,
+            'Tramites' => 2,
+            'Movil' => 3,
+            'Retencion' => 5,
+            'Pruebas' => 18,
+        ];
+
+        // Elegir la primera operación válida encontrada
+        $selectedOperation = null;
+        foreach ($operationNames as $name) {
+            if (isset($operationMap[$name])) {
+                $selectedOperation = $operationMap[$name];
+                break;
+            }
+        }
+
+        $selectedOperationName = null;
+        foreach ($operationNames as $name) {
+            if (isset($operationMap[$name])) {
+            $selectedOperationName = $name;
+            break;
+            }
+        }
+
+        if (!$selectedOperation) {
+            return response()->json(['error' => 'No se encontró operación válida para este usuario.'], 422);
+        }
+        $response = Http::get("http://10.57.251.181:3009/api/llamadas/ranking?operation_id={$selectedOperation}");
+
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
+        }
+
+        // Retornar tanto los datos de la API como el selectedOperation
+
+        // dd($response->json());
+        return response()->json([
+            'data' => $response->json(),
+            'selectedOperation' => $selectedOperationName,
+        ]);
+    }
+
 
 
 
