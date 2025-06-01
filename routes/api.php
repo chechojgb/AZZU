@@ -17,3 +17,4 @@ Route::post('/hangup-channel', [PostProxyController::class, 'chanelHangup']);
 Route::post('/pause-extension', [PostProxyController::class, 'pauseExtension']);
 Route::post('/unpause-extension', [PostProxyController::class, 'unpauseExtension']);
 Route::post('/transfer-call', [PostProxyController::class, 'channelTransfer']);
+
