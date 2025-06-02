@@ -174,7 +174,7 @@ const AgentControlPanel = ({ agent }) => {
     fetch(`/api/agent/${agent}`)
       .then((res) => res.json())
       .then((resData) => {
-        console.log('Datos del agente:', resData); // Using console.log directly
+        // console.log('Datos del agente:', resData); // Using console.log directly
         setData(resData);
       })
       .catch((err) => console.error('Error al obtener datos del agente', err));
@@ -194,7 +194,7 @@ const AgentControlPanel = ({ agent }) => {
       <Head title="showTableAgents" />
       <div className="min-h-screen text-gray-900 dark:text-white p-8 space-y-10">
         <DataAgent data={data} />
-        <ListenRecords />
+        <ListenRecords extension={data.extension}/>
         <AdminActions data={data} />
       </div>
     </AppLayout>
