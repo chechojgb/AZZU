@@ -1,6 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import AgentStatusDonut from '@/components/welcome/agentStatusDount';
+import { LoadProvider } from '@/components/context/loadContext';
+
 
 
 const breadcrumbs = [
@@ -23,7 +25,9 @@ export default function TableAgents() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <AgentStatusDonut />
+                    <LoadProvider total={1}>
+                          <AgentStatusDonut />
+                    </LoadProvider>
                     </div>
 
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow flex flex-col justify-between">
