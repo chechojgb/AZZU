@@ -44,7 +44,7 @@ export default function AgentRankingWidget() {
   }, []);
 
   return (
-    <div className="absolute inset-0 p-6 flex flex-col justify-between">
+    <div className="p-6 flex flex-col justify-between">
       {loading || !allLoaded ? ( // ⛳ doble condición: hasta que TODOS estén listos
         <DiscordLoader />
       ) : (

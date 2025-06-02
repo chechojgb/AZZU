@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostProxyController;
+use App\Http\Controllers\SpyController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -18,3 +19,5 @@ Route::post('/pause-extension', [PostProxyController::class, 'pauseExtension']);
 Route::post('/unpause-extension', [PostProxyController::class, 'unpauseExtension']);
 Route::post('/transfer-call', [PostProxyController::class, 'channelTransfer']);
 
+// routes/api.php
+Route::post('/spy', [SpyController::class, 'start']);
