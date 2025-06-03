@@ -26,7 +26,7 @@ function PrevTable() {
         return () => clearInterval(interval);
         
     }, []);
-    console.log(data);
+    // console.log(data);
 
     return (
         <div className="absolute inset-0 p-6 flex flex-col justify-between">

@@ -168,6 +168,9 @@
 .bg-purple-light-20 {
     background-color: rgba(147, 51, 234, 1);
 }
+.bg-purple-light-10 {
+    background-color: rgba(207, 184, 228);
+}
 
 .hover-bg-purple-light-20:hover {
   background-color: rgb(132, 29, 228);

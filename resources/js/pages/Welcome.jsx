@@ -38,8 +38,8 @@ export default function Welcome() {
                                     title=""
                                     className="flex items-center text-lg font-semibold transition-colors duration-200 dark:text-white"
                                 >
-                                    <img src="/images/Soul.svg" className="h-10 w-10 mr-2" alt="" />
-                                    MySoulBoard
+                                    <img src="/images/azzu.png" className="h-10 w-10 mr-2" alt="" />
+                                    AZZU
                                 </a>
                             </div>
                         </div>
@@ -55,7 +55,7 @@ export default function Welcome() {
                                     <div className="relative inline-flex">
                                         <span className="absolute inset-x-0 bottom-0 border-b-[30px] border-purple-light-20"></span>
                                         <h1 className="relative text-4xl font-bold text-black sm:text-6xl lg:text-7xl dark:text-white">
-                                            MySoulBoard.
+                                            AZZU.
                                         </h1>
                                     </div>
                                 </h1>
