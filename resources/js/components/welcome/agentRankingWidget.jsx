@@ -15,7 +15,7 @@ const getMedal = (rank) => {
 
 export default function AgentRankingWidget() {
   const [agentes, setAgentes] = useState([]);
-  const [loading, setLoading] = useState(true); // ✅ agregado
+  const [loading, setLoading] = useState(true); 
   const { allLoaded, markLoaded } = useLoadStatus();
 
   useEffect(() => {

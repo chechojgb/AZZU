@@ -18,6 +18,7 @@ Route::post('/hangup-channel', [PostProxyController::class, 'chanelHangup']);
 Route::post('/pause-extension', [PostProxyController::class, 'pauseExtension']);
 Route::post('/unpause-extension', [PostProxyController::class, 'unpauseExtension']);
 Route::post('/transfer-call', [PostProxyController::class, 'channelTransfer']);
+Route::get('/getCallsPerOperation', [PostProxyController::class, 'getCallsPerOperation']);
 
 // routes/api.php
 Route::post('/spy', [SpyController::class, 'start']);

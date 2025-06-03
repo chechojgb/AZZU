@@ -21,9 +21,7 @@ class PostProxyController extends Controller
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
-
         $data = $response->json();
-
         return response()->json($data);
     }
 
@@ -33,36 +31,28 @@ class PostProxyController extends Controller
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
-
         $data = $response->json();
-
         // Recorremos los elementos y solo modificamos 'member'
         foreach ($data as &$item) {
             if (!isset($item['member'])) continue;
-
             $texto = $item['member'];
-
             // Extraer nombre (lo que está antes del primer espacio)
             $nombre = explode(' ', $texto)[0];
-
             // Extraer estado (palabra entre paréntesis como Busy, Idle, etc.)
             preg_match_all('/\((.*?)\)/', $texto, $matches);
             $estado = null;
-
             foreach ($matches[1] as $match) {
                 if (in_array($match, ['Busy', 'On Hold', 'In call', 'Ringing', 'Not in use'])) {
                     $estado = $match;
                     break;
                 }
             }
-
             // Sobrescribimos el campo member con los nuevos datos
             $item['member'] = [
                 'nombre' => $nombre,
                 'estado' => $estado,
             ];
         }
-
         return response()->json($data);
     }
 
@@ -72,17 +62,13 @@ class PostProxyController extends Controller
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
-
         $data = $response->json();
-
         $texto = $data['member'] ?? $data['member2'] ?? null;
-
         if ($texto) {
             $nombre = explode(' ', $texto)[0];
             preg_match_all('/\((.*?)\)/', $texto, $matches);
             $estado = null;
             $pausa = null;
-
             foreach ($matches[1] as $match) {
                 if (str_contains($match, 'paused')) {
                     $pausa = $match;
@@ -91,7 +77,6 @@ class PostProxyController extends Controller
                     $estado = $match;
                 }
             }
-
             // Si no encontramos la pausa en el primer texto, revisamos member2
             if (!$pausa && isset($data['member2'])) {
                 preg_match_all('/\((.*?)\)/', $data['member2'], $matches2);
@@ -102,47 +87,37 @@ class PostProxyController extends Controller
                     }
                 }
             }
-
             $data['member'] = [
                 'nombre' => $nombre,
                 'estado' => $estado,
                 'pausa' => $pausa,
             ];
         }
-
         return response()->json($data);
     }
 
     public function getOverview()
     {
         $response = Http::get('http://10.57.251.181:3007/extensions/overview');
-
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
-
         $data = $response->json();
-
         // Recorremos los elementos y solo modificamos 'member'
         foreach ($data as &$item) {
             if (!isset($item['member'])) continue;
-
             $texto = $item['member'];
-
             // Extraer nombre (lo que está antes del primer espacio)
             $nombre = explode(' ', $texto)[0];
-
             // Extraer estado (palabra entre paréntesis como Busy, Idle, etc.)
             preg_match_all('/\((.*?)\)/', $texto, $matches);
             $estado = null;
-
             foreach ($matches[1] as $match) {
                 if (in_array($match, ['Busy', 'On Hold', 'In call', 'Ringing', 'Not in use'])) {
                     $estado = $match;
                     break;
                 }
             }
-
             // Sobrescribimos el campo member con los nuevos datos
             $item['member'] = [
                 'nombre' => $nombre,
@@ -156,26 +131,21 @@ class PostProxyController extends Controller
     public function chanelHangup(Request $request)
     {
         $channel = $request->input('channel');
-
         $response = Http::post('http://10.57.251.181:3000/channel/hangup', [
             'channel' => $channel
         ]);
-
         if ($response->successful()) {
             return response()->json(['message' => 'Canal colgado correctamente']);
         }
-
         return response()->json(['error' => 'No se pudo colgar el canal'], 500);
     }
 
     public function pauseExtension(Request $request): JsonResponse
     {
         $extension = $request->input('extension');
-
         if (!$extension) {
             return response()->json(['error' => 'Extensión no proporcionada'], 400);
         }
-
         $interface = "SIP/{$extension}";
         $queues = [];
         for ($i = 1; $i <= 120; $i++) {
@@ -183,18 +153,15 @@ class PostProxyController extends Controller
         }
         $paused = 1;
         $reason = 'ACW';
-
         $response = Http::post('http://10.57.251.181:3000/queue/pause', [
             'queues' => $queues,
             'interface' => $interface,
             'paused' => $paused,
             'reason' => $reason,
         ]);
-
         if ($response->successful()) {
             return response()->json(['message' => 'Agente pausado correctamente']);
         }
-
         return response()->json(['error' => 'No se pudo pausar al agente'], 500);
     }
 
@@ -202,11 +169,9 @@ class PostProxyController extends Controller
     public function unpauseExtension(Request $request): JsonResponse
     {
         $extension = $request->input('extension');
-
         if (!$extension) {
             return response()->json(['error' => 'Extensión no proporcionada'], 400);
         }
-
         $interface = "SIP/{$extension}";
         $queues = [];
         for ($i = 1; $i <= 120; $i++) {
@@ -214,18 +179,15 @@ class PostProxyController extends Controller
         }
         $paused = 0;
         $reason = 'ACW';
-
         $response = Http::post('http://10.57.251.181:3000/queue/pause', [
             'queues' => $queues,
             'interface' => $interface,
             'paused' => $paused,
             'reason' => $reason,
         ]);
-
         if ($response->successful()) {
             return response()->json(['message' => 'Agente despausado correctamente']);
         }
-
         return response()->json(['error' => 'No se pudo pausar al agente'], 500);
     }
 
@@ -233,37 +195,29 @@ class PostProxyController extends Controller
     {
         $channel = $request->input('canal');
         $destino = $request->input('destino'); // ← este nombre es el correcto
-
         if (!$channel || !$destino) {
             return response()->json(['error' => 'Todos los datos no fueron proporcionados'], 400);
         }
-
         $response = Http::post('http://10.57.251.181:3006/transferir', [
             'canal' => $channel,
             'destino' => $destino, // ← debe mantenerse igual que en Postman
         ]);
-
         if ($response->successful()) {
             return response()->json(['message' => 'Llamada transferida correctamente']);
         }
-
         return response()->json(['error' => 'No se pudo transferir la llamada'], 500);
     }
 
     public function getDonutCalls()
     {
         $user = Auth::user();
-
         if (!$user) {
             return response()->json(['error' => 'No authenticated user.'], 401);
         }
-
         $user = User::with('areaRoles.area')->find($user->id);
-
         $operationNames = $user->areaRoles->map(fn($ar) => $ar->area->name)
                                         ->unique()
                                         ->values();
-
         // Mapeo de nombre de operación a su operation_id real
         $operationMap = [
             'Soporte' => 1,
@@ -272,7 +226,6 @@ class PostProxyController extends Controller
             'Retencion' => 5,
             'Pruebas' => 18,
         ];
-
         // Elegir la primera operación válida encontrada
         $selectedOperation = null;
         foreach ($operationNames as $name) {
@@ -281,7 +234,6 @@ class PostProxyController extends Controller
                 break;
             }
         }
-
         $selectedOperationName = null;
         foreach ($operationNames as $name) {
             if (isset($operationMap[$name])) {
@@ -289,16 +241,13 @@ class PostProxyController extends Controller
             break;
             }
         }
-
         if (!$selectedOperation) {
             return response()->json(['error' => 'No se encontró operación válida para este usuario.'], 422);
         }
         $response = Http::get("http://10.57.251.181:3011/api/llamadas/hoy?operation_id={$selectedOperation}");
-
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
         }
-
         // Retornar tanto los datos de la API como el selectedOperation
         return response()->json([
             'data' => $response->json(),
@@ -309,17 +258,13 @@ class PostProxyController extends Controller
     public function rankingCalls()
     {
         $user = Auth::user();
-
         if (!$user) {
             return response()->json(['error' => 'No authenticated user.'], 401);
         }
-
         $user = User::with('areaRoles.area')->find($user->id);
-
         $operationNames = $user->areaRoles->map(fn($ar) => $ar->area->name)
                                         ->unique()
                                         ->values();
-
         // Mapeo de nombre de operación a su operation_id real
         $operationMap = [
             'Soporte' => 1,
@@ -328,7 +273,6 @@ class PostProxyController extends Controller
             'Retencion' => 5,
             'Pruebas' => 18,
         ];
-
         // Elegir la primera operación válida encontrada
         $selectedOperation = null;
         foreach ($operationNames as $name) {
@@ -337,7 +281,6 @@ class PostProxyController extends Controller
                 break;
             }
         }
-
         $selectedOperationName = null;
         foreach ($operationNames as $name) {
             if (isset($operationMap[$name])) {
@@ -345,23 +288,30 @@ class PostProxyController extends Controller
             break;
             }
         }
-
         if (!$selectedOperation) {
             return response()->json(['error' => 'No se encontró operación válida para este usuario.'], 422);
         }
         $response = Http::get("http://10.57.251.181:3009/api/llamadas/ranking?operation_id={$selectedOperation}");
-
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
         }
-
         // Retornar tanto los datos de la API como el selectedOperation
-
         // dd($response->json());
         return response()->json([
             'data' => $response->json(),
             'selectedOperation' => $selectedOperationName,
         ]);
+    }
+        
+    
+    public function getCallsPerOperation()
+    {
+        $response = Http::get("http://10.57.251.181:3012/llamadas-en-cola");
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
+        }
+        $data = $response->json();
+        return response()->json($data);
     }
 
 
