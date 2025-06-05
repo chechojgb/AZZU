@@ -17,7 +17,12 @@ class PostProxyController extends Controller
 
     public function index($area): JsonResponse
     {
-        $response = Http::get("http://10.57.251.181:3003/area/{$area}/estado");
+        if ($area === 'AR_CONSTRUCCIONES' || $area === 'AR_POSTVENTA') {
+            $response = Http::get("http://98.85.112.126:13003/area/{$area}/estado");
+        }else{
+            $response = Http::get("http://10.57.251.181:3002/area/{$area}");
+        }
+
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
@@ -27,7 +32,12 @@ class PostProxyController extends Controller
 
     public function usersTable($area): JsonResponse
     {
-        $response = Http::get("http://10.57.251.181:3002/area/{$area}");
+        if ($area === 'AR_CONSTRUCCIONES' || $area === 'AR_POSTVENTA') {
+            $response = Http::get("http://98.85.112.126:13002/area/{$area}");
+        }else{
+            $response = Http::get("http://10.57.251.181:3002/area/{$area}");
+        }
+
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
@@ -98,18 +108,39 @@ class PostProxyController extends Controller
 
     public function getOverview()
     {
-        $response = Http::get('http://10.57.251.181:3007/extensions/overview');
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => "No authenticated user."], 401);
+        }
+
+        $fullUser = User::with('areaRoles.area')->find($user->id);
+        if (!$fullUser) {
+            return response()->json(['error' => "Usuario no encontrado."], 404);
+        }
+        $operationNames = $fullUser->areaRoles
+            ->filter(fn($ar) => $ar->area) 
+            ->map(fn($ar) => $ar->area->name)
+            ->unique()
+            ->values();
+        $operationAR = ['AR_CONSTRUCCIONES', 'AR_POSTVENTA'];
+        $selectedOperation = $operationNames->firstWhere(fn($name) => in_array($name, $operationAR));
+        if (!$selectedOperation && $operationNames->isNotEmpty()) {
+            $selectedOperation = $operationNames[0];
+        }
+        $isEspecial = in_array($selectedOperation, $operationAR);
+        $endpoint = $isEspecial
+            ? 'http://98.85.112.126:13007/extensions/overview'
+            : 'http://10.57.251.181:3007/extensions/overview';
+        $response = Http::get($endpoint);
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
         $data = $response->json();
-        // Recorremos los elementos y solo modificamos 'member'
         foreach ($data as &$item) {
-            if (!isset($item['member'])) continue;
+            if (!isset($item['member']) || !is_string($item['member'])) continue;
             $texto = $item['member'];
-            // Extraer nombre (lo que está antes del primer espacio)
-            $nombre = explode(' ', $texto)[0];
-            // Extraer estado (palabra entre paréntesis como Busy, Idle, etc.)
+            $partes = explode(' ', $texto);
+            $nombre = $partes[0] ?? 'Desconocido';
             preg_match_all('/\((.*?)\)/', $texto, $matches);
             $estado = null;
             foreach ($matches[1] as $match) {
@@ -118,15 +149,16 @@ class PostProxyController extends Controller
                     break;
                 }
             }
-            // Sobrescribimos el campo member con los nuevos datos
             $item['member'] = [
                 'nombre' => $nombre,
                 'estado' => $estado,
             ];
         }
+        unset($item); 
 
         return response()->json($data);
     }
+
 
     public function chanelHangup(Request $request)
     {
@@ -225,6 +257,8 @@ class PostProxyController extends Controller
             'Movil' => 3,
             'Retencion' => 5,
             'Pruebas' => 18,
+            'AR_CONSTRUCCIONES' => 1,
+            'AR_POSTVENTA' => 2,
         ];
         // Elegir la primera operación válida encontrada
         $selectedOperation = null;
@@ -244,7 +278,17 @@ class PostProxyController extends Controller
         if (!$selectedOperation) {
             return response()->json(['error' => 'No se encontró operación válida para este usuario.'], 422);
         }
-        $response = Http::get("http://10.57.251.181:3011/api/llamadas/hoy?operation_id={$selectedOperation}");
+
+        // Determinar si la operación requiere endpoint especial para AR o G4
+        $operationAR = ['AR_CONSTRUCCIONES', 'AR_POSTVENTA'];
+        $isOperationAR = in_array($selectedOperationName, $operationAR);
+
+        $baseUrl = $isOperationAR
+            ? "http://98.85.112.126:13011"
+            : "http://10.57.251.181:3011";
+
+        $response = Http::get("{$baseUrl}/api/llamadas/hoy?operation_id={$selectedOperation}");
+
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
         }
@@ -272,6 +316,8 @@ class PostProxyController extends Controller
             'Movil' => 3,
             'Retencion' => 5,
             'Pruebas' => 18,
+            'AR_CONSTRUCCIONES' => 1,
+            'AR_POSTVENTA' => 2,
         ];
         // Elegir la primera operación válida encontrada
         $selectedOperation = null;
@@ -291,7 +337,17 @@ class PostProxyController extends Controller
         if (!$selectedOperation) {
             return response()->json(['error' => 'No se encontró operación válida para este usuario.'], 422);
         }
-        $response = Http::get("http://10.57.251.181:3009/api/llamadas/ranking?operation_id={$selectedOperation}");
+        
+        
+        $operationAR = ['AR_CONSTRUCCIONES', 'AR_POSTVENTA'];
+        $isOperationAR = in_array($selectedOperationName, $operationAR);
+        
+        $baseUrl = $isOperationAR
+        ? "http://98.85.112.126:13009"
+        : "http://10.57.251.181:13011";
+        
+        $response = Http::get("{$baseUrl}/api/llamadas/ranking?operation_id={$selectedOperation}");
+        
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
         }
@@ -309,6 +365,16 @@ class PostProxyController extends Controller
         $response = Http::get("http://10.57.251.181:3012/llamadas-en-cola");
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos de la API externa.'], 500);
+        }
+        $data = $response->json();
+        return response()->json($data);
+    }
+
+    public function operationState($area): JsonResponse
+    {
+        $response = Http::get("http://10.57.251.181:3014/operacion/{$area}");
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
         $data = $response->json();
         return response()->json($data);

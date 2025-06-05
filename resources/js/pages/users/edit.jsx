@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Toast, Button, TextInput, Label, Checkbox } from 'flowbite-react';
@@ -11,11 +11,18 @@ const breadcrumbs = [
 ];
 
 export default function Edit({ user, areas }) {
+  // Validar áreas válidas
+  const validAreaIds = useMemo(() => areas.map((a) => a.id), [areas]);
+  const filteredCheckedAreas = useMemo(
+    () => user.checkedAreas.filter((id) => validAreaIds.includes(id)),
+    [user.checkedAreas, validAreaIds]
+  );
+
   const { data, setData, put, processing, errors } = useForm({
     name: user.name,
     email: user.email,
     role: user.role,
-    areas: user.checkedAreas,
+    areas: filteredCheckedAreas,
   });
 
   const [toast, setToast] = useState({
@@ -33,6 +40,8 @@ export default function Edit({ user, areas }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('➡ Enviando áreas:', data.areas); // Log útil
+
     put(route('users.update', user.id), {
       preserveScroll: true,
       onSuccess: (page) => {
@@ -142,25 +151,20 @@ export default function Edit({ user, areas }) {
               </Button>
             </div>
           </form>
-
         </div>
 
         {/* Panel lateral */}
-        
-        {/* Panel lateral con estilo unificado y sobrio */}
         <div className="space-y-6">
-          {/* Nota rápida */}
           <div className="p-5 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
             <h3 className="text-lg font-semibold border-b border-gray-300 dark:border-gray-600 pb-2 mb-2 flex items-center gap-2">
               <ClipboardCopy /> Nota rápida
             </h3>
             <p className="text-sm leading-relaxed">
               Solo se permite cambiar entre los roles <strong>Soporte</strong> y <strong>Supervisor</strong>. 
-              Los administradores no   se pueden editar desde aquí.
+              Los administradores no se pueden editar desde aquí.
             </p>
           </div>
 
-          {/* Información del usuario */}
           <div className="p-5 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
             <h3 className="text-lg font-semibold border-b border-gray-300 dark:border-gray-600 pb-2 mb-2 flex items-center gap-2">
               <SquareUserRound/> Información del usuario
@@ -172,14 +176,13 @@ export default function Edit({ user, areas }) {
             </ul>
           </div>
 
-          {/* Áreas actuales */}
           <div className="p-5 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
             <h3 className="text-lg font-semibold border-b border-gray-300 dark:border-gray-600 pb-2 mb-2 flex items-center gap-2">
               <Eye/> Áreas actuales
             </h3>
             <ul className="text-sm space-y-1">
-              {user.checkedAreas.length > 0
-                ? user.checkedAreas.map((id) => {
+              {filteredCheckedAreas.length > 0
+                ? filteredCheckedAreas.map((id) => {
                     const area = areas.find((a) => a.id === id);
                     return <li key={id}>{area?.name ?? 'Área desconocida'}</li>;
                   })
@@ -187,7 +190,6 @@ export default function Edit({ user, areas }) {
             </ul>
           </div>
         </div>
-
       </div>
     </AppLayout>
   );

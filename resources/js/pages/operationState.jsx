@@ -15,7 +15,49 @@ const breadcrumbs = [
 
 export default function CallsWaitingByOperation() {
     const [userOps, setUserOps] = useState([]);
-    const [selectedOperation, setSelectedOperation] = useState(null);
+    const [operation, setOperation] = useState(null);
+    const [pollingInterval, setPollingInterval] = useState(null);
+    const [stats, setStats] = useState([]);
+
+
+
+    const fetchStastOperation = (operation) => {
+        if (!operation) return;
+
+        fetch(`/api/operationState/${operation}`)
+            .then(res => res.json())
+            .then(data => {
+            console.log('Datos crudos de la API:', data);
+            setStats(data);
+            })
+            .catch(() => console.error('Error fetching stats'));
+    }
+
+    const startPolling = (operation) => {
+        // Limpia cualquier intervalo existente antes de iniciar uno nuevo
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+        }
+
+        fetchStastOperation(operation); // Realiza la primera solicitud inmediatamente
+        const intervalId = setInterval(() => {
+            fetchStastOperation(operation);
+        }, 8000);
+
+        
+
+        setPollingInterval(intervalId); // Guarda el identificador del intervalo
+    };
+
+    useEffect(() => {
+        return () => {
+            // Limpia el intervalo cuando el componente se desmonte
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        };
+    }, [pollingInterval]);
+
     useEffect(() => {
     axios.get('/user/data')
         .then(res => setUserOps(res.data.operations))
@@ -56,7 +98,7 @@ export default function CallsWaitingByOperation() {
                         <div className="flex flex-col gap-2 mb-4">
                             <Dropdown label="Selecciona la operación" theme={customTheme}>
                                 {userOps.map((op) => (
-                                    <DropdownItem key={op} onClick={() => { startPolling(op); selectedOperation (op); }}>
+                                    <DropdownItem key={op} onClick={() => { startPolling(op); setOperation (op); }}>
                                     {op}
                                     </DropdownItem>
                                 ))}
@@ -70,7 +112,7 @@ export default function CallsWaitingByOperation() {
                         </div>
 
                         <div className="flex-1 flex items-center justify-center min-h-[80px] text-gray-400 dark:text-gray-500">
-                            {!selectedOperation ? "Sin operación seleccionada" : `Opción seleccionada: ${selectedOperation}`}
+                            {!operation ? "Sin operación seleccionada" : `Opción seleccionada: ${operation}`}
                         </div>
 
                         <div className="mt-6 text-xs text-gray-400 dark:text-gray-500">
@@ -79,7 +121,7 @@ export default function CallsWaitingByOperation() {
                     </div>
                 </div>
 
-               {!selectedOperation  ? (
+               {!operation  ? (
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">🔍 Análisis detallado por operación</h2>
                         <div className="h-64 flex flex-col items-center justify-center text-center text-sm text-gray-400 dark:text-gray-500">
@@ -93,7 +135,7 @@ export default function CallsWaitingByOperation() {
                         <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow">
                             <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-2">⏱️ Tiempo promedio de espera</h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                Promedio de espera actual en la operación <strong>{selectedOperation}</strong>.
+                                Promedio de espera actual en la operación <strong>{operation}</strong>.
                             </p>
                             {/* <AvgWaitTimeChart operation={selectedOperation} /> */}
                         </div>

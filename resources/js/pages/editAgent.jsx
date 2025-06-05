@@ -174,7 +174,7 @@ const AgentControlPanel = ({ agent }) => {
     fetch(`/api/agent/${agent}`)
       .then((res) => res.json())
       .then((resData) => {
-        // console.log('Datos del agente:', resData); // Using console.log directly
+        console.log('Datos del agente:', resData); // Using console.log directly
         setData(resData);
       })
       .catch((err) => console.error('Error al obtener datos del agente', err));
