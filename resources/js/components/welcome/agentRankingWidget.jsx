@@ -1,8 +1,10 @@
-import { Link } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DiscordLoader from '@/components/discordloader';
 import { useLoadStatus } from "../context/loadContext";
+import { Link, usePage } from "@inertiajs/react";
+import { themeByProject } from '../utils/theme';
+
 
 const getMedal = (rank) => {
   switch (rank) {
@@ -14,6 +16,9 @@ const getMedal = (rank) => {
 };
 
 export default function AgentRankingWidget() {
+  const { props } = usePage();
+  const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+  const theme = themeByProject[proyecto];
   const [agentes, setAgentes] = useState([]);
   const [loading, setLoading] = useState(true); 
   const { allLoaded, markLoaded } = useLoadStatus();
@@ -52,7 +57,7 @@ export default function AgentRankingWidget() {
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ranking de Agentes</h3>
             <span className="text-sm text-gray-500">
-              <Link className='text-purple-light-20' href={route('showAgentRankingState')}>Hoy</Link>
+              <Link className={`${theme.text}`} href={route('showAgentRankingState')}>Hoy</Link>
             </span>
           </div>
 
@@ -71,7 +76,7 @@ export default function AgentRankingWidget() {
                     </p>
                   </div>
                 </div>
-                <p className="font-semibold text-purple-light-20">{agente.total_llamadas} llamadas</p>
+                <p className={`${theme.textSafe} font-semibold`}>{agente.total_llamadas} llamadas</p>
               </li>
             ))}
           </ul>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { Link } from "@inertiajs/react";
+import { Link,usePage} from "@inertiajs/react";
 import axios from "axios";
 import DiscordLoader from '@/components/discordloader';
 import { useLoadStatus } from "../context/loadContext";
+import { themeByProject } from '../utils/theme';
 
 import {
   Chart as ChartJS,
@@ -27,6 +28,12 @@ const options = {
 };
 
 export default function AgentStatusDonut() {
+  const { props } = usePage();
+  const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+  const theme = themeByProject[proyecto];
+
+  console.log(theme);
+  
   const [loading, setLoading] = useState(true);
   const [callData, setCallData] = useState({
     atendidas: 0,
@@ -87,7 +94,7 @@ export default function AgentStatusDonut() {
               Estado de Llamadas {selectedOperation}
             </h3>
             <span className="text-sm text-gray-500">
-              <Link className='text-purple-light-20' href={route('showCallState')}>Hoy</Link>
+              <Link className={`${theme.text}`} href={route('showCallState')}>Hoy</Link>
             </span>
           </div>
 
