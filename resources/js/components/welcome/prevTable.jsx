@@ -14,7 +14,7 @@ function PrevTable() {
     
     useEffect(() => {
         const fetchData = () => {
-            axios.get('/api/getOverview')
+            axios.get('/getOverview')
                 .then(res=> {setData(res.data); setLoading(false); markLoaded(); setLoading(false); markLoaded();})
                 .catch(err =>{console.error('Error al obtener overview:', err)});
         }

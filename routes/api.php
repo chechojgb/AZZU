@@ -13,12 +13,11 @@ Route::get('/user', function (Request $request) {
 Route::get('/stats/{area}', [PostProxyController::class, 'index']);
 Route::get('/agents/{area}', [PostProxyController::class, 'usersTable']);
 Route::get('/agent/{extension}', [PostProxyController::class, 'userData']);
-Route::get('/getOverview', [PostProxyController::class, 'getOverview']);
 Route::post('/hangup-channel', [PostProxyController::class, 'chanelHangup']);
 Route::post('/pause-extension', [PostProxyController::class, 'pauseExtension']);
 Route::post('/unpause-extension', [PostProxyController::class, 'unpauseExtension']);
 Route::post('/transfer-call', [PostProxyController::class, 'channelTransfer']);
 Route::get('/getCallsPerOperation', [PostProxyController::class, 'getCallsPerOperation']);
-
+Route::get('/operationState/{area}', [PostProxyController::class, 'operationState']);
 // routes/api.php
 Route::post('/spy', [SpyController::class, 'start']);
