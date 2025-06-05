@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
+import { Link, usePage } from "@inertiajs/react";
+import { themeByProject, getChartColors } from '../utils/theme';
 import {
   Chart as ChartJS,
   LineElement,
@@ -38,20 +40,6 @@ const alerts = [
   },
 ];
 
-const data = {
-  labels: ['6:00', '7:00', '8:00', '9:00', '10:00'],
-  datasets: [
-    {
-      label: 'Alertas por hora',
-      data: [1, 3, 2, 5, 4],
-      fill: true,
-      backgroundColor: 'rgba(147, 51, 234, 0.2)',
-      borderColor: 'rgba(147, 51, 234, 1)',
-      tension: 0.4,
-    },
-  ],
-};
-
 const options = {
   plugins: { legend: { display: false } },
   scales: {
@@ -61,18 +49,34 @@ const options = {
 };
 
 export default function AlertasRecientesWidget() {
+  const { props } = usePage();
+  const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+  const theme = themeByProject[proyecto];
+  const chartColors = getChartColors(proyecto);
   const [loading, setLoading] = useState(true);
   const { allLoaded, markLoaded } = useLoadStatus();
 
   useEffect(() => {
-    // Simula una carga real
     const timer = setTimeout(() => {
       setLoading(false);
-      markLoaded(); // marcar este componente como cargado
-    }, 800); // puedes ajustar este tiempo si lo deseas
-
+      markLoaded();
+    }, 800);
     return () => clearTimeout(timer);
   }, []);
+
+  const chartData = {
+    labels: ['6:00', '7:00', '8:00', '9:00', '10:00'],
+    datasets: [
+      {
+        label: 'Alertas por hora',
+        data: [1, 3, 2, 5, 4],
+        fill: true,
+        backgroundColor: chartColors.fill,
+        borderColor: chartColors.border,
+        tension: 0.4,
+      },
+    ],
+  };
 
   return (
     <div className="absolute inset-0 flex flex-col justify-between p-5">
@@ -80,19 +84,17 @@ export default function AlertasRecientesWidget() {
         <DiscordLoader />
       ) : (
         <>
-          {/* Encabezado */}
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Alertas recientes</h3>
-              <button className="text-xs text-cyan-600 hover:underline">Ver todo</button>
+              <button className={`${theme.text} text-xs hover:underline`}>Ver todo</button>
             </div>
 
-            {/* Lista */}
             <ul className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
               {alerts.map((alert, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <div className="flex flex-col items-center">
-                    <div className="bg-purple-100 text-purple-600 rounded-full p-1">{alert.icon}</div>
+                    <div className={`${theme.bgSafe} ${theme.text} rounded-full p-1`}>{alert.icon}</div>
                     {i < alerts.length - 1 && <div className="h-full w-px bg-gray-300 dark:bg-gray-600 mt-1" />}
                   </div>
                   <div className="flex-1">
@@ -108,9 +110,8 @@ export default function AlertasRecientesWidget() {
             </ul>
           </div>
 
-          {/* Gráfico */}
           <div className="mt-4">
-            <Line data={data} options={options} height={80} />
+            <Line data={chartData} options={options} height={80} />
           </div>
         </>
       )}

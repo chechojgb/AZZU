@@ -102,7 +102,7 @@ export function AppSidebar() {
         const required = item.requiredAreas ?? [];
         return userHasArea(user, required);
     });
-    console.log("visibleNavItems", visibleNavItems);
+    // console.log("visibleNavItems", visibleNavItems);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
