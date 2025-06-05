@@ -5,6 +5,8 @@ import AppLayout from '@/layouts/app-layout';
 import UsersList from '@/components/userList';
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
 import UserInfoList from '@/components/userInfoList';
+import { usePage, router } from '@inertiajs/react';
+import { userHasArea } from '@/components/utils/useAuthUtils';
 
 const breadcrumbs = [
   { title: 'Usuarios activos', href: '/users' },
@@ -14,6 +16,20 @@ export default function Users() {
   const [users, setUsers] = useState([]);
   const [totalAreas, setTotalAreas] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // const { auth } = usePage().props;
+  // const user = auth.user;
+
+  // // Verificación al cargar la página
+  // useEffect(() => {
+  //   if (!userHasArea(user, [])) {
+  //     router.visit('/dashboard'); // Redirecciona si no tiene acceso
+  //   }
+  // }, []);
+
+  // if (!userHasArea(user, [])) {
+  //   return null; // Evita mostrar el contenido mientras redirige
+  // }
 
   useEffect(() => {
     axios.get('users/index')
@@ -33,6 +49,7 @@ export default function Users() {
   // console.log(users);
   
   console.log(totalAreas)
+
 
 
   return (
