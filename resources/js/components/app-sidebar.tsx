@@ -65,7 +65,7 @@ const mainNavItems = [
             { title: 'Agregar', href: '/users/create' }
         ],
         icon: SquareUserRound,
-        requiredAreas: [3],
+        requiredAreas: [2],
     },
     {
         title: 'Operaciones',
@@ -74,7 +74,7 @@ const mainNavItems = [
             { title: 'Administrar', href: '/areas' },
         ],
         icon: Tags,
-        requiredAreas: [3], 
+        requiredAreas: [2], 
     },
 ];
 
@@ -94,13 +94,15 @@ const footerNavItems = [
 export function AppSidebar() {
     const { auth } = usePage<InertiaProps>().props;
     const user = auth?.user ?? { areaRoles: [] };
-    // console.log('user', user);
     
-
+    console.log("user", user);
+    
+    
     const visibleNavItems = mainNavItems.filter(item => {
         const required = item.requiredAreas ?? [];
         return userHasArea(user, required);
     });
+    console.log("visibleNavItems", visibleNavItems);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
