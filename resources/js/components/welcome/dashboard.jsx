@@ -40,7 +40,7 @@ export default function Dashboard() {
                         <AgentRankingWidget/>
                     </div>
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
-                        <CallsPerOperationChart/>
+                        {/* <CallsPerOperationChart/> */}
                     </div>
                 </div>
 

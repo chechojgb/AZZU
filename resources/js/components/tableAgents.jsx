@@ -111,9 +111,9 @@ const AgentPanel = () => {
     
 
     return (
-        <div className="mt-4 relative overflow-x-auto shadow-md sm:rounded-sm ml-4 mb-16">
+        <div className="rounded-lg mt-4 relative shadow-md sm:rounded-lg px-4 mb-16">
             
-            <div className="flex px-4 py-2  dark:bg-gray-800">
+            <div className="flex flex-wrap items-center px-4 py-2 text-sm dark:bg-gray-800 break-words max-w-full">
                 <a href="/table/agents" className="text-purple-light-20">Tablas</a>
                 <span className="mx-2 text-gray-500">/</span>
                 <span>Agentes</span>
@@ -121,20 +121,30 @@ const AgentPanel = () => {
                 <span>{operation ? ` ${operation}` : ''}</span>
             </div>
 
-            <div className="rounded-lg overflow-hidden shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-6 px-4 pb-2 pt-2 bg-white dark:bg-gray-900 ">
-                    <div className="relative">
-                        
-                    <Dropdown label="Selecciona la operación" theme={customTheme}>
-                    {userOps.map((op) => (
-                        <DropdownItem key={op} onClick={() => { startPolling(op); setOperation(op); }}>
-                        {op}
-                        </DropdownItem>
-                    ))}
-                    </Dropdown>
+            <div className=" overflow-hidden shadow-sm pb-60">
+                <div className="flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-4 px-4 pb-4 pt-2 bg-white dark:bg-gray-900">
+                    <div className="w-full lg:w-auto mb-2 relative [&_.dropdown-menu]:w-auto [&_.dropdown-menu]:max-w-xs [&_.dropdown-menu]:mx-auto [&_.dropdown-menu]:z-50">
+                        <Dropdown
+                            label="Selecciona la operación"
+                            theme={customTheme}
+                            className="w-full"
+                        >
+                            {userOps.map((op) => (
+                            <DropdownItem
+                                key={op}
+                                onClick={() => {
+                                startPolling(op);
+                                setOperation(op);
+                                }}
+                                className='z-99'
+                            >
+                                {op}
+                            </DropdownItem>
+                            ))}
+                        </Dropdown>
                     </div>
                     <div className="flex-1 flex justify-center">
-                        <div className="grid grid-cols-3 [@media(min-width:1200px)]:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-6 gap-4 max-w-full">
                             {Object.entries(stats).map(([key, value]) => (
                             <div
                                 key={key}
@@ -151,14 +161,14 @@ const AgentPanel = () => {
                             </div>
                             ))}
                         </div>
-                        </div>
+                    </div>
 
-                    <div className="relative">
+                    <div className="w-full sm:w-auto">
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-64 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                            className="w-full sm:w-64 block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                             placeholder="Buscar agente..."
                         />
                     </div>
