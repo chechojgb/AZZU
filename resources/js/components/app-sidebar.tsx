@@ -95,7 +95,7 @@ export function AppSidebar() {
     const { auth } = usePage<InertiaProps>().props;
     const user = auth?.user ?? { areaRoles: [] };
     
-    console.log("user", user);
+    // console.log("user", user);
     
     
     const visibleNavItems = mainNavItems.filter(item => {

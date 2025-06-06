@@ -20,7 +20,7 @@ class PostProxyController extends Controller
         if ($area === 'AR_CONSTRUCCIONES' || $area === 'AR_POSTVENTA') {
             $response = Http::get("http://98.85.112.126:13003/area/{$area}/estado");
         }else{
-            $response = Http::get("http://10.57.251.181:3002/area/{$area}");
+            $response = Http::get("http://10.57.251.181:3003/area/{$area}/estado");
         }
 
         if (!$response->successful()) {
