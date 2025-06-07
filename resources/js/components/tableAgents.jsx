@@ -21,13 +21,13 @@ const AgentPanel = () => {
         fetch(`/api/stats/${operation}`)
           .then(res => res.json())
           .then(data => {
-            console.log('Datos crudos de la API:', data);
+            // console.log('Datos crudos de la API:', data);
       
             const cleaned = Object.fromEntries(
               Object.entries(data).filter(([key]) => !['area', 'unknown'].includes(key))
             );
       
-            console.log('Datos filtrados (sin area ni unknown):', cleaned); // 🔍 Log del resultado
+            // console.log('Datos filtrados (sin area ni unknown):', cleaned); // 🔍 Log del resultado
       
             setStats(cleaned);
           })
@@ -39,6 +39,7 @@ const AgentPanel = () => {
         fetch(`/api/agents/${operation}`)
             .then(res => res.json())
             .then(data => {
+                console.log('Datos del agente:', data);
                 setAgents(data);
                 fetchStats(operation); // Llamar fetchStats después de obtener agentes
             })
