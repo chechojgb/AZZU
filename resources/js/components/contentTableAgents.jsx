@@ -19,9 +19,19 @@ function ContentTableAgents({ data, search, openModal, getStatusClass }) {
         cell: info => info.getValue(),
         },
         {
-        accessorKey: 'member.nombre',
-        header: 'Agente',
-        cell: info => info.getValue(),
+          accessorKey: 'member.nombre',
+          header: 'Agente',
+          cell: info => {
+            const rowData = info.row.original;
+            const nombre = rowData.member?.nombre ?? 'Sin nombre';
+            const enPausa = typeof rowData.member2?.pausa === 'string' && rowData.member2.pausa.toLowerCase().includes('paused');
+
+            return (
+              <span className={`font-semibold ${enPausa ? 'text-yellow-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                {nombre}
+              </span>
+            );
+          },
         },
         {
         accessorKey: 'member.estado',
@@ -78,9 +88,9 @@ function ContentTableAgents({ data, search, openModal, getStatusClass }) {
     });
 
   return (
-    <div className="overflow-x-auto max-h-[400px] overflow-y-auto ">
+    <div className="overflow-x-auto">
 
-      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
+      <table className="min-w-[600px] w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>

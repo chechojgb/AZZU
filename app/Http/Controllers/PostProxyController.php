@@ -34,21 +34,28 @@ class PostProxyController extends Controller
     {
         if ($area === 'AR_CONSTRUCCIONES' || $area === 'AR_POSTVENTA') {
             $response = Http::get("http://98.85.112.126:13002/area/{$area}");
-        }else{
+        } else {
             $response = Http::get("http://10.57.251.181:3002/area/{$area}");
         }
 
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
+
         $data = $response->json();
-        // Recorremos los elementos y solo modificamos 'member'
+
         foreach ($data as &$item) {
             if (!isset($item['member'])) continue;
+
+            // ✅ Si ya es array, no hacemos nada
+            if (is_array($item['member'])) {
+                continue;
+            }
+
+            // Si aún es string (caso viejo), lo procesamos
             $texto = $item['member'];
-            // Extraer nombre (lo que está antes del primer espacio)
             $nombre = explode(' ', $texto)[0];
-            // Extraer estado (palabra entre paréntesis como Busy, Idle, etc.)
+
             preg_match_all('/\((.*?)\)/', $texto, $matches);
             $estado = null;
             foreach ($matches[1] as $match) {
@@ -57,14 +64,16 @@ class PostProxyController extends Controller
                     break;
                 }
             }
-            // Sobrescribimos el campo member con los nuevos datos
+
             $item['member'] = [
                 'nombre' => $nombre,
                 'estado' => $estado,
             ];
         }
+
         return response()->json($data);
     }
+
 
     public function userData($extension): JsonResponse
     {
