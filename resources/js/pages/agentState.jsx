@@ -34,15 +34,15 @@ export default function TableAgents() {
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    <div className="xl:col-span-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 flex flex-col">
+                    <div className="xl:col-span-2 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 flex flex-col">
                         <h2 className="text-xl font-semibold text-indigo-700 dark:text-indigo-300 mb-4">Tabla de Ranking</h2>
                         <div className="flex-1">
-                            <LoadProvider total={1}>
+                            {/* <LoadProvider total={1}>
                                 <AgentRankingWidget />
-                            </LoadProvider>
+                            </LoadProvider> */}
                         </div>
                     </div>
-                    <div className="bg-gradient-to-br from-purple-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 flex flex-col justify-between">
+                    <div className=" from-purple-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 flex flex-col justify-between">
                         <h3 className="text-lg font-bold text-purple-700 dark:text-purple-300 mb-2">Resumen del Día</h3>
                         <ul className="space-y-3 text-base text-gray-700 dark:text-gray-200">
                             <li>
@@ -64,7 +64,7 @@ export default function TableAgents() {
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-8 mt-8">
+                <div className=" rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-8 mt-8">
                     <h2 className="text-xl font-semibold text-indigo-700 dark:text-indigo-300 mb-4">📈 Evolución Horaria</h2>
                     <p className="text-base text-gray-700 dark:text-gray-300 mb-4">
                         Visualiza el comportamiento de las llamadas a lo largo del día para identificar tendencias y optimizar recursos.

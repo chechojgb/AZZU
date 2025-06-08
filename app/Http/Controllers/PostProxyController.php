@@ -190,7 +190,7 @@ class PostProxyController extends Controller
         $interface = "SIP/{$extension}";
         $queues = [];
         for ($i = 1; $i <= 120; $i++) {
-            $queues[] = 'Q' . str_pad($i, 3, '0', STR_PAD_LEFT);
+            $queues[] = 'Q' . $i;
         }
         $paused = 1;
         $reason = 'ACW';
@@ -216,7 +216,7 @@ class PostProxyController extends Controller
         $interface = "SIP/{$extension}";
         $queues = [];
         for ($i = 1; $i <= 120; $i++) {
-            $queues[] = 'Q' . str_pad($i, 3, '0', STR_PAD_LEFT);
+            $queues[] = 'Q' . $i;
         }
         $paused = 0;
         $reason = 'ACW';
@@ -353,7 +353,7 @@ class PostProxyController extends Controller
         
         $baseUrl = $isOperationAR
         ? "http://98.85.112.126:13009"
-        : "http://10.57.251.181:13011";
+        : "http://10.57.251.181:3009";
         
         $response = Http::get("{$baseUrl}/api/llamadas/ranking?operation_id={$selectedOperation}");
         
@@ -380,6 +380,15 @@ class PostProxyController extends Controller
     }
 
     public function operationState($area): JsonResponse
+    {
+        $response = Http::get("http://10.57.251.181:3014/operacion/{$area}");
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos'], 500);
+        }
+        $data = $response->json();
+        return response()->json($data);
+    }
+    public function operationQueueState($area): JsonResponse
     {
         $response = Http::get("http://10.57.251.181:3014/operacion/{$area}");
         if (!$response->successful()) {
