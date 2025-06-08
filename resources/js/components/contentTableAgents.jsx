@@ -91,7 +91,7 @@ function ContentTableAgents({ data, search, openModal, getStatusClass }) {
     <div className="overflow-x-auto">
 
       <table className="min-w-[600px] w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
@@ -108,7 +108,7 @@ function ContentTableAgents({ data, search, openModal, getStatusClass }) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map(row => (
-            <tr key={row.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <tr key={row.id} className="bg-white dark:bg-[#011111]  border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
               {row.getVisibleCells().map(cell => (
                 <td key={cell.id} className="px-6 py-4">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

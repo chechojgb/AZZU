@@ -3,7 +3,7 @@ import Dashboard from '@/components/welcome/dashboard';
 
 export default function MainApp() {
   return (
-    <LoadProvider total={4}>
+    <LoadProvider total={5}>
       <Dashboard />
     </LoadProvider>
   );
