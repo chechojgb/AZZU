@@ -32,7 +32,7 @@ const AgentModalWrapper = ({ children, closeModal }) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`transform transition-all duration-300 ease-out ${
+        className={`mx-2 transform transition-all duration-300 ease-out ${
           show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         } bg-white dark:bg-gray-800 border rounded-xl p-4 shadow max-w-sm w-full`}
       >

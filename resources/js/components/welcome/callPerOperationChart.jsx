@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/react";
+import { Link,usePage } from "@inertiajs/react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,10 +10,10 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { useEffect, useState } from 'react';
-import { useLoadStatus } from "../context/loadContext";
 import DiscordLoader from '@/components/discordloader';
 import axios from "axios";
-
+import { useLoadStatus } from "../context/loadContext";
+import { themeByProject } from "../utils/theme";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -58,6 +58,9 @@ const options = {
 const labels = ['Soporte', 'Trámites', 'Retención', 'Móvil', 'Pruebas'];
 
 export default function CallsPerOperationChart() {
+  const { props } = usePage();
+  const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+  const theme = themeByProject[proyecto];
   const [loading, setLoading] = useState(true);
   const { allLoaded, markLoaded } = useLoadStatus();
   const [callData, setCallData] = useState({
@@ -117,7 +120,7 @@ export default function CallsPerOperationChart() {
   };
 
   return (
-    <div className="absolute inset-0 p-6 flex flex-col justify-between">
+    <div className="absolute inset-0 p-6 flex flex-col justify-between ">
       {!allLoaded ? (
         <DiscordLoader />
       ) : (
@@ -125,7 +128,7 @@ export default function CallsPerOperationChart() {
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Llamadas por operación</h3>
             <span className="text-sm text-gray-500">
-              <Link className='text-purple-light-20' href={route('showOperationState')}>Hoy</Link>
+              <Link className={`${theme.text}`} href={route('showOperationState')}>Hoy</Link>
             </span>
           </div>
           <Bar options={options} data={chartData} className="h-full w-full" />
