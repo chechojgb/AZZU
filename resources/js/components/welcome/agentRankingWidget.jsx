@@ -4,7 +4,7 @@ import DiscordLoader from '@/components/discordloader';
 import { useLoadStatus } from "../context/loadContext";
 import { Link, usePage } from "@inertiajs/react";
 import { themeByProject } from '../utils/theme';
-
+import TiempoFormateado from '@/components/utils/formatTime';
 
 const getMedal = (rank) => {
   switch (rank) {
@@ -34,6 +34,8 @@ export default function AgentRankingWidget() {
             .map((agente, index) => ({ ...agente, rank: index + 1 }));
 
           setAgentes(ordenados);
+          console.log(ordenados);
+          
         } else {
           console.warn("La respuesta no contiene un array de datos:", res.data);
         }
@@ -49,7 +51,7 @@ export default function AgentRankingWidget() {
   }, []);
 
   return (
-    <div className="p-6 flex flex-col justify-between">
+    <div className="p-0 sm:p-6 flex flex-col justify-between">
       {loading || !allLoaded ? ( // ⛳ doble condición: hasta que TODOS estén listos
         <DiscordLoader />
       ) : (
@@ -72,7 +74,7 @@ export default function AgentRankingWidget() {
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">{agente.agente}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Directas: {agente.directas}, Transferidas: {agente.transferidas}
+                      promedio: <TiempoFormateado tiempo={agente?.promedio_duracion}/>,<br/> Total en llamadas: <TiempoFormateado tiempo={agente?.total_duracion}/> 
                     </p>
                   </div>
                 </div>

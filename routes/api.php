@@ -19,6 +19,7 @@ Route::post('/unpause-extension', [PostProxyController::class, 'unpauseExtension
 Route::post('/transfer-call', [PostProxyController::class, 'channelTransfer']);
 Route::get('/getCallsPerOperation', [PostProxyController::class, 'getCallsPerOperation']);
 Route::get('/operationState/{area}', [PostProxyController::class, 'operationState']);
-Route::get('/operationQueueState/{area}', [PostProxyController::class, 'operationQueueState']);
+Route::get('/operationPromState/{area}', [PostProxyController::class, 'operationPromState']);
+Route::get('/operationStatusAgentOperation/{area}', [PostProxyController::class, 'operationAgentSatus']);
 // routes/api.php
 Route::post('/spy', [SpyController::class, 'start']);

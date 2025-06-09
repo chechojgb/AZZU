@@ -388,9 +388,18 @@ class PostProxyController extends Controller
         $data = $response->json();
         return response()->json($data);
     }
-    public function operationQueueState($area): JsonResponse
+    public function operationPromState($area): JsonResponse
     {
-        $response = Http::get("http://10.57.251.181:3014/operacion/{$area}");
+        $response = Http::get("http://10.57.251.181:3015/tiempo-respuesta/{$area}");
+        if (!$response->successful()) {
+            return response()->json(['error' => 'No se pudo obtener los datos'], 500);
+        }
+        $data = $response->json();
+        return response()->json($data);
+    }
+    public function operationAgentSatus($area): JsonResponse
+    {
+        $response = Http::get("http://10.57.251.181:3016/operacion/{$area}");
         if (!$response->successful()) {
             return response()->json(['error' => 'No se pudo obtener los datos'], 500);
         }
