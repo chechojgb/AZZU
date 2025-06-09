@@ -8,6 +8,10 @@ import axios from 'axios';
 import { useLoadStatus } from '@/components/context/loadContext';
 import { themeByProject } from '@/components/utils/theme';
 import { usePage } from "@inertiajs/react";
+import TiempoFormateado from '@/components/utils/formatTime';
+import AgentModalWrapper from '@/components/agentsModalWrapper';
+import useOperationModal from '@/hooks/useOperationModal';
+import ModalColasAgent from '@/components/queuesAgentsModal';
 
 import {
     Hourglass,
@@ -28,9 +32,12 @@ export default function CallsWaitingByOperation() {
     const [operation, setOperation] = useState(null);
     const [pollingInterval, setPollingInterval] = useState(null);
     const [stats, setStats] = useState([]);
+    const [promedio, setPromedio] = useState([]);
+    const [estadoAgentes, setEstadoAgentes] = useState([]);
     const { props } = usePage();
     const proyecto = props?.auth?.user?.proyecto || 'AZZU';
     const theme = themeByProject[proyecto];
+    const { modal, showModal, hideModal } = useOperationModal();
 
 
 
@@ -46,19 +53,30 @@ export default function CallsWaitingByOperation() {
             .catch(() => console.error('Error fetching stats'));
     }
 
-    const fetchStastQueueOperation = (operation) => {
+    const fetchStastPromOperation = (operation) => {
         if (!operation) return;
 
-        fetch(`/api/operationQueueState/${operation}`)
+        fetch(`/api/operationPromState/${operation}`)
             .then(res => res.json())
             .then(data => {
-            console.log('Datos crudos de la API:', data);
-            setStats(data);
+            // console.log('Datos crudos del promedio:', data);
+            setPromedio(data);
             })
             .catch(() => console.error('Error fetching stats'));
-
-        
     }
+
+    const fetchStatusAgentsOperation = (operation) => {
+        if (!operation) return;
+
+        fetch(`/api/operationStatusAgentOperation/${operation}`)
+            .then(res => res.json())
+            .then(data => {
+            // console.log('Datos crudos del estado del agente:', data);
+            setEstadoAgentes(data);
+            })
+            .catch(() => console.error('Error fetching stats'));
+    }
+
 
     const startPolling = (operation) => {
         // Limpia cualquier intervalo existente antes de iniciar uno nuevo
@@ -66,9 +84,11 @@ export default function CallsWaitingByOperation() {
             clearInterval(pollingInterval);
         }
 
-        fetchStastOperation(operation); // Realiza la primera solicitud inmediatamente
+        fetchStastOperation(operation);
+         (operation) // Realiza la primera solicitud inmediatamente
         const intervalId = setInterval(() => {
             fetchStastOperation(operation);
+            fetchStatusAgentsOperation(operation);
         }, 8000);
 
         
@@ -90,7 +110,7 @@ export default function CallsWaitingByOperation() {
         .then(res => setUserOps(res.data.operations))
         .catch(err => console.error('Error cargando operaciones', err));
     }, []);
-    console.log('Operaciones asignadas:',userOps);
+    // console.log('Operaciones asignadas:',userOps);
 
     const customTheme = {
         root: {
@@ -115,17 +135,17 @@ export default function CallsWaitingByOperation() {
                 </p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+                    <div className="relative rounded-xl border border-sidebar-border/70 dark:border-sidebar-border shadow-lg">
                         <LoadProvider total={1}>
                             <CallsPerOperationChart />
                         </LoadProvider>
                     </div>
 
-                    <div className=" p-6 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border shadow-none flex flex-col justify-between h-full ">
+                    <div className=" p-6 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border shadow-lg flex flex-col justify-between h-full ">
                         <div className="flex flex-col gap-2 mb-4">
                             <Dropdown label="Selecciona la operación" theme={customTheme}>
                             {userOps.map((op) => (
-                                <DropdownItem key={op} onClick={() => { startPolling(op); setOperation(op);  }}>
+                                <DropdownItem key={op} onClick={() => { startPolling(op); setOperation(op); fetchStastPromOperation(op) }}>
                                 {op}
                                 </DropdownItem>
                             ))}
@@ -156,19 +176,40 @@ export default function CallsWaitingByOperation() {
 
                         <div className="max-h-[300px] overflow-y-auto space-y-4">
 
-                            {stats.detalle_colas && stats.detalle_colas.map((cola) => (
-                                <div key={cola.cola} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 mb-4">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <h4 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2"><CircleDashed className={`${theme.text}`}/> Cola {cola.cola}</h4>
-                                        <span className="text-xs text-purple-500">{cola.llamadas} llamadas</span>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2 text-gray-600 dark:text-gray-400 text-xs">
-                                        <p>Total: <strong>{cola.agentes_totales}</strong></p>
-                                        <p>Ocupados: <strong>{cola.agentes_ocupados}</strong></p>
-                                        <p>Disponibles: <strong>{cola.agentes_disponibles}</strong></p>
-                                    </div>
-                                </div>
-                            ))}
+                            {stats.detalle_colas &&
+                                [...stats.detalle_colas]
+                                    .sort((a, b) => b.llamadas - a.llamadas) // ← ordena de mayor a menor
+                                    .map((cola) => {
+                                    let containerClass =
+                                        "p-3 rounded-lg border mb-4 transition-colors ";
+
+                                    if (cola.llamadas > 5) {
+                                        containerClass += "border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-300";
+                                    } else if (cola.llamadas >= 1) {
+                                        containerClass += "border-blue-500 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300";
+                                    } else {
+                                        containerClass += "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white";
+                                    }
+
+                                    return (
+                                        <div key={cola.cola} className={containerClass}>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <h4 className="font-semibold flex items-center gap-2">
+                                            <CircleDashed className={`${theme.text}`} />
+                                            Cola {cola.cola}
+                                            </h4>
+                                            <span className="text-xs font-semibold">
+                                            {cola.llamadas} llamadas
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-2 text-xs">
+                                            <p>Total: <strong>{cola.agentes_totales}</strong></p>
+                                            <p>Ocupados: <strong>{cola.agentes_ocupados}</strong></p>
+                                            <p>Disponibles: <strong>{cola.agentes_disponibles}</strong></p>
+                                        </div>
+                                        </div>
+                                    );
+                            })}
                         </div>
        
 
@@ -192,7 +233,7 @@ export default function CallsWaitingByOperation() {
                 </div>
 
                {!operation  ? (
-                    <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow">
+                    <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Glasses/> Análisis detallado por operación</h2>
                         <div className="h-64 flex flex-col items-center justify-center text-center text-sm text-gray-400 dark:text-gray-500">
                             <p className="mb-2">Aún no has seleccionado una operación.</p>
@@ -204,13 +245,14 @@ export default function CallsWaitingByOperation() {
                         {/* Columna 1: Tiempo promedio de espera */}
                         <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow">
                             <div className="flex flex-col items-start gap-2">
-                            <p className="text-3xl font-semibold text-orange-500">01:38</p>
+                            <p  className={`${theme.text} text-3xl font-semibold`}><TiempoFormateado tiempo={promedio.promedio_respuesta_hora} /></p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Promedio actual en la operación <strong>{operation}</strong>
                             </p>
                             <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                                Máximo histórico hoy: 04:15 <br />
-                                Objetivo ideal: ≤ 02:00
+                                Máximo histórico hoy: <TiempoFormateado tiempo={promedio.promedio_respuesta_dia} /> <br />
+                                Tiempo maximo de respuesta hoy: <TiempoFormateado tiempo={promedio.maximo_respuesta} /><br />
+                                Objetivo ideal: ≤ 01:00
                             </div>
                             </div>
                         </div>
@@ -218,24 +260,37 @@ export default function CallsWaitingByOperation() {
                         {/* Columna 2: Agentes conectados */}
                         <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow">
                             <div className="flex flex-col gap-2">
-  <p className="text-lg font-semibold text-gray-900 dark:text-white">9 agentes conectados</p>
-  <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
-    <li>🟢 4 disponibles</li>
-    <li>🔴 3 ocupados</li>
-    <li>🟡 2 en pausa</li>
-  </ul>
-  <div className="mt-3">
-    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Top 3 agentes activos</p>
-    <ul className="text-xs text-gray-500 dark:text-gray-400 mt-1 list-disc ml-4">
-      <li>Karol.Ospina — 18 llamadas</li>
-      <li>David.Mendez — 14 llamadas</li>
-      <li>Andrea.Sierra — 13 llamadas</li>
-    </ul>
-  </div>
-</div>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">9 agentes conectados</p>
+                            <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
+                                <li className='cursor-pointer'  onClick={() => showModal('disponibles')}>
+                                    🟢 {estadoAgentes?.total?.disponibles ?? 0} disponibles
+                                </li>
+                                <li className='cursor-pointer' onClick={() => showModal('ocupados')}>
+                                    🔴 {estadoAgentes?.total?.ocupados ?? 0} ocupados
+                                </li>
+                                <li className='cursor-pointer' onClick={() => showModal('en_pausa')}>
+                                    🟡 {estadoAgentes?.total?.en_pausa ?? 0} en pausa
+                                </li>
+                            </ul>
+                            <div className="mt-3">
+                                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">Has click en el status que desees para obtener mas informacion</p>
+                                <ul className="text-xs text-gray-500 dark:text-gray-400 mt-1 list-disc ml-4">
+                                </ul>
+                            </div>
+                            </div>
                             {/* <AgentsList operation={selectedOperation} /> */}
                         </div>
                     </div>
+                )}
+
+                {modal.show && (
+                    <AgentModalWrapper closeModal={hideModal}>
+                        <ModalColasAgent
+                            titulo={`Agentes ${modal.tipo?.replace('_', ' ')}`}
+                            tipo={modal.tipo}
+                            usuarios={estadoAgentes?.[modal.tipo] ?? []}
+                        />
+                    </AgentModalWrapper>
                 )}
 
 

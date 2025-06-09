@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import DiscordLoader from '@/components/discordloader';
 import axios from "axios";
 import { useLoadStatus } from "../context/loadContext";
-import { themeByProject } from "../utils/theme";
+import { themeByProject, getChartColors } from '../utils/theme';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -63,6 +63,8 @@ export default function CallsPerOperationChart() {
   const theme = themeByProject[proyecto];
   const [loading, setLoading] = useState(true);
   const { allLoaded, markLoaded } = useLoadStatus();
+  const chartColors = getChartColors(proyecto);
+  
   const [callData, setCallData] = useState({
     Soporte: 0,
     Tramites: 0,
@@ -111,8 +113,8 @@ export default function CallsPerOperationChart() {
           callData.Movil,
           callData.Pruebas
         ],
-        backgroundColor: 'rgba(168, 85, 247, 0.6)',
-        borderColor: 'rgba(147, 51, 234, 1)',
+        backgroundColor: chartColors.fill,
+        borderColor: chartColors.border,
         borderWidth: 1,
         borderRadius: 10,
       },
@@ -120,7 +122,7 @@ export default function CallsPerOperationChart() {
   };
 
   return (
-    <div className="absolute inset-0 p-6 flex flex-col justify-between ">
+    <div className="px-4 py-3 sm:px-6 sm:py-4 flex flex-col justify-between h-full">
       {!allLoaded ? (
         <DiscordLoader />
       ) : (
