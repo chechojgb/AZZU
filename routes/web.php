@@ -98,3 +98,7 @@ Route::get('/escuchar', function () {
 Route::get('/getDonutCalls', [PostProxyController::class, 'getDonutCalls']);
 Route::get('/getAgentRanking', [PostProxyController::class, 'rankingCalls']);
 Route::get('/getOverview', [PostProxyController::class, 'getOverview']);
+
+Route::get('/mi-ip', function () {
+    return request()->ip(); // o $_SERVER['REMOTE_ADDR']
+});
