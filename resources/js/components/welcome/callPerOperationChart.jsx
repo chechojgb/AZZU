@@ -9,7 +9,7 @@ import {
   Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import DiscordLoader from '@/components/discordloader';
 import axios from "axios";
 import { useLoadStatus } from "../context/loadContext";
@@ -64,7 +64,9 @@ export default function CallsPerOperationChart() {
   const [loading, setLoading] = useState(true);
   const { allLoaded, markLoaded } = useLoadStatus();
   const chartColors = getChartColors(proyecto);
-  
+  const [error, setError] = useState(false);
+  const intervalRef = useRef(null);
+
   const [callData, setCallData] = useState({
     Soporte: 0,
     Tramites: 0,
@@ -76,7 +78,7 @@ export default function CallsPerOperationChart() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get('/api/getCallsPerOperation');
+        const res = await axios.get('/api/getCallsPerOperation', { timeout: 5000 });
         const result = res.data;
 
         setCallData({
@@ -86,17 +88,28 @@ export default function CallsPerOperationChart() {
           Movil: result.Movil || 0,
           Pruebas: result.Pruebas || 0
         });
+
+        setError(false); // ✅ Limpia el error si todo salió bien
       } catch (err) {
         console.error('Error al obtener llamadas por operación:', err);
+        setError(true); // ✅ Marca que hay error
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current); // 🔥 Detiene el polling
+        }
       } finally {
         setLoading(false);
         markLoaded();
       }
     };
-    fetchData();
 
-    const interval = setInterval(fetchData, 8000);
-    return () => clearInterval(interval); 
+    fetchData();
+    intervalRef.current = setInterval(fetchData, 8000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current); // 🧹 Limpieza segura
+      }
+    };
   }, []);
 
   console.log(callData);
@@ -132,6 +145,15 @@ export default function CallsPerOperationChart() {
             <span className="text-sm text-gray-500">
               <Link className={`${theme.text}`} href={route('showOperationState')}>Hoy</Link>
             </span>
+          </div>
+          <div>
+            <div>
+              {error && (
+                <div className={`${theme.text} text-center mt-4`}>
+                  😓 Ups, no pudimos obtener datos del servidor.
+                </div>
+              )}
+            </div>
           </div>
           <Bar options={options} data={chartData} className="h-full w-full" />
         </>

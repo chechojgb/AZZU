@@ -1,6 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import ButtonLarge from "@/components/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import ButtonPurple from "@/components/buttonPurple";
 import DiscordLoader from '@/components/discordloader';
@@ -14,21 +14,39 @@ function PrevTable() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const { allLoaded, markLoaded } = useLoadStatus();
-
+    const [error, setError] = useState(false);
+    const intervalRef = useRef(null);
     
     useEffect(() => {
         const fetchData = () => {
-            axios.get('/getOverview')
-                .then(res=> {setData(res.data); setLoading(false); markLoaded(); setLoading(false); markLoaded();})
-                .catch(err =>{console.error('Error al obtener overview:', err)});
-        }
+            axios.get('/getOverview', { timeout: 5000 })
+                .then(res => {
+                    setData(res.data);
+                    setLoading(false);
+                    setError(false);
+                    markLoaded();
+                })
+                .catch(err => {
+                    console.error('Error al obtener overview:', err);
+                    setError(true);
+                    setLoading(false);
+                    markLoaded();
+
+                    // 🛑 Detiene el intervalo si hay error
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                    }
+                });
+        };
 
         fetchData();
+        intervalRef.current = setInterval(fetchData, 8000);
 
-        const interval = setInterval(fetchData, 8000);
-        
-        return () => clearInterval(interval);
-        
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
     }, []);
     // console.log(data);
 
@@ -36,7 +54,12 @@ function PrevTable() {
         <div className="absolute inset-0 p-6 flex flex-col justify-between">
             {loading || !allLoaded ? (
                 <DiscordLoader />
-            ) : (
+            ) : error ? (
+                <div className={`${theme.text} text-center mt-10`}>
+                    😓 Ups, no pudimos obtener datos del servidor.
+                </div>
+            ) 
+            :(
                 <>
                     <div className="flex flex-col">
                         <div className="flex justify-between items-center mb-4">
