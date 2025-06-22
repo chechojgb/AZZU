@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useRef  } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Link,usePage} from "@inertiajs/react";
 import axios from "axios";
@@ -31,9 +31,7 @@ export default function AgentStatusDonut() {
   const { props } = usePage();
   const proyecto = props?.auth?.user?.proyecto || 'AZZU';
   const theme = themeByProject[proyecto];
-
-  console.log(theme);
-  
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [callData, setCallData] = useState({
     atendidas: 0,
@@ -43,10 +41,13 @@ export default function AgentStatusDonut() {
   const [selectedOperation, setSelectedOperation] = useState('');
   const { allLoaded, markLoaded } = useLoadStatus();
 
+  console.log(theme);
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get('/getDonutCalls');
+        const res = await axios.get('/getDonutCalls', {timeout: 5000});
         const responseData = res.data;
 
         setCallData({
@@ -58,6 +59,7 @@ export default function AgentStatusDonut() {
         setSelectedOperation(responseData.selectedOperation || '');
       } catch (err) {
         console.error('Error al obtener overview:', err);
+        setError(true);
       } finally {
         setLoading(false);
         markLoaded(); // 🎯 indicamos que este componente terminó
@@ -97,6 +99,15 @@ export default function AgentStatusDonut() {
           <span className="text-sm text-gray-500">
             <Link className={`${theme.text}`} href={route('showCallState')}>Hoy</Link>
           </span>
+
+          
+        </div>
+        <div>
+          {error && (
+            <div className={`${theme.text} text-center mt-4`}>
+              😓 Ups, no pudimos obtener datos del servidor.
+            </div>
+          )}
         </div>
 
         {/* Donut Chart con espacio controlado */}
