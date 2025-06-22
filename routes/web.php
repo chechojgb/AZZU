@@ -103,6 +103,3 @@ Route::get('/mi-ip', function () {
     return request()->ip(); // o $_SERVER['REMOTE_ADDR']
 });
 
-Route::get('/hojacv', function () {
-    return view('hojacv');
-});
