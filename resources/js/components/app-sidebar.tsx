@@ -65,7 +65,7 @@ const mainNavItems = [
             { title: 'Agregar', href: '/users/create' }
         ],
         icon: SquareUserRound,
-        requiredAreas: [2],
+
     },
     {
         title: 'Operaciones',
@@ -74,7 +74,7 @@ const mainNavItems = [
             { title: 'Administrar', href: '/areas' },
         ],
         icon: Tags,
-        requiredAreas: [2], 
+
     },
 ];
 
