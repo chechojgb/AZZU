@@ -23,3 +23,5 @@ yarn-error.log
 /.vscode
 /.zed
 100.conf
+**/node_modules/
+node_modules/
