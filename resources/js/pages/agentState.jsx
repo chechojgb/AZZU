@@ -43,27 +43,7 @@ export default function TableAgents() {
                         </div>
                     </div>
                     <div className="from-purple-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 flex flex-col justify-between">
-                        <h3 className="text-lg font-bold text-purple-700 dark:text-purple-300 mb-2">Estadísticas Curiosas</h3>
-                        
-                        <ul className="space-y-3 text-base text-gray-700 dark:text-gray-200">
-                            <li>
-                            🏆 <span className="font-bold text-indigo-600">luisa611</span> fue el agente más rápido  
-                            <span className="block text-xs text-gray-500 dark:text-gray-400">Promedio de duración: 2:31</span>
-                            </li>
-                            <li>
-                            🧱 <span className="font-bold text-green-600">baguirre39</span> trabajó sin pausas por 3h 10m  
-                            <span className="block text-xs text-gray-500 dark:text-gray-400">Resistencia comprobada 💪</span>
-                            </li>
-                            <li>
-                            🎯 <span className="font-bold text-pink-600">sramoss1</span> recibió 12 transferencias  
-                            <span className="block text-xs text-gray-500 dark:text-gray-400">¡Más apoyo recibido!</span>
-                            </li>
-                        </ul>
 
-                        <div className="mt-6 text-xs text-gray-400 dark:text-gray-500">
-                            Última actualización: hace 5 minutos.
-                        </div>
-                    </div>
                 </div>
 
                 <div className=" rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-8 mt-8">
