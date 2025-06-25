@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function useSSHConsole({ onAutocomplete, onSuggestion } = {}) {
+export default function useSSHConsole({ onSuggestion } = {}) {
   const [connected, setConnected] = useState(false);
   const [status, setStatus] = useState("");
   const [user, setUser] = useState("");
@@ -11,10 +11,9 @@ export default function useSSHConsole({ onAutocomplete, onSuggestion } = {}) {
   const scrollRef = useRef(null);
   const socketRef = useRef(null);
 
-  const awaitingAutocomplete = useRef(false);
   const lastSentCommand = useRef("");
-  const autoCompleteCallbackRef = useRef(null);
-  const lastAutoCompleteBase = useRef("");
+  const awaitingSuggestion = useRef(false);
+  const lastSuggestionCommand = useRef("");
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3001");
@@ -49,72 +48,45 @@ export default function useSSHConsole({ onAutocomplete, onSuggestion } = {}) {
       if (msg.host) setHost(msg.host);
       if (msg.cwd) setCwd(msg.cwd);
 
-      // ✅ Autocompletado exacto
-      if (msg.autocomplete) {
-        const cleanValue = clean(msg.autocomplete);
-        const forbidden = ["compgen", "echo", "_END", "__AUTO", "$"];
-        const isInvalid = forbidden.some((term) => cleanValue.includes(term));
-
-        if (!isInvalid && cleanValue.trim() !== "") {
-          console.log("✅ Autocompletado válido recibido:", cleanValue);
-          if (cleanValue === lastAutoCompleteBase.current) {
-            console.warn("🔁 Autocompletado repetido");
-            return;
-          }
-
-          lastAutoCompleteBase.current = cleanValue;
-
-          const original = lastSentCommand.current.trim();
-          const parts = original.split(/\s+/);
-          parts[parts.length - 1] = cleanValue;
-          const completed = parts.join(" ");
-
-          if (onAutocomplete) {
-            onAutocomplete(completed);
-          } else if (autoCompleteCallbackRef.current) {
-            autoCompleteCallbackRef.current(completed);
-            autoCompleteCallbackRef.current = null;
-          }
-
-          awaitingAutocomplete.current = false;
-          return;
-        } else {
-          console.warn("⛔ Autocompletado inválido, intentamos con sugerencias si hay");
-        }
-      }
-
-      // ✅ Sugerencias múltiples
       if (msg.suggestions) {
+        awaitingSuggestion.current = false;
+        lastSuggestionCommand.current = "";
+
+        const clean = (s) =>
+          s
+            .replace(/\x1B\[[0-9;?]*[a-zA-Z]/g, "")
+            .replace(/\r/g, "")
+            .trim();
+
         const list = msg.suggestions
-          .map((s) => clean(s))
-          .filter((s) => s && !s.startsWith("\x1B") && !s.includes("__AUTO"));
+          .map(clean)
+          .filter(
+            (s) =>
+              s &&
+              !s.startsWith("\x1B") &&
+              !s.includes("__AUTO") &&
+              !s.includes("_END") &&
+              !s.match(/^.*@.*:.*\$/)
+          );
 
         console.log("💡 Sugerencias:", list);
-
-        if (list.length === 1 && awaitingAutocomplete.current) {
-          const original = lastSentCommand.current.trim();
-          const parts = original.split(/\s+/);
-          parts[parts.length - 1] = list[0];
-          const completed = parts.join(" ");
-
-          if (onAutocomplete) {
-            onAutocomplete(completed);
-          }
-        } else if (onSuggestion) {
-          onSuggestion(list);
-        }
-
-        awaitingAutocomplete.current = false;
+        if (onSuggestion) onSuggestion(list);
         return;
       }
 
       if (msg.output) {
+        const clean = (text) =>
+          text
+            .replace(/\x1B\[[0-9;?]*[a-zA-Z]/g, "")
+            .replace(/\r/g, "")
+            .trim();
+
         const text = clean(msg.output);
         setOutput((prev) => prev + "\n" + text);
       }
 
       if (msg.error) {
-        setOutput((prev) => prev + "\n❌ " + clean(msg.error));
+        setOutput((prev) => prev + "\n❌ " + msg.error);
       }
     };
 
@@ -129,39 +101,29 @@ export default function useSSHConsole({ onAutocomplete, onSuggestion } = {}) {
     }
   }, [output]);
 
-  const clean = (text) =>
-    text
-      .replace(/\x1B\[[0-9;?]*[a-zA-Z]/g, "")
-      .replace(/\r/g, "")
-      .trim();
-
   const sendCommand = (cmd) => {
     if (!cmd || socketRef.current?.readyState !== WebSocket.OPEN) return;
     lastSentCommand.current = cmd;
     socketRef.current.send(JSON.stringify({ command: cmd }));
   };
 
-  const triggerAutocomplete = (cmd, callback) => {
-    const tokens = cmd.trim().split(/\s+/);
-    const last = tokens[tokens.length - 1];
-    if (last.length < 1 || last === lastAutoCompleteBase.current) {
-      console.log("⛔ Evitando autocompletar repetido o vacío");
+  const triggerSuggestion = (cmd) => {
+    const cleanCmd = cmd.trim();
+    if (
+      !cleanCmd ||
+      awaitingSuggestion.current ||
+      cleanCmd === lastSuggestionCommand.current
+    ) {
+      console.log("⛔ Ignorando trigger repetido o esperando");
       return;
     }
 
-    awaitingAutocomplete.current = true;
-    lastSentCommand.current = cmd;
-    lastAutoCompleteBase.current = last;
-    autoCompleteCallbackRef.current = callback;
+    lastSuggestionCommand.current = cleanCmd;
+    awaitingSuggestion.current = true;
 
-    const autoCmd = `__AUTO_COMPLETE__ ${cmd}`;
-    console.log("📤 Enviando autocompletado:", autoCmd);
+    const autoCmd = `__AUTO_SUGGEST__ ${cmd}`;
+    console.log("📤 Enviando sugerencias para:", cleanCmd);
     socketRef.current.send(JSON.stringify({ command: autoCmd }));
-  };
-
-  const triggerSuggestion = (cmd) => {
-    if (!socketRef.current) return;
-    socketRef.current.send(JSON.stringify({ command: `__AUTO_SUGGEST__ ${cmd}` }));
   };
 
   return {
@@ -173,7 +135,6 @@ export default function useSSHConsole({ onAutocomplete, onSuggestion } = {}) {
     output,
     scrollRef,
     sendCommand,
-    triggerAutocomplete,
     triggerSuggestion,
   };
 }

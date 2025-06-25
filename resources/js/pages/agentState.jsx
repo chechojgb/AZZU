@@ -15,7 +15,7 @@ export default function TableAgents() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="showAgentsState" />
             {/* import debug from 'debug'; */}
-            <div className="p-8 space-y-8  min-h-screen">
+            <div className="p-8 space-y-8 min-h-screen">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-extrabold text-indigo-800 dark:text-white mb-2">🏆 Ranking de Agentes</h1>
@@ -42,11 +42,13 @@ export default function TableAgents() {
                             </LoadProvider>
                         </div>
                     </div>
-                    <div className="from-purple-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 flex flex-col justify-between">
 
+                    <div className="from-purple-100 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-6 flex flex-col justify-between">
+                        {/* Aquí puedes poner contenido adicional si lo necesitas */}
+                    </div>
                 </div>
 
-                <div className=" rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-8 mt-8">
+                <div className="rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-8 mt-8">
                     <h2 className="text-xl font-semibold text-indigo-700 dark:text-indigo-300 mb-4">📈 Evolución Horaria</h2>
                     <p className="text-base text-gray-700 dark:text-gray-300 mb-4">
                         Visualiza el comportamiento de las llamadas a lo largo del día para identificar tendencias y optimizar recursos.
@@ -57,5 +59,6 @@ export default function TableAgents() {
                 </div>
             </div>
         </AppLayout>
+
     );
 }
