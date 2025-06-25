@@ -104,3 +104,6 @@ Route::get('/mi-ip', function () {
 });
 
 
+Route::get('test-terminal', function () {
+    return Inertia::render('TestTerminal');
+})->name('test-terminal');
