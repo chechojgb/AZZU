@@ -112,11 +112,11 @@ export default function SimpleSSHTerminal() {
             color = "text-purple-300";
           }
 
-          const isPrompt = /^\w+@[\w.-]+:.*\$ ?$/.test(line.trim());
-          if (isPrompt && lastCommandRendered.current) {
-            line = `${line.trim()} ${lastCommandRendered.current}`;
-            lastCommandRendered.current = "";
-          }
+          // const isPrompt = /^\w+@[\w.-]+:.*\$ ?$/.test(line.trim());
+          // if (isPrompt && lastCommandRendered.current) {
+          //   line = `${line.trim()} ${lastCommandRendered.current}`;
+          //   lastCommandRendered.current = "";
+          // }
 
           return (
             <div key={idx} className={color}>

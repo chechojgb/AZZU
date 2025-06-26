@@ -54,7 +54,9 @@ export default function useSSHConsole({ onSuggestion } = {}) {
 
         const clean = (s) =>
           s
-            .replace(/\x1B\[[0-9;?]*[a-zA-Z]/g, "")
+            .replace(/\x1B\[[0-9;?]*[a-zA-Z]/g, "")     // códigos ANSI
+            .replace(/\x1B\][^\x07]*\x07/g, "")         // OSC
+            .replace(/\x1B=P|\x1B>|\x1B\[\?2004[hl]/g, "") // bracketed paste
             .replace(/\r/g, "")
             .trim();
 
@@ -74,15 +76,28 @@ export default function useSSHConsole({ onSuggestion } = {}) {
         return;
       }
 
+      if (msg.output && msg.output.includes("__CMD_ECHO__")) {
+        const cmd = msg.output.split("__CMD_ECHO__:")[1]?.trim();
+        if (cmd && user && host && cwd) {
+          const promptLine = `${user}@${host}:${cwd} $ ${cmd}`;
+          setOutput((prev) => prev + `\n${promptLine}`);
+        }
+        return;
+      }
+
       if (msg.output) {
         const clean = (text) =>
           text
             .replace(/\x1B\[[0-9;?]*[a-zA-Z]/g, "")
+            .replace(/\x1B\][^\x07]*\x07/g, "")
+            .replace(/\x1B=P|\x1B>|\x1B\[\?2004[hl]/g, "")
             .replace(/\r/g, "")
             .trim();
 
         const text = clean(msg.output);
-        setOutput((prev) => prev + "\n" + text);
+        if (text) {
+          setOutput((prev) => prev + "\n" + text);
+        }
       }
 
       if (msg.error) {
