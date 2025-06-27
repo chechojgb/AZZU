@@ -17,7 +17,9 @@ export default function TableAgents() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="terminal" />
-            <XTermSSH/>
+            <div className='p-8 space-y-8 w-full h-[calc(100vh-4rem)]'>
+                <XTermSSH/>
+            </div>
         </AppLayout>
     );
 }
