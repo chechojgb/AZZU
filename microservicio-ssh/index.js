@@ -30,7 +30,7 @@ wss.on("connection", (ws) => {
         }
 
         shellStream = stream;
-        ws.send(JSON.stringify({ output: "🟢 Sesión iniciada\n" }));
+        // ws.send(JSON.stringify({ output: "🟢 Sesión iniciada\n" }));
 
         stream.on("data", (data) => {
           ws.send(JSON.stringify({ output: data.toString() }));
