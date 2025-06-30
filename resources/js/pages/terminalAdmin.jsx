@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Head } from '@inertiajs/react';
+import { Head,Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import AreaList from '@/components/areaList';
+import TerminalList from '@/components/terminalList';
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
 import UserInfoList from '@/components/userInfoList';
 import { Button } from "flowbite-react";
@@ -11,21 +11,26 @@ import { ClipboardList } from 'lucide-react';
 import AgentModalWrapper from '@/components/agentsModalWrapper';
 import AreaModalContent from '@/components/areaModalContent';
 import AreaModalEditContent from '@/components/areaModalEditContent';
+import { themeByProject } from '@/components/utils/theme';
 import { HiCheck, HiX } from "react-icons/hi";
 import { Toast } from "flowbite-react";
+import SshSessionModalContent from '@/components/TerminalModalContent';
 // import { log } from 'node:console';
 
 const breadcrumbs = [
-  { title: 'Operaciones activos', href: '/users' },
+  { title: 'Administracion de terminales', href: '/terminal-admin' },
 ];
 
 export default function Areas() {
-    const [areas, setAreas] = useState([]);
+    const [terminal, setTerminal] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalOpenEdit, setModalOpenEdit] = useState(false);
     const [totalAreas, setTotalAreas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedArea, setSelectedArea] = useState(null);
+    const { props } = usePage();
+    const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+    const theme = themeByProject[proyecto];
   
     const [toast, setToast] = useState({
         show: false,
@@ -46,10 +51,10 @@ export default function Areas() {
     };
 
   useEffect(() => {
-    axios.get('areas/index')
+    axios.get('terminal/index')
       .then(res => {
-        setAreas(res.data.areas);
-        setTotalAreas(res.data.totalAreas)
+        setTerminal(res.data);
+        // setTotalAreas(res.data.totalAreas)
         setLoading(false);
       })
       .catch(err => {
@@ -62,7 +67,7 @@ export default function Areas() {
 
   
   console.log('Total de areas:',totalAreas);
-  console.log('Areas:', areas);
+  console.log('Terminales:', terminal);
   
 
 
@@ -72,11 +77,11 @@ export default function Areas() {
 
       <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
         
-        <UserInfoList data={areas}/>
+        {/* <UserInfoList data={areas}/> */}
         <div className="min-h-[100vh] md:min-h-min">
-            <Button className='bg-purple-light-20 mb-4 ' onClick={() => openModal()}>
+                <Button className={`${theme.bgHard} dark:${theme.bg} ${theme.bgHover} dark:${theme.bgHover} mb-4`} onClick={() => openModal()}>
                 <ClipboardList  />
-                Crear nueva area
+                Agregar nueva terminal
             </Button>
           <div className="border relative overflow-hidden rounded-xl border">
             <div className="overflow-x-auto">
@@ -84,13 +89,14 @@ export default function Areas() {
                 <TableHead>
                   <TableRow>
                     <TableHeadCell>Nombre</TableHeadCell>
-                    <TableHeadCell>Creada</TableHeadCell>
-                    <TableHeadCell>Actualizada</TableHeadCell>
-                    <TableHeadCell>Editar usuario</TableHeadCell>
+                    <TableHeadCell>Host</TableHeadCell>
+                    <TableHeadCell>UserName</TableHeadCell>
+                    <TableHeadCell>Descripcion</TableHeadCell>
+                    <TableHeadCell >Editar usuario</TableHeadCell>
                   </TableRow>
                 </TableHead>
                 <TableBody className="divide-y">
-                  <AreaList areas={areas} totalAreas={totalAreas} openModal={openModalEdit}/>
+                  <TerminalList terminales={terminal}  openModal={openModalEdit}/>
                 </TableBody>
               </Table>
             </div>
@@ -115,7 +121,7 @@ export default function Areas() {
 
         {modalOpen && (
             <AgentModalWrapper closeModal={closeModal}>
-                <AreaModalContent  onClose={closeModal} setToast={setToast} />
+                <SshSessionModalContent  onClose={closeModal} setToast={setToast} />
             </AgentModalWrapper>
         )}
 

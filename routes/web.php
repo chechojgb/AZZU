@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PostProxyController;
+use App\Http\Controllers\SshSessionController;
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
@@ -103,7 +104,26 @@ Route::get('/mi-ip', function () {
     return request()->ip(); // o $_SERVER['REMOTE_ADDR']
 });
 
+use App\Models\SshSession;
 
 Route::get('test-terminal', function () {
     return Inertia::render('TestTerminal');
 })->name('test-terminal');
+Route::get('terminal-admin', function () {
+    return Inertia::render('terminalAdmin');
+})->name('terminal-admin');
+
+Route::get('terminal/index', [SshSessionController::class, 'index'])->name('terminal_index');
+Route::post('terminal.store', [SshSessionController::class, 'store'])->name('terminal.store');
+
+
+Route::get('/terminales/{id}', function ($id) {
+    return Inertia::render('XTermSSH', [
+        'sessionId' => (int) $id,
+    ]);
+})->middleware('auth')->name('terminales.show');
+
+
+Route::get('/ssh-session/{id}', function ($id) {
+    return App\Models\SshSession::findOrFail($id);
+});
