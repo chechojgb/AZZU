@@ -20,18 +20,21 @@ import {
     Tags,
     BarChartBig,
     BookHeadphones,
-    HeadphonesIcon
+    HeadphonesIcon,
+    Terminal
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { userHasArea } from '@/components/utils/useAuthUtils';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import type { InertiaProps } from '@/types';
 
-const mainNavItems = [
+const staticNavItems = [
     {
         title: 'AzzuBoard',
         href: '/dashboard',
         icon: LayoutGrid,
-        requiredAreas: [2, 3], // Soporte y Supervisor
+        requiredAreas: [2, 3],
     },
     {
         title: 'Tabla de agentes',
@@ -66,7 +69,6 @@ const mainNavItems = [
         ],
         icon: SquareUserRound,
         requiredAreas: [2, 3],
-
     },
     {
         title: 'Operaciones',
@@ -76,17 +78,7 @@ const mainNavItems = [
         ],
         icon: Tags,
         requiredAreas: [2, 3],
-    },
-    {
-        title: 'Terminales',
-        href: '/terminales',
-        children: [
-            { title: 'Administrar', href: '/test-terminal' },
-        ],
-        icon: Tags,
-        requiredAreas: [2, 3],
-    },
-    
+    }
 ];
 
 const footerNavItems = [
@@ -105,15 +97,34 @@ const footerNavItems = [
 export function AppSidebar() {
     const { auth } = usePage<InertiaProps>().props;
     const user = auth?.user ?? { areaRoles: [] };
-    
-    // console.log("user", user);
-    
-    
-    const visibleNavItems = mainNavItems.filter(item => {
+    const [sshSessions, setSshSessions] = useState([]);
+
+    useEffect(() => {
+        axios.get('/terminal/index')
+            .then((res) => setSshSessions(res.data))
+            .catch((err) => console.error('Error loading SSH sessions', err));
+    }, []);
+
+    const visibleNavItems = staticNavItems.filter(item => {
         const required = item.requiredAreas ?? [];
         return userHasArea(user, required);
     });
-    // console.log("visibleNavItems", visibleNavItems);
+
+    const terminalNavItem = {
+        title: 'Terminales',
+        href: '/terminales',
+        icon: Terminal,
+        requiredAreas: [1, 2, 3],
+        children: [
+            { title: 'Administrar', href: '/terminal-admin' },
+            ...sshSessions.map(session => ({
+                title: `${session.host}-${session.username}`,
+                href: `/terminales/${session.id}`,
+            }))
+        ]
+    };
+
+    visibleNavItems.push(terminalNavItem);
 
     return (
         <Sidebar collapsible="icon" variant="inset">

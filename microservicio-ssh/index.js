@@ -1,84 +1,122 @@
-require("dotenv").config();
-const express = require("express");
-const http = require("http");
-const { WebSocketServer } = require("ws");
+const { Server } = require("ws");
 const { Client } = require("ssh2");
+const express = require("express");
+const axios = require("axios");
 
-const PORT = process.env.PORT || 3001;
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const wss = new Server({ port: 3001 });
+
+const sshSessions = new Map(); // Mantenemos conexiones por sessionId
 
 wss.on("connection", (ws) => {
-  console.log("📡 Cliente conectado");
-
-  const ssh = new Client();
   let shellStream;
+  let currentSessionId;
 
-  ssh
-    .on("ready", () => {
-      console.log("🔐 Conexión SSH establecida");
-      ssh.shell({ 
-        term: 'xterm-color',
-        rows: 40,
-        cols: 120,
-        pty: true
-      }, (err, stream) => {
-        if (err) {
-          ws.send(JSON.stringify({ output: `Error iniciando shell: ${err.message}\n` }));
+  ws.on("message", async (message) => {
+    try {
+      const data = JSON.parse(message);
+
+      if (data.type === "init") {
+        currentSessionId = data.sessionId;
+
+        if (sshSessions.has(currentSessionId)) {
+          console.log("♻️ Reutilizando conexión SSH para sessionId:", currentSessionId);
+          const existing = sshSessions.get(currentSessionId);
+          shellStream = existing.shell;
+          existing.sockets.add(ws);
+
+          // Reenviar datos al nuevo WebSocket
+          shellStream.write('\n'); // fuerza redibujo (útil si estaba en vim)
           return;
         }
 
-        shellStream = stream;
-        // ws.send(JSON.stringify({ output: "🟢 Sesión iniciada\n" }));
+        // Obtener datos desde Laravel
+        const apiUrl = `http://localhost:8000/ssh-session/${currentSessionId}`;
+        const response = await axios.get(apiUrl);
+        const session = response.data;
 
-        stream.on("data", (data) => {
-          ws.send(JSON.stringify({ output: data.toString() }));
-        });
+        const ssh = new Client();
+        const sshConfig = {
+          host: session.host,
+          port: session.port || 22,
+          username: session.username,
+        };
 
-        stream.stderr.on("data", (data) => {
-          ws.send(JSON.stringify({ output: data.toString() }));
-        });
+        if (session.use_private_key && session.private_key) {
+          sshConfig.privateKey = session.private_key;
+        } else {
+          sshConfig.password = String(session.password || "").trim();
+        }
 
-        stream.on("close", () => {
-          console.log("🔒 Shell cerrada");
-          ssh.end();
-        });
-      });
-    })
-    .on("error", (err) => {
-      console.error("❌ Error SSH:", err.message);
-      ws.send(JSON.stringify({ output: "Fallo SSH: " + err.message }));
-    })
-    .connect({
-      host: "192.168.20.58",
-      port: 22,
-      username: "chechojgb",
-      password: "3209925728",
-    });
+        ssh
+          .on("ready", () => {
+            console.log("✅ Nueva conexión SSH lista");
 
-  // ✅ Captura de entrada cruda desde xterm
-  ws.on("message", (msg) => {
-    let input;
-    try {
-      const parsed = JSON.parse(msg);
-      input = parsed.input;
+            ssh.shell((err, stream) => {
+              if (err) {
+                return ws.send(JSON.stringify({ output: `❌ Shell error: ${err.message}` }));
+              }
+
+              shellStream = stream;
+
+              // Guardar en el mapa
+              sshSessions.set(currentSessionId, {
+                ssh,
+                shell: stream,
+                sockets: new Set([ws])
+              });
+
+              stream.on("data", (chunk) => {
+                for (const socket of sshSessions.get(currentSessionId).sockets) {
+                  socket.send(JSON.stringify({ output: chunk.toString() }));
+                }
+              });
+
+              stream.stderr.on("data", (chunk) => {
+                for (const socket of sshSessions.get(currentSessionId).sockets) {
+                  socket.send(JSON.stringify({ output: `❗ ${chunk.toString()}` }));
+                }
+              });
+
+              stream.on("close", () => {
+                console.log("❌ Shell cerrado");
+                sshSessions.delete(currentSessionId);
+              });
+            });
+          })
+          .on("error", (err) => {
+            ws.send(JSON.stringify({ output: `❌ Error SSH: ${err.message}` }));
+          })
+          .connect(sshConfig);
+      }
+
+      // Si se está enviando input
+      if (data.input && currentSessionId && sshSessions.has(currentSessionId)) {
+        const stream = sshSessions.get(currentSessionId).shell;
+        stream.write(data.input);
+      }
     } catch (err) {
-      input = msg.toString();
-    }
-
-    if (shellStream && input) {
-      shellStream.write(input);
+      ws.send(JSON.stringify({ output: `❌ Error: ${err.message}` }));
     }
   });
 
   ws.on("close", () => {
-    console.log("🔌 Cliente desconectado");
-    if (shellStream) shellStream.end();
-    ssh.end();
-  });
-});
+    // ❌ No cerramos la sesión SSH, solo eliminamos el WebSocket de la lista
+    if (currentSessionId && sshSessions.has(currentSessionId)) {
+      const session = sshSessions.get(currentSessionId);
+      session.sockets.delete(ws);
 
-server.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+      // Si no hay sockets abiertos, puedes cerrar la conexión opcionalmente después de un timeout
+      if (session.sockets.size === 0) {
+        setTimeout(() => {
+          if (session.sockets.size === 0) {
+            console.log("🧹 Cerrando sesión inactiva:", currentSessionId);
+            session.shell.end();
+            session.ssh.end();
+            sshSessions.delete(currentSessionId);
+          }
+        }, 30000); // Espera 30s antes de cerrar
+      }
+    }
+  });
 });

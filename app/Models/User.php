@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\AreaRoleUser;
 use App\Models\Area;
 use App\Models\Role;
+use App\Models\SshSession;
 
 class User extends Authenticatable
 {
@@ -63,5 +65,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function sshSessions(): HasMany
+    {
+        return $this->hasMany(SshSession::class);
     }
 }

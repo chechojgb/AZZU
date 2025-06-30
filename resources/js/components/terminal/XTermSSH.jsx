@@ -3,7 +3,7 @@ import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 
-export default function XTermSSH() {
+export default function XTermSSH({ sessionId }) {
   const terminalRef = useRef(null);
   const term = useRef(null);
   const fitAddon = useRef(new FitAddon());
@@ -13,7 +13,7 @@ export default function XTermSSH() {
   const getTheme = () => {
     const isDark = document.documentElement.classList.contains("dark");
     return {
-      background: isDark ? "#" : "#ffffff",
+      background: isDark ? "#000000" : "#ffffff",
       foreground: isDark ? "#00ff00" : "#000000",
       cursor: isDark ? "#00ff00" : "#000000",
       selection: isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(0,0,0,0.3)",
@@ -29,6 +29,7 @@ export default function XTermSSH() {
   };
 
   useEffect(() => {
+    // Crear terminal
     term.current = new Terminal({
       cursorBlink: true,
       fontSize: 14,
@@ -40,15 +41,17 @@ export default function XTermSSH() {
     term.current.open(terminalRef.current);
     fitAddon.current.fit();
 
+    // WebSocket
     socketRef.current = new WebSocket("ws://localhost:3001");
+
+    socketRef.current.onopen = () => {
+      console.log("🔌 WebSocket abierto. Enviando init con sessionId:", sessionId);
+      socketRef.current.send(JSON.stringify({ type: "init", sessionId }));
+    };
 
     socketRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.output) {
-        term.current.write(data.output);
-      } else if (typeof event.data === "string") {
-        term.current.write(event.data);
-      }
+      if (data.output) term.current.write(data.output);
     };
 
     socketRef.current.onerror = (err) => {
@@ -59,34 +62,42 @@ export default function XTermSSH() {
       socketRef.current.send(JSON.stringify({ input: data }));
     });
 
+    // 🌟 Copiar automáticamente al seleccionar texto
+    term.current.onSelectionChange(() => {
+      const selected = term.current.getSelection();
+      if (selected) {
+        navigator.clipboard.writeText(selected)
+          .then(() => {
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 2000);
+          })
+          .catch((err) => {
+            console.error("❌ Error copiando al portapapeles:", err);
+          });
+      }
+    });
+
+    // 🌟 Pegar automáticamente al hacer clic derecho
+    terminalRef.current.addEventListener("contextmenu", async (e) => {
+      e.preventDefault();
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) term.current.paste(text);
+      } catch (err) {
+        console.error("❌ Error pegando desde el portapapeles:", err);
+      }
+    });
+
+    // Detectar cambios de tema (claro/oscuro)
     const observer = new MutationObserver(applyTheme);
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
 
+    // Redimensionar
     const handleResize = () => fitAddon.current.fit();
     window.addEventListener("resize", handleResize);
-
-    // ✅ Copiar automáticamente lo seleccionado (una sola vez)
-    let lastCopiedSelection = "";
-    term.current.onSelectionChange(() => {
-      const selection = term.current.getSelection();
-      if (selection && selection !== lastCopiedSelection) {
-        navigator.clipboard.writeText(selection).then(() => {
-          setShowToast(true);
-          setTimeout(() => setShowToast(false), 1500);
-        });
-        lastCopiedSelection = selection;
-      }
-    });
-
-    // ✅ Pegar con clic derecho
-    terminalRef.current.addEventListener("contextmenu", async (e) => {
-      e.preventDefault();
-      const text = await navigator.clipboard.readText();
-      if (text) term.current.paste(text);
-    });
 
     return () => {
       term.current.dispose();
@@ -94,7 +105,7 @@ export default function XTermSSH() {
       observer.disconnect();
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [sessionId]);
 
   return (
     <div className="relative w-full h-full">
