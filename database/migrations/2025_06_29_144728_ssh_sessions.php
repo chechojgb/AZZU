@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('private_key')->nullable();     // Opcional: autenticación por clave privada
             $table->text('description')->nullable();     // Opcional: para mostrar en el frontend
             $table->boolean('use_private_key')->default(false); // ¿Usar clave privada?
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

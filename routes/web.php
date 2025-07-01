@@ -115,6 +115,8 @@ Route::get('terminal-admin', function () {
 
 Route::get('terminal/index', [SshSessionController::class, 'index'])->name('terminal_index');
 Route::post('terminal.store', [SshSessionController::class, 'store'])->name('terminal.store');
+Route::get('/terminal/{sshSession}/show', [SshSessionController::class, 'show']);
+Route::put('/terminal/{sshSession}/edit', [SshSessionController::class, 'update']);
 
 
 Route::get('/terminales/{id}', function ($id) {
