@@ -33,6 +33,6 @@ class SshSession extends Model
     {
         return $this->belongsTo(User::class);
     }
-    protected $hidden = [ 'private_key'];
+    protected $hidden = ['private_key'];
 
 }

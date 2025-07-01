@@ -10,7 +10,7 @@ import { HiOutlineArrowRight, HiShoppingCart } from "react-icons/hi";
 import { ClipboardList } from 'lucide-react';
 import AgentModalWrapper from '@/components/agentsModalWrapper';
 import AreaModalContent from '@/components/areaModalContent';
-import AreaModalEditContent from '@/components/areaModalEditContent';
+import TerminalModalEditContent from '@/components/terminalModalEdit';
 import { themeByProject } from '@/components/utils/theme';
 import { HiCheck, HiX } from "react-icons/hi";
 import { Toast } from "flowbite-react";
@@ -127,7 +127,7 @@ export default function Areas() {
 
         {modalOpenEdit && (
             <AgentModalWrapper closeModal={closeModal}>
-                <AreaModalEditContent  onClose={closeModal} setToast={setToast} area={selectedArea}/>
+                <TerminalModalEditContent  onClose={closeModal} setToast={setToast} terminal={selectedArea}/>
             </AgentModalWrapper>
         )}
     </AppLayout>
