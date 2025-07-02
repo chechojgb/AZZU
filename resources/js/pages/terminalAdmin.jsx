@@ -4,7 +4,7 @@ import { Head,Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import TerminalList from '@/components/terminalList';
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
-import UserInfoList from '@/components/userInfoList';
+import UserInfoList from '@/components/areaInfoList';
 import { Button } from "flowbite-react";
 import { HiOutlineArrowRight, HiShoppingCart } from "react-icons/hi";
 import { ClipboardList } from 'lucide-react';

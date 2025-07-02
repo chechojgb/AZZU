@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import AreaList from '@/components/areaList';
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
-import UserInfoList from '@/components/userInfoList';
+import UserInfoList from '@/components/areaInfoList';
 import { Button } from "flowbite-react";
 import { HiOutlineArrowRight, HiShoppingCart } from "react-icons/hi";
 import { ClipboardList } from 'lucide-react';
@@ -13,6 +12,9 @@ import AreaModalContent from '@/components/areaModalContent';
 import AreaModalEditContent from '@/components/areaModalEditContent';
 import { HiCheck, HiX } from "react-icons/hi";
 import { Toast } from "flowbite-react";
+import { Link, usePage, Head } from "@inertiajs/react";
+import { useLoadStatus } from '@/components/context/loadContext';
+import { themeByProject } from '@/components/utils/theme';
 // import { log } from 'node:console';
 
 const breadcrumbs = [
@@ -26,6 +28,9 @@ export default function Areas() {
     const [totalAreas, setTotalAreas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedArea, setSelectedArea] = useState(null);
+    const { props } = usePage();
+    const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+    const theme = themeByProject[proyecto];
   
     const [toast, setToast] = useState({
         show: false,
@@ -74,7 +79,7 @@ export default function Areas() {
         
         <UserInfoList data={areas}/>
         <div className="min-h-[100vh] md:min-h-min">
-            <Button className='bg-purple-light-20 mb-4 ' onClick={() => openModal()}>
+            <Button className={`${theme.bgHard} dark:${theme.bg} ${theme.bgHover} dark:${theme.bgHover} mb-4`} onClick={() => openModal()}>
                 <ClipboardList  />
                 Crear nueva area
             </Button>
