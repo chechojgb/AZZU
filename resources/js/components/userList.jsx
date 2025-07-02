@@ -2,7 +2,13 @@
 // import { log } from "console";
 import { TableCell, TableRow } from "flowbite-react";
 import { Link } from '@inertiajs/react'
+import { themeByProject } from "./utils/theme";
+import {  usePage } from "@inertiajs/react";
+
 export default function UsersList({ users, totalAreas }) {
+  const { props } = usePage();
+  const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+  const theme = themeByProject[proyecto];
   
   console.log(users);
   // console.log(totalAreas)
@@ -46,7 +52,7 @@ export default function UsersList({ users, totalAreas }) {
           )}
         </TableCell>
           <TableCell>
-            <Link href={route('users.edit', user.id)} className="font-medium text-purple-light-20 hover:underline ">
+            <Link href={route('users.edit', user.id)} className={`font-medium  hover:underline ${theme.text}`}>
                 Editar
             </Link>
           </TableCell>
