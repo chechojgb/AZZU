@@ -28,8 +28,19 @@ export default function XTermSSH({ sessionId }) {
     }
   };
 
+  const sendResize = () => {
+    if (socketRef.current && term.current) {
+      const cols = term.current.cols;
+      const rows = term.current.rows;
+      socketRef.current.send(JSON.stringify({
+        type: "resize",
+        cols,
+        rows,
+      }));
+    }
+  };
+
   useEffect(() => {
-    // Crear terminal
     term.current = new Terminal({
       cursorBlink: true,
       fontSize: 14,
@@ -40,12 +51,12 @@ export default function XTermSSH({ sessionId }) {
     term.current.loadAddon(fitAddon.current);
     term.current.open(terminalRef.current);
     fitAddon.current.fit();
+    sendResize();
 
-    // WebSocket
     socketRef.current = new WebSocket("ws://localhost:3001");
 
     socketRef.current.onopen = () => {
-      console.log("🔌 WebSocket abierto. Enviando init con sessionId:", sessionId);
+      console.log("🔌 WebSocket abierto:", sessionId);
       socketRef.current.send(JSON.stringify({ type: "init", sessionId }));
     };
 
@@ -62,7 +73,6 @@ export default function XTermSSH({ sessionId }) {
       socketRef.current.send(JSON.stringify({ input: data }));
     });
 
-    // 🌟 Copiar automáticamente al seleccionar texto
     term.current.onSelectionChange(() => {
       const selected = term.current.getSelection();
       if (selected) {
@@ -72,31 +82,31 @@ export default function XTermSSH({ sessionId }) {
             setTimeout(() => setShowToast(false), 2000);
           })
           .catch((err) => {
-            console.error("❌ Error copiando al portapapeles:", err);
+            console.error("❌ Error copiando:", err);
           });
       }
     });
 
-    // 🌟 Pegar automáticamente al hacer clic derecho
     terminalRef.current.addEventListener("contextmenu", async (e) => {
       e.preventDefault();
       try {
         const text = await navigator.clipboard.readText();
         if (text) term.current.paste(text);
       } catch (err) {
-        console.error("❌ Error pegando desde el portapapeles:", err);
+        console.error("❌ Error pegando:", err);
       }
     });
 
-    // Detectar cambios de tema (claro/oscuro)
     const observer = new MutationObserver(applyTheme);
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
 
-    // Redimensionar
-    const handleResize = () => fitAddon.current.fit();
+    const handleResize = () => {
+      fitAddon.current.fit();
+      sendResize();
+    };
     window.addEventListener("resize", handleResize);
 
     return () => {

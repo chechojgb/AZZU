@@ -1,122 +1,88 @@
 const { Server } = require("ws");
-const { Client } = require("ssh2");
 const express = require("express");
 const axios = require("axios");
+const {
+  createSSHProcess,
+  getSession,
+  resizeSession,
+  cleanupSocket,
+} = require("./ssh/ptyManager");
 
 const app = express();
 const wss = new Server({ port: 3001 });
 
-const sshSessions = new Map(); // Mantenemos conexiones por sessionId
+console.log("🚀 Servidor WebSocket listo en ws://localhost:3001");
 
 wss.on("connection", (ws) => {
-  let shellStream;
+  console.log("🔌 Nueva conexión WebSocket");
+
   let currentSessionId;
 
   ws.on("message", async (message) => {
+    console.log("📩 Mensaje recibido:", message);
+
     try {
       const data = JSON.parse(message);
 
+      // Inicializar una sesión
       if (data.type === "init") {
         currentSessionId = data.sessionId;
+        console.log("🆔 sessionId recibido:", currentSessionId);
 
-        if (sshSessions.has(currentSessionId)) {
-          console.log("♻️ Reutilizando conexión SSH para sessionId:", currentSessionId);
-          const existing = sshSessions.get(currentSessionId);
-          shellStream = existing.shell;
-          existing.sockets.add(ws);
+        const apiUrl = `http://localhost:8000/ssh-session/${currentSessionId}`;
+        console.log("🌐 Solicitando datos a Laravel en:", apiUrl);
 
-          // Reenviar datos al nuevo WebSocket
-          shellStream.write('\n'); // fuerza redibujo (útil si estaba en vim)
+        let session;
+        try {
+          const response = await axios.get(apiUrl);
+          session = response.data;
+          console.log("✅ Datos de sesión obtenidos:", session);
+        } catch (err) {
+          console.error("❌ Error al obtener sesión de Laravel:", err.message);
+          ws.send(JSON.stringify({ output: `❌ Error al obtener sesión: ${err.message}` }));
           return;
         }
 
-        // Obtener datos desde Laravel
-        const apiUrl = `http://localhost:8000/ssh-session/${currentSessionId}`;
-        const response = await axios.get(apiUrl);
-        const session = response.data;
+        // Crear o reutilizar terminal
+        const terminal = createSSHProcess(currentSessionId, session);
+        terminal.onData((data) => {
+          ws.send(JSON.stringify({ output: data }));
+        });
 
-        const ssh = new Client();
-        const sshConfig = {
-          host: session.host,
-          port: session.port || 22,
-          username: session.username,
-        };
+        terminal.onExit(() => {
+          console.log(`❌ Terminal cerrada para sesión ${currentSessionId}`);
+        });
 
-        if (session.use_private_key && session.private_key) {
-          sshConfig.privateKey = session.private_key;
-        } else {
-          sshConfig.password = String(session.password || "").trim();
-        }
-
-        ssh
-          .on("ready", () => {
-            console.log("✅ Nueva conexión SSH lista");
-
-            ssh.shell((err, stream) => {
-              if (err) {
-                return ws.send(JSON.stringify({ output: `❌ Shell error: ${err.message}` }));
-              }
-
-              shellStream = stream;
-
-              // Guardar en el mapa
-              sshSessions.set(currentSessionId, {
-                ssh,
-                shell: stream,
-                sockets: new Set([ws])
-              });
-
-              stream.on("data", (chunk) => {
-                for (const socket of sshSessions.get(currentSessionId).sockets) {
-                  socket.send(JSON.stringify({ output: chunk.toString() }));
-                }
-              });
-
-              stream.stderr.on("data", (chunk) => {
-                for (const socket of sshSessions.get(currentSessionId).sockets) {
-                  socket.send(JSON.stringify({ output: `❗ ${chunk.toString()}` }));
-                }
-              });
-
-              stream.on("close", () => {
-                console.log("❌ Shell cerrado");
-                sshSessions.delete(currentSessionId);
-              });
-            });
-          })
-          .on("error", (err) => {
-            ws.send(JSON.stringify({ output: `❌ Error SSH: ${err.message}` }));
-          })
-          .connect(sshConfig);
+        // Registrar el socket en la sesión
+        getSession(currentSessionId).sockets.add(ws);
+        console.log(`📡 WebSocket añadido a sesión ${currentSessionId}`);
       }
 
-      // Si se está enviando input
-      if (data.input && currentSessionId && sshSessions.has(currentSessionId)) {
-        const stream = sshSessions.get(currentSessionId).shell;
-        stream.write(data.input);
+      // Entrada del usuario
+      if (data.input && currentSessionId) {
+        const session = getSession(currentSessionId);
+        if (session && session.pty) {
+          console.log("⌨️ Entrada del usuario:", data.input.trim());
+          session.pty.write(data.input);
+        }
+      }
+
+      // Cambio de tamaño del terminal
+      if (data.type === "resize" && currentSessionId) {
+        console.log("📐 Resize recibido:", data.cols, "x", data.rows);
+        resizeSession(currentSessionId, data.cols, data.rows);
       }
     } catch (err) {
+      console.error("❌ Error procesando mensaje:", err.message);
       ws.send(JSON.stringify({ output: `❌ Error: ${err.message}` }));
     }
   });
 
   ws.on("close", () => {
-    // ❌ No cerramos la sesión SSH, solo eliminamos el WebSocket de la lista
-    if (currentSessionId && sshSessions.has(currentSessionId)) {
-      const session = sshSessions.get(currentSessionId);
-      session.sockets.delete(ws);
+    console.log("🔌 WebSocket desconectado");
 
-      // Si no hay sockets abiertos, puedes cerrar la conexión opcionalmente después de un timeout
-      if (session.sockets.size === 0) {
-        setTimeout(() => {
-          if (session.sockets.size === 0) {
-            console.log("🧹 Cerrando sesión inactiva:", currentSessionId);
-            session.shell.end();
-            session.ssh.end();
-            sshSessions.delete(currentSessionId);
-          }
-        }, 30000); // Espera 30s antes de cerrar
-      }
+    if (currentSessionId) {
+      cleanupSocket(currentSessionId, ws);
     }
   });
 });
