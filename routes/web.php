@@ -129,3 +129,7 @@ Route::get('/terminales/{id}', function ($id) {
 Route::get('/ssh-session/{id}', function ($id) {
     return App\Models\SshSession::findOrFail($id);
 });
+
+route::get('/hoja-cv', function () {
+    return view('hoja-cv');
+})->name('hoja-cv');

@@ -44,7 +44,7 @@ wss.on("connection", (ws) => {
         }
 
         // Crear o reutilizar terminal
-        const terminal = createSSHProcess(currentSessionId, session);
+        const terminal = createSSHProcess(currentSessionId, session, ws);
         terminal.onData((data) => {
           ws.send(JSON.stringify({ output: data }));
         });

@@ -1,21 +1,22 @@
+// ssh/ptyManager.js
 const pty = require("node-pty");
 
-const sshSessions = new Map(); // sessionId -> { ptyProcess, sockets }
+const sshSessions = new Map();
 
 function createSSHProcess(sessionId, sshConfig, ws) {
   const { username, host, port = 22 } = sshConfig;
 
+  const sshExecutable = "C:\\Windows\\System32\\OpenSSH\\ssh.exe";
   const args = [`${username}@${host}`];
   if (port && port !== 22) args.push("-p", port.toString());
 
-  console.log("🚀 Lanzando SSH con: ssh", args);
+  console.log("🚀 Lanzando SSH con:", sshExecutable, args);
 
-
-  const ptyProcess = pty.spawn("ssh", args, {
+  const ptyProcess = pty.spawn(sshExecutable, args, {
     name: "xterm-color",
     cols: 80,
     rows: 30,
-    cwd: process.env.HOME,
+    cwd: process.env.HOME || process.env.USERPROFILE,
     env: process.env,
   });
 
