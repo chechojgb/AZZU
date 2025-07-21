@@ -1,130 +1,101 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { usePage } from "@inertiajs/react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 
-export default function XTermSSH({ sessionId }) {
+export default function XTermSSH() {
+  const { props } = usePage();
+  const session = props.session;
   const terminalRef = useRef(null);
+  const wsRef = useRef(null);
   const term = useRef(null);
-  const fitAddon = useRef(new FitAddon());
-  const socketRef = useRef(null);
-  const [showToast, setShowToast] = useState(false);
-
-  const getTheme = () => {
-    const isDark = document.documentElement.classList.contains("dark");
-    return {
-      background: isDark ? "#000000" : "#ffffff",
-      foreground: isDark ? "#00ff00" : "#000000",
-      cursor: isDark ? "#00ff00" : "#000000",
-      selection: isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(0,0,0,0.3)",
-    };
-  };
-
-  const applyTheme = () => {
-    if (term.current) {
-      const theme = getTheme();
-      term.current.options.theme = theme;
-      term.current.refresh(0, term.current.rows - 1);
-    }
-  };
+  const fitAddon = useRef(null);
 
   const sendResize = () => {
-    if (socketRef.current && term.current) {
-      const cols = term.current.cols;
-      const rows = term.current.rows;
-      socketRef.current.send(JSON.stringify({
+    if (wsRef.current?.readyState === WebSocket.OPEN && term.current && fitAddon.current) {
+      fitAddon.current.fit();
+      const { cols, rows } = term.current;
+      wsRef.current.send(JSON.stringify({
         type: "resize",
-        cols,
-        rows,
+        payload: { cols, rows }
       }));
     }
   };
 
   useEffect(() => {
+    if (!session) {
+      console.error("❌ Sesión SSH no está definida");
+      return;
+    }
+
     term.current = new Terminal({
       cursorBlink: true,
+      fontFamily: "Fira Code, monospace",
       fontSize: 14,
-      fontFamily: "monospace",
-      theme: getTheme(),
+      theme: {
+        background: "#000000",
+        foreground: "#00FF00",
+      },
     });
 
+    fitAddon.current = new FitAddon();
     term.current.loadAddon(fitAddon.current);
+
     term.current.open(terminalRef.current);
     fitAddon.current.fit();
+
+    const ws = new WebSocket("ws://localhost:8080");
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      const { cols, rows } = term.current;
+      ws.send(JSON.stringify({ type: "connect", payload: { ...session, cols, rows } }));
+    };
+
+    ws.onmessage = (event) => {
+      term.current.write(event.data);
+    };
+
+    ws.onerror = () => {
+      term.current.writeln("\r\n🛑 Error en la conexión WebSocket.");
+    };
+
+    ws.onclose = () => {
+      term.current.writeln("\r\n🔌 Conexión SSH cerrada.");
+    };
+
+    term.current.onData((input) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "input", payload: input }));
+      }
+    });
+
+    window.addEventListener("resize", sendResize);
     sendResize();
 
-    socketRef.current = new WebSocket("ws://localhost:3001");
-
-    socketRef.current.onopen = () => {
-      console.log("🔌 WebSocket abierto:", sessionId);
-      socketRef.current.send(JSON.stringify({ type: "init", sessionId }));
-    };
-
-    socketRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.output) term.current.write(data.output);
-    };
-
-    socketRef.current.onerror = (err) => {
-      term.current.write(`\n❌ Error: ${err.message}`);
-    };
-
-    term.current.onData((data) => {
-      socketRef.current.send(JSON.stringify({ input: data }));
-    });
-
-    term.current.onSelectionChange(() => {
-      const selected = term.current.getSelection();
-      if (selected) {
-        navigator.clipboard.writeText(selected)
-          .then(() => {
-            setShowToast(true);
-            setTimeout(() => setShowToast(false), 2000);
-          })
-          .catch((err) => {
-            console.error("❌ Error copiando:", err);
-          });
-      }
-    });
-
-    terminalRef.current.addEventListener("contextmenu", async (e) => {
-      e.preventDefault();
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text) term.current.paste(text);
-      } catch (err) {
-        console.error("❌ Error pegando:", err);
-      }
-    });
-
-    const observer = new MutationObserver(applyTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    const handleResize = () => {
-      fitAddon.current.fit();
+    const observer = new ResizeObserver(() => {
       sendResize();
-    };
-    window.addEventListener("resize", handleResize);
+    });
+    if (terminalRef.current) {
+      observer.observe(terminalRef.current);
+    }
 
     return () => {
-      term.current.dispose();
-      socketRef.current.close();
+      window.removeEventListener("resize", sendResize);
       observer.disconnect();
-      window.removeEventListener("resize", handleResize);
+      wsRef.current?.close();
+      term.current?.dispose();
     };
-  }, [sessionId]);
+  }, [session]);
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={terminalRef} className="w-full h-full" />
-      {showToast && (
-        <div className="absolute top-2 right-2 bg-green-600 text-white px-4 py-2 rounded shadow-lg text-sm animate-fade-in-out z-50">
-          Copiado al portapapeles
-        </div>
-      )}
+    <div className="flex-grow w-full min-h-0">
+      <div
+        ref={terminalRef}
+        className="w-full h-full"
+        style={{ background: "#000" }}
+      ></div>
     </div>
   );
 }

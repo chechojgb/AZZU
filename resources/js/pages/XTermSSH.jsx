@@ -19,9 +19,9 @@ export default function TableAgents() {
     const sessionId = props.sessionId;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="terminal" />
-            <div className='p-8 space-y-8 w-full h-[calc(100vh-4rem)]'>
-                <XTermSSH sessionId={sessionId}/>
+            <Head title="Terminal" />
+            <div className="h-screen w-screen flex flex-col bg-black">
+                <XTermSSH sessionId={sessionId} />
             </div>
         </AppLayout>
     );

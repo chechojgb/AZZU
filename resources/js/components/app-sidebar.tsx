@@ -120,6 +120,7 @@ export function AppSidebar() {
             ...sshSessions.map(session => ({
                 title: `${session.host}-${session.username}`,
                 href: `/terminales/${session.id}`,
+                key: session.id
             }))
         ]
     };

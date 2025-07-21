@@ -119,15 +119,17 @@ Route::get('/terminal/{sshSession}/show', [SshSessionController::class, 'show'])
 Route::put('/terminal/{sshSession}/edit', [SshSessionController::class, 'update']);
 
 
-Route::get('/terminales/{id}', function ($id) {
-    return Inertia::render('XTermSSH', [
-        'sessionId' => (int) $id,
-    ]);
-})->middleware('auth')->name('terminales.show');
 
+
+Route::get('/terminales/{id}', function ($id) {
+    $session = SshSession::findOrFail($id);
+    return Inertia::render('XTermSSH', [
+        'session' => $session,
+    ]);
+});
 
 Route::get('/ssh-session/{id}', function ($id) {
-    return App\Models\SshSession::findOrFail($id);
+    return response()->json(App\Models\SshSession::findOrFail($id));
 });
 
 route::get('/hoja-cv', function () {
