@@ -1,88 +1,101 @@
-const { Server } = require("ws");
-const express = require("express");
-const axios = require("axios");
-const {
-  createSSHProcess,
-  getSession,
-  resizeSession,
-  cleanupSocket,
-} = require("./ssh/ptyManager");
+const WebSocket = require('ws');
+const { Client } = require('ssh2');
 
-const app = express();
-const wss = new Server({ port: 3001 });
+const wss = new WebSocket.Server({ port: 8080 });
+console.log("🚀 Servidor WebSocket corriendo en ws://localhost:8080");
 
-console.log("🚀 Servidor WebSocket listo en ws://localhost:3001");
+wss.on('connection', function connection(ws) {
+  console.log("🟢 Cliente WebSocket conectado");
 
-wss.on("connection", (ws) => {
-  console.log("🔌 Nueva conexión WebSocket");
+  let sshClient = null;
+  let sshStream = null;
 
-  let currentSessionId;
-
-  ws.on("message", async (message) => {
-    console.log("📩 Mensaje recibido:", message);
-
+  ws.on('message', function incoming(message) {
     try {
       const data = JSON.parse(message);
+      console.log("📥 Mensaje recibido del front:", data);
 
-      // Inicializar una sesión
-      if (data.type === "init") {
-        currentSessionId = data.sessionId;
-        console.log("🆔 sessionId recibido:", currentSessionId);
+      // 🔌 Conexión SSH
+      if (data.type === 'connect') {
+        const { host, port, username, password } = data.payload;
 
-        const apiUrl = `http://localhost:8000/ssh-session/${currentSessionId}`;
-        console.log("🌐 Solicitando datos a Laravel en:", apiUrl);
-
-        let session;
-        try {
-          const response = await axios.get(apiUrl);
-          session = response.data;
-          console.log("✅ Datos de sesión obtenidos:", session);
-        } catch (err) {
-          console.error("❌ Error al obtener sesión de Laravel:", err.message);
-          ws.send(JSON.stringify({ output: `❌ Error al obtener sesión: ${err.message}` }));
+        if (!host || !port || !username || !password) {
+          console.error("❌ Faltan datos de conexión SSH");
+          ws.send("❌ Datos incompletos para conectar al servidor SSH\n");
+          ws.close();
           return;
         }
 
-        // Crear o reutilizar terminal
-        const terminal = createSSHProcess(currentSessionId, session, ws);
-        terminal.onData((data) => {
-          ws.send(JSON.stringify({ output: data }));
-        });
+        sshClient = new Client();
+        sshClient
+          .on('ready', () => {
+            console.log("✅ Conexión SSH establecida");
 
-        terminal.onExit(() => {
-          console.log(`❌ Terminal cerrada para sesión ${currentSessionId}`);
-        });
+            sshClient.shell((err, stream) => {
+              if (err) {
+                console.error("❌ Error al iniciar shell SSH:", err);
+                ws.send("❌ Error al iniciar shell SSH\n");
+                ws.close();
+                return;
+              }
 
-        // Registrar el socket en la sesión
-        getSession(currentSessionId).sockets.add(ws);
-        console.log(`📡 WebSocket añadido a sesión ${currentSessionId}`);
+              sshStream = stream;
+
+              stream
+                .on('data', (chunk) => {
+                  ws.send(chunk.toString());
+                })
+                .on('close', () => {
+                  console.log("🔌 Shell cerrada");
+                  sshClient.end();
+                });
+
+              stream.stderr?.on('data', (chunk) => {
+                console.error("🛑 STDERR:", chunk.toString());
+              });
+
+              ws.send("🟢 Conectado al servidor SSH\n");
+            });
+          })
+          .on('error', (err) => {
+            console.error("❌ Error en SSH:", err);
+            ws.send(`❌ Error de conexión SSH: ${err.message}\n`);
+            ws.close();
+          })
+          .on('end', () => {
+            console.log("🔚 Conexión SSH finalizada");
+          });
+
+        sshClient.connect({ host, port, username, password });
       }
 
-      // Entrada del usuario
-      if (data.input && currentSessionId) {
-        const session = getSession(currentSessionId);
-        if (session && session.pty) {
-          console.log("⌨️ Entrada del usuario:", data.input.trim());
-          session.pty.write(data.input);
+      // ⌨️ Entrada del usuario (comando)
+      if (data.type === 'input' && sshStream) {
+        sshStream.write(data.payload);
+      }
+
+      // 📐 Redimensionar ventana
+      if (data.type === 'resize') {
+        const { cols, rows } = data.payload;
+        if (sshStream) {
+          sshStream.setWindow(rows, cols, rows * 24, cols * 8);
         }
       }
 
-      // Cambio de tamaño del terminal
-      if (data.type === "resize" && currentSessionId) {
-        console.log("📐 Resize recibido:", data.cols, "x", data.rows);
-        resizeSession(currentSessionId, data.cols, data.rows);
-      }
     } catch (err) {
-      console.error("❌ Error procesando mensaje:", err.message);
-      ws.send(JSON.stringify({ output: `❌ Error: ${err.message}` }));
+      console.error("❌ Error procesando mensaje:", err);
+      ws.send("❌ Error interno en el backend\n");
     }
   });
 
-  ws.on("close", () => {
-    console.log("🔌 WebSocket desconectado");
-
-    if (currentSessionId) {
-      cleanupSocket(currentSessionId, ws);
+  ws.on('close', () => {
+    console.log("🔴 Cliente WebSocket desconectado");
+    if (sshClient) {
+      sshClient.end();
     }
+  });
+
+  ws.on('error', (err) => {
+    console.error("❌ Error WebSocket:", err);
   });
 });

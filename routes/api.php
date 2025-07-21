@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostProxyController;
 use App\Http\Controllers\SpyController;
+use App\Models\SshSession;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -23,3 +24,7 @@ Route::get('/operationPromState/{area}', [PostProxyController::class, 'operation
 Route::get('/operationStatusAgentOperation/{area}', [PostProxyController::class, 'operationAgentSatus']);
 // routes/api.php
 Route::post('/spy', [SpyController::class, 'start']);
+
+Route::get('/ssh-sessions/{id}', function ($id) {
+    return SshSession::findOrFail($id);
+});
