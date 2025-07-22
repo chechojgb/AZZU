@@ -1,3 +1,4 @@
+// index.js (backend Node.js)
 const WebSocket = require('ws');
 const { Client } = require('ssh2');
 
@@ -15,14 +16,23 @@ wss.on('connection', function connection(ws) {
       const data = JSON.parse(message);
       console.log("📥 Mensaje recibido del front:", data);
 
+      if (!data?.type) return;
+
       // 🔌 Conexión SSH
       if (data.type === 'connect') {
-        const { host, port, username, password } = data.payload;
+        const payload = data.payload;
+
+        if (!payload) {
+          console.error("❌ connect recibido sin payload");
+          ws.send("❌ connect recibido sin payload\n");
+          return;
+        }
+
+        const { host, port, username, password } = payload;
 
         if (!host || !port || !username || !password) {
           console.error("❌ Faltan datos de conexión SSH");
           ws.send("❌ Datos incompletos para conectar al servidor SSH\n");
-          ws.close();
           return;
         }
 
@@ -35,24 +45,21 @@ wss.on('connection', function connection(ws) {
               if (err) {
                 console.error("❌ Error al iniciar shell SSH:", err);
                 ws.send("❌ Error al iniciar shell SSH\n");
-                ws.close();
                 return;
               }
 
               sshStream = stream;
 
               stream
-                .on('data', (chunk) => {
-                  ws.send(chunk.toString());
-                })
+                .on('data', (chunk) => ws.send(chunk.toString()))
                 .on('close', () => {
                   console.log("🔌 Shell cerrada");
                   sshClient.end();
                 });
 
-              stream.stderr?.on('data', (chunk) => {
-                console.error("🛑 STDERR:", chunk.toString());
-              });
+              stream.stderr?.on('data', (chunk) =>
+                console.error("🛑 STDERR:", chunk.toString())
+              );
 
               ws.send("🟢 Conectado al servidor SSH\n");
             });
@@ -60,7 +67,6 @@ wss.on('connection', function connection(ws) {
           .on('error', (err) => {
             console.error("❌ Error en SSH:", err);
             ws.send(`❌ Error de conexión SSH: ${err.message}\n`);
-            ws.close();
           })
           .on('end', () => {
             console.log("🔚 Conexión SSH finalizada");
@@ -75,11 +81,9 @@ wss.on('connection', function connection(ws) {
       }
 
       // 📐 Redimensionar ventana
-      if (data.type === 'resize') {
+      if (data.type === 'resize' && sshStream && data.payload) {
         const { cols, rows } = data.payload;
-        if (sshStream) {
-          sshStream.setWindow(rows, cols, rows * 24, cols * 8);
-        }
+        sshStream.setWindow(rows, cols, rows * 24, cols * 8);
       }
 
     } catch (err) {
@@ -90,9 +94,7 @@ wss.on('connection', function connection(ws) {
 
   ws.on('close', () => {
     console.log("🔴 Cliente WebSocket desconectado");
-    if (sshClient) {
-      sshClient.end();
-    }
+    if (sshClient) sshClient.end();
   });
 
   ws.on('error', (err) => {

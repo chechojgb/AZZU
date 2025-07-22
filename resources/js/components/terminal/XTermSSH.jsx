@@ -90,7 +90,7 @@ export default function XTermSSH() {
   }, [session]);
 
   return (
-    <div className="flex-grow w-full min-h-0">
+    <div className="w-full h-screen">
       <div
         ref={terminalRef}
         className="w-full h-full"
