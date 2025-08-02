@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PostProxyController;
 use App\Http\Controllers\SshSessionController;
+use App\Http\Controllers\BlProductoController;
+use App\Http\Controllers\BlEmpaqueController;
+use App\Http\Controllers\BlMovimientoController;
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
@@ -135,3 +139,27 @@ Route::get('/ssh-session/{id}', function ($id) {
 route::get('/hoja-cv', function () {
     return view('hoja-cv');
 })->name('hoja-cv');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Route::prefix('BLproductosInventario')->group(function () {
+    Route::get('BLProductos', [BlProductoController::class, 'index'])->name('productos.index');
+    Route::post('productos', [BlProductoController::class, 'store'])->name('productosBL.store');
+    Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productos.update');
+});

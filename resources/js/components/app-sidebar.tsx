@@ -21,7 +21,8 @@ import {
     BarChartBig,
     BookHeadphones,
     HeadphonesIcon,
-    Terminal
+    Terminal,
+    CalendarHeart
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { userHasArea } from '@/components/utils/useAuthUtils';
@@ -34,31 +35,31 @@ const staticNavItems = [
         title: 'AzzuBoard',
         href: '/dashboard',
         icon: LayoutGrid,
-        requiredAreas: [2, 3],
+        requiredAreas: [1,2, 3],
     },
     {
         title: 'Tabla de agentes',
         href: '/showTableAgents',
         icon: TableProperties,
-        requiredAreas: [2, 3],
+        requiredAreas: [1,2, 3],
     },
     {
         title: 'estado de operaciones',
         href: '/showOperationState',
         icon: BarChartBig,
-        requiredAreas: [2, 3],
+        requiredAreas: [1,2, 3],
     },
     {
         title: 'Ranking de agentes',
         href: '/showAgentRankingState',
         icon: HeadphonesIcon,
-        requiredAreas: [2, 3],
+        requiredAreas: [1,2, 3],
     },
     {
         title: 'Estado de las llamadas',
         href: '/showCallState',
         icon: BookHeadphones,
-        requiredAreas: [2, 3],
+        requiredAreas: [1,2, 3],
     },
     {
         title: 'Usuarios',
@@ -68,7 +69,7 @@ const staticNavItems = [
             { title: 'Agregar', href: '/users/create' }
         ],
         icon: SquareUserRound,
-        requiredAreas: [2, 3],
+        requiredAreas: [1,2, 3],
     },
     {
         title: 'Operaciones',
@@ -77,7 +78,18 @@ const staticNavItems = [
             { title: 'Administrar', href: '/areas' },
         ],
         icon: Tags,
-        requiredAreas: [2, 3],
+        requiredAreas: [1,2, 3],
+    },
+    {
+        title: 'Button Lovers',
+        href: '/BLProductos',
+        children: [
+            { title: 'Productos', href: '/BLproductosInventario/BLProductos' },
+            { title: 'Analisis', href: '/' },
+            { title: 'Historico', href: '/' },
+        ],
+        icon: CalendarHeart,
+        requiredAreas: [1,2, 3],
     }
 ];
 

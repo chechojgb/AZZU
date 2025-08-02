@@ -12,13 +12,15 @@ export default function XTermSSH() {
   const term = useRef(null);
   const fitAddon = useRef(null);
 
+  // 🔧 Valores forzados (puedes ajustar a gusto)
+  const forcedCols = 400;
+  const forcedRows = 400;
+
   const sendResize = () => {
-    if (wsRef.current?.readyState === WebSocket.OPEN && term.current && fitAddon.current) {
-      fitAddon.current.fit();
-      const { cols, rows } = term.current;
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: "resize",
-        payload: { cols, rows }
+        payload: { cols: forcedCols, rows: forcedRows }
       }));
     }
   };
@@ -41,16 +43,22 @@ export default function XTermSSH() {
 
     fitAddon.current = new FitAddon();
     term.current.loadAddon(fitAddon.current);
-
     term.current.open(terminalRef.current);
-    fitAddon.current.fit();
+
+    setTimeout(() => {
+      fitAddon.current.fit();
+      sendResize();
+    }, 50);
 
     const ws = new WebSocket("ws://localhost:8080");
     wsRef.current = ws;
 
     ws.onopen = () => {
-      const { cols, rows } = term.current;
-      ws.send(JSON.stringify({ type: "connect", payload: { ...session, cols, rows } }));
+      // 🚀 Enviamos tamaño forzado desde el inicio
+      ws.send(JSON.stringify({ 
+        type: "connect", 
+        payload: { ...session, cols: forcedCols, rows: forcedRows }
+      }));
     };
 
     ws.onmessage = (event) => {
@@ -71,12 +79,9 @@ export default function XTermSSH() {
       }
     });
 
+    // Observamos cambios pero usamos el tamaño forzado
     window.addEventListener("resize", sendResize);
-    sendResize();
-
-    const observer = new ResizeObserver(() => {
-      sendResize();
-    });
+    const observer = new ResizeObserver(() => sendResize());
     if (terminalRef.current) {
       observer.observe(terminalRef.current);
     }
@@ -90,7 +95,7 @@ export default function XTermSSH() {
   }, [session]);
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-full">
       <div
         ref={terminalRef}
         className="w-full h-full"
