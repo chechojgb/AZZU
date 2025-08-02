@@ -5,19 +5,27 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\BlProducto;
+use App\Models\BlColor;
+use App\Models\BlEmpaque;
+use App\Models\BlMovimiento;
+use Database\Seeders\BlColoresSeeder;
+use Database\Seeders\BlProductosSeeder;
+use Database\Seeders\BlEmpaquesSeeder;
+use Database\Seeders\BlMovimientosSeeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
      */
-    public function run(): void
+    public function run()
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            BlColoresSeeder::class,
+            BlProductosSeeder::class,
+            BlEmpaquesSeeder::class,
+            BlMovimientosSeeder::class,
         ]);
     }
 }

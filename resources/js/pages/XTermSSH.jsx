@@ -20,7 +20,7 @@ export default function TableAgents() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Terminal" />
-            <div className="w-full h-full bg-black">
+            <div className="w-screen h-screen">
                 <XTermSSH sessionId={sessionId} />
             </div>
         </AppLayout>
