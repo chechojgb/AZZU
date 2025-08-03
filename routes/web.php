@@ -160,6 +160,8 @@ route::get('/hoja-cv', function () {
 
 Route::prefix('BLproductosInventario')->group(function () {
     Route::get('BLProductos', [BlProductoController::class, 'index'])->name('productos.index');
+    Route::get('colores', [BlProductoController::class, 'index'])->name('colores.index');
     Route::post('productos', [BlProductoController::class, 'store'])->name('productosBL.store');
+    Route::post('colores', [BlProductoController::class, 'storeColor'])->name('coloresBL.store');
     Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productos.update');
 });

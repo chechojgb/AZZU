@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { TextInput, Select, Button, Label } from 'flowbite-react';
 import { HiOutlineCamera, HiCheck } from 'react-icons/hi';
 import BarcodeScanner from './BarcodeScanner';
+import TextScanner from './TextScanner';
 
-export default function AgregarProductoModal({ onClose, onSave }) {
+
+export default function AgregarProductoModal({ onClose, onSave, colores }) {
   const [showScanner, setShowScanner] = useState(false);
   const [formData, setFormData] = useState({
     tipo_producto: 'BT',
@@ -13,21 +15,23 @@ export default function AgregarProductoModal({ onClose, onSave }) {
     cantidad_por_empaque: '',
     codigo_barras: '',
     descripcion: '',
-    
   });
 
-  const colores = [
-    { id: 1, codigo: 'Z6', nombre: 'Dorado' },
-    { id: 2, codigo: 'A3', nombre: 'Plateado' }
-  ];
 
-  const handleScan = (data) => {
+
+    const handleScan = (data) => {
     setFormData({
-      ...formData,
-      codigo_barras: data,
+        ...formData,
+        tipo_producto: data.tipo_producto || formData.tipo_producto,
+        codigo_unico: data.codigo_unico || formData.codigo_unico,
+        tamanio: data.tamanio || formData.tamanio,
+        color_id: data.color_id || formData.color_id,
+        cantidad_por_empaque: data.cantidad_por_empaque || formData.cantidad_por_empaque,
+        codigo_barras: data.codigo_barras || formData.codigo_barras
     });
     setShowScanner(false);
-  };
+    };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -162,7 +166,7 @@ export default function AgregarProductoModal({ onClose, onSave }) {
 
       {/* Escáner QR */}
       {showScanner && (
-        <BarcodeScanner
+        <TextScanner
           onScan={handleScan}
           onClose={() => setShowScanner(false)}
         />

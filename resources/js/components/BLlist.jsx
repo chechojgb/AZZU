@@ -9,7 +9,7 @@ export default function BTOList({ productos, openModal }) {
   const proyecto = props?.auth?.user?.proyecto || 'AZZU';
   const theme = themeByProject[proyecto];
   
-  console.log(productos);
+  // console.log(productos);
   // console.log(totalAreas)
   return (
     <>
