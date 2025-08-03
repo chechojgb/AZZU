@@ -46,7 +46,7 @@ class BlProductoController extends Controller
             'tamanio' => 'required|string|max:10',
             'color_id' => 'required|exists:bl_colores,id',
             'cantidad_por_empaque' => 'required|integer|min:1',
-            'codigo_barras' => 'nullable|string|unique:bl_ingresos,codigo_barras',
+            'codigo_barras' => 'nullable|string|unique:bl_empaques,codigo_barras',
             'codigo_unico' => 'nullable|string|max:255', // si se necesita un código único
         ]);
 
