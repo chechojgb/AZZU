@@ -13,17 +13,44 @@ export default function TextScanner({ onClose, onScan  }) {
   // Activar cámara
   useEffect(() => {
     if (isScanning) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
+      const activateCamera = async () => {
+        try {
+          // Listar dispositivos disponibles
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoDevices = devices.filter(device => device.kind === 'videoinput');
+          
+          // Intentar encontrar la cámara trasera (generalmente es la segunda cámara)
+          const rearCamera = videoDevices.length > 1 ? videoDevices[1] : videoDevices[0];
+          
+          const constraints = {
+            video: {
+              deviceId: rearCamera ? { exact: rearCamera.deviceId } : undefined,
+              facingMode: { ideal: "environment" } // Esto ayuda en algunos dispositivos
+            }
+          };
+
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
             videoRef.current.play();
           }
-        })
-        .catch(() => {
-          setError("No se pudo acceder a la cámara");
-        });
+        } catch (err) {
+          console.error("Error al acceder a la cámara:", err);
+          // Si falla, intentar con cámara frontal como respaldo
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              videoRef.current.play();
+            }
+          } catch (fallbackErr) {
+            setError("No se pudo acceder a la cámara");
+          }
+        }
+      };
+
+      activateCamera();
     }
 
     return () => {
