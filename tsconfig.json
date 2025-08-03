@@ -119,5 +119,5 @@
         "resources/js/**/*.d.ts",
         "resources/js/**/*.tsx",
         "resources/js/**/*.jsx"
-, "resources/js/pages/settings/appearance.ksx"    ]
+, "resources/js/pages/settings/appearance.ksx", "resources/js/components/BL/TextScanner.js"    ]
 }

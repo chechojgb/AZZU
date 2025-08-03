@@ -46,7 +46,7 @@ class BlProductoController extends Controller
             'tamanio' => 'required|string|max:10',
             'color_id' => 'required|exists:bl_colores,id',
             'cantidad_por_empaque' => 'required|integer|min:1',
-            'codigo_barras' => 'nullable|string|unique:bl_ingresos,codigo_barras', // importante evitar duplicados
+            'codigo_barras' => 'nullable|string|unique:bl_ingresos,codigo_barras',
             'codigo_unico' => 'nullable|string|max:255', // si se necesita un código único
         ]);
 
@@ -70,7 +70,6 @@ class BlProductoController extends Controller
                 'tamanio' => $validated['tamanio'],
                 'color_id' => $validated['color_id'],
                 'descripcion' => $descripcion,
-                // puedes agregar más campos si se necesitan
             ]);
         }
 
@@ -97,6 +96,40 @@ class BlProductoController extends Controller
                 'message' => 'Ingreso registrado correctamente',
             ],
         ]);
+    }
+
+    public function storeColor(Request $request)
+    {
+        $validated = $request->validate([
+            'codigo' => 'required|string|max:10',
+            'nombre' => 'required|string|max:20',
+        ]);
+
+        // 1. Buscar si ya existe el producto
+        $producto = BlColor::where('codigo', $validated['codigo'])
+            ->first();
+        // 2. Si no existe, crearlo
+        if (!$producto) {
+            $producto = BlColor::create([
+                'codigo' => $validated['codigo'],
+                'nombre' => $validated['nombre']
+            ]);
+        }else {
+            return Inertia::render('BLProductos', [
+                'toast' => [
+                    'type' => 'error',
+                    'message' => 'Ese color ya está registrado.',
+                ],
+            ]);
+           
+        }
+        return Inertia::render('BLProductos', [
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Color guardado correctamente',
+                ],
+        ]);
+        
     }
 
     public function update(Request $request, BlProducto $producto)

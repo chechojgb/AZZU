@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { Head,Link, usePage,router  } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import BTOList from '@/components/BLlist';
@@ -11,6 +11,7 @@ import { themeByProject } from '@/components/utils/theme';
 import { HiCheck, HiX } from "react-icons/hi";
 import { Toast } from "flowbite-react";
 import AgregarProductoModal from '@/components/BL/agregarProductosModal';
+import AddDbColores from '@/components/BL/modalAddColoresBL';
 // import { log } from 'node:console';
 
 const breadcrumbs = [
@@ -19,7 +20,9 @@ const breadcrumbs = [
 
 export default function BLProductos() {
     const [productos, setProductos] = useState([]);
+    const [colores, setColores] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
+    const [modalOpenColores, setModalOpenColores] = useState(false);
     const [modalOpenEdit, setModalOpenEdit] = useState(false);
     const [loading, setLoading] = useState(true);
     const [selectedArea, setSelectedArea] = useState(null);
@@ -52,7 +55,32 @@ export default function BLProductos() {
         }
       });
     };
-  
+    const handleGuardarColor = (colorData) => {
+    console.log(colorData);
+    router.post(route('coloresBL.store'), colorData, {
+      preserveState: true,
+      onSuccess: (response) => {
+        console.log("✅ onSuccess ejecutado");
+        // Usamos la respuesta del servidor para mostrar el mensaje
+        setToast({
+          show: true,
+          success: response.props.success ?? true,
+          message: response.props.message || "Operación completada"
+        });
+        
+
+      },
+      onError: (errors) => {
+        console.log("❌ onError ejecutado:", errors);
+        setToast({
+          show: true,
+          success: false,
+          message: errors.message || "Error al guardar el color"
+        });
+      }
+    });
+    };
+
     const [toast, setToast] = useState({
         show: false,
         success: false,
@@ -60,6 +88,7 @@ export default function BLProductos() {
     });
 
     const openModal = () => setModalOpen(true);
+    const openModalColores = () => setModalOpenColores(true);
 
     const openModalEdit = (area) => {
         setSelectedArea(area);
@@ -68,15 +97,18 @@ export default function BLProductos() {
 
     const closeModal = () => {
         setModalOpen(false);
+        setModalOpenColores(false);
         setModalOpenEdit(false)
     };
 
   useEffect(() => {
       router.visit(route('productos.index'), {
           preserveState: true,  // ← Clave para mantener la página actual
-          only: ['productos'], // Solo recibir estos datos
+          only: ['productos', 'colores'], // Solo recibir estos datos
           onSuccess: (res) => {
               setProductos(res.props.productos);
+              setColores(res.props.colores);
+              console.log("Productos cargados:", res.props.productos);
               setLoading(false);
           },
           onError: (err) => {
@@ -85,6 +117,26 @@ export default function BLProductos() {
           }
       });
   }, []);
+
+  console.log("colores cargados:", colores);
+  
+  useEffect(() => {
+    if (props.toast) {
+      console.log("🎉 props.toast recibido:", props.toast);
+      setToast({
+        show: true,
+        success: props.toast.type === 'success',
+        message: props.toast.message,
+      });
+
+      // Ocultar toast automáticamente después de 3 segundos
+      const timeout = setTimeout(() => {
+        setToast({ show: false, success: false, message: '' });
+      }, 3000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [props.toast])
 
   if (loading) return <p className="p-4">Cargando productos...</p>;
 
@@ -102,10 +154,18 @@ export default function BLProductos() {
         
         
         <div className="min-h-[100vh] md:min-h-min">
-              <Button className={`${theme.bgHard} dark:${theme.bg} ${theme.bgHover} dark:${theme.bgHover} mb-4`} onClick={() => openModal()}>
+          <div className='flex   mb-4'>
+            <Button className={`${theme.bgHard} dark:${theme.bg} ${theme.bgHover} dark:${theme.bgHover} mb-4 mr-2`} onClick={() => openModal()}>
                 <ClipboardList  />
-                Agregar nuevo producto
+                Agregar bolsa
             </Button>
+            <Button className={`${theme.bgHard} dark:${theme.bg} ${theme.bgHover} dark:${theme.bgHover} mb-4 mr-2`} onClick={() => openModalColores()}>
+                <ClipboardList  />
+                Agregar nuevo color
+            </Button>
+
+          </div>
+            
           <div className="border relative overflow-hidden rounded-xl border">
             <div className="overflow-x-auto">
               <Table>
@@ -146,8 +206,13 @@ export default function BLProductos() {
         {modalOpen && (
             <AgentModalWrapper closeModal={closeModal}>
                 <AgregarProductoModal 
-                  onClose={closeModal} onSave={handleGuardarProducto}
+                  onClose={closeModal} onSave={handleGuardarProducto} color={colores}
                 />
+            </AgentModalWrapper>
+        )}
+        {modalOpenColores && (
+            <AgentModalWrapper closeModal={closeModal}>
+                <AddDbColores onClose={closeModal} onSave={handleGuardarColor}/>
             </AgentModalWrapper>
         )}
 
