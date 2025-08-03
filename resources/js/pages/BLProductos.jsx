@@ -41,17 +41,26 @@ export default function BLProductos() {
             message: "Producto guardado correctamente"
           });
           // Refrescar la lista de productos
-          router.reload({
-            only: ['productos'],
-            preserveState: true
-          });
+          router.visit(route('productos.index'));
         },
         onError: (errors) => {
-          setToast({
-            show: true,
-            success: false,
-            message: "Error al guardar el producto"
-          });
+        const primerError = Object.values(errors)[0];
+        setToast({
+          show: true,
+          success: false,
+          message: primerError || "Error al guardar el producto"
+        });
+        },
+        onFinish: (visit) => {
+          // Si hubo error de servidor (status 500 o más)
+          if (visit.response?.status >= 500) {
+            const msg = visit.response?.data?.message || "Error interno del servidor";
+            setToast({
+              show: true,
+              success: false,
+              message: msg
+            });
+          }
         }
       });
     };
@@ -67,15 +76,14 @@ export default function BLProductos() {
           success: response.props.success ?? true,
           message: response.props.message || "Operación completada"
         });
-        
-
+        router.visit(route('productos.index'));
       },
       onError: (errors) => {
-        console.log("❌ onError ejecutado:", errors);
+        const primerError = Object.values(errors)[0];
         setToast({
           show: true,
           success: false,
-          message: errors.message || "Error al guardar el color"
+          message: primerError || "Error al guardar el color"
         });
       }
     });
@@ -87,7 +95,17 @@ export default function BLProductos() {
         message: "",
     });
 
-    const openModal = () => setModalOpen(true);
+    const openModal = () => {
+      if (!colores || colores.length === 0) {
+        setToast({
+          show: true,
+          success: false,
+          message: "No se pueden agregar productos porque no hay colores disponibles.",
+        });
+        return;
+      }
+      setModalOpen(true);
+    };
     const openModalColores = () => setModalOpenColores(true);
 
     const openModalEdit = (area) => {
@@ -119,6 +137,16 @@ export default function BLProductos() {
   }, []);
 
   console.log("colores cargados:", colores);
+
+  useEffect(() => {
+  if (toast.show) {
+    const timer = setTimeout(() => {
+      setToast({ show: false, success: false, message: '' });
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }
+}, [toast]);
   
   useEffect(() => {
     if (props.toast) {
@@ -206,7 +234,7 @@ export default function BLProductos() {
         {modalOpen && (
             <AgentModalWrapper closeModal={closeModal}>
                 <AgregarProductoModal 
-                  onClose={closeModal} onSave={handleGuardarProducto} color={colores}
+                  onClose={closeModal} onSave={handleGuardarProducto} colores={colores}
                 />
             </AgentModalWrapper>
         )}

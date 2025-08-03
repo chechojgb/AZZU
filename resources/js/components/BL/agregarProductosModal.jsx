@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TextInput, Select, Button, Label } from 'flowbite-react';
-import { HiOutlineCamera, HiCheck } from 'react-icons/hi';
-import BarcodeScanner from './BarcodeScanner';
+import { HiOutlineCamera, HiCheck} from 'react-icons/hi';
 import TextScanner from './TextScanner';
 
 
 export default function AgregarProductoModal({ onClose, onSave, colores }) {
   const [showScanner, setShowScanner] = useState(false);
+
   const [formData, setFormData] = useState({
     tipo_producto: 'BT',
-    codigo: '',
+    codigo_unico: '',
     tamanio: '',
     color_id: '',
     cantidad_por_empaque: '',
@@ -39,8 +39,11 @@ export default function AgregarProductoModal({ onClose, onSave, colores }) {
     onClose();
   };
 
+
+  const hasColors = colores && colores.length > 0;
+
   return (
-    <div className="space-y-6 max-w-xl">
+    <div className="space-y-6 max-w-xl relative">
       <h2 className="text-lg font-semibold">Agregar Nuevo Producto</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -119,11 +122,19 @@ export default function AgregarProductoModal({ onClose, onSave, colores }) {
               }
             >
               <option value="">Seleccione...</option>
-              {colores.map((color) => (
-                <option key={color.id} value={color.id}>
-                  {color.nombre} ({color.codigo})
-                </option>
-              ))}
+              {
+                hasColors
+                  ? colores.map((color) => (
+                      <option key={color.id} value={color.id}>
+                        {color.nombre} ({color.codigo})
+                      </option>
+                    ))
+                  : (
+                      <option value="" disabled>
+                        No hay colores disponibles
+                      </option>
+                    )
+              }
             </Select>
           </div>
 
@@ -140,24 +151,12 @@ export default function AgregarProductoModal({ onClose, onSave, colores }) {
             />
           </div>
         </div>
-        {/* <div>
-            <Label htmlFor="descripcion" value="descripcion" />
-            <TextInput
-              id="descripcion"
-              
-              value={formData.descripcion}
-              onChange={(e) =>
-                setFormData({ ...formData, descripcion: e.target.value })
-              }
-            />
-        </div> */}
-
         {/* Botones */}
         <div className="flex justify-between pt-4 border-t mt-6">
-          <Button color="gray" type="button" onClick={onClose}>
+          <Button color="gray" type="button" onClick={onClose}  >
             Cancelar
           </Button>
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={!colores || colores.length === 0}>
             <HiCheck className="mr-2" />
             Guardar Producto
           </Button>
