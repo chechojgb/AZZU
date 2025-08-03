@@ -6,6 +6,11 @@ import AlertasRecientesWidget from '@/components/welcome/agentAlertsPreview';
 import AgentStatusDonut from '@/components/welcome/agentStatusDount';
 import AgentRankingWidget from '@/components/welcome/agentRankingWidget';
 import CallsPerOperationChart from '@/components/welcome/callPerOperationChart';
+import MovimientosRecientesBL from '../BL/MovimientosRecientes';
+import StockActualProductosBL from '../BL/StockActualProductosBL';
+import RankingBotonesVendidosBL from '../BL/RankingBotonesVendidosBL';
+import OrdenesPendientesBL from '../BL/OrdenesPendientesBL';
+import GraficoProduccionSemanalBL from '../BL/GraficoProduccionSemanal';
 
 const breadcrumbs = [
     {
@@ -14,13 +19,18 @@ const breadcrumbs = [
     },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({user}) {
     return (
         <AppLayout breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }]}>
             <Head title="Dashboard" />
             <div className="flex flex-col flex-1 gap-4 rounded-xl p-4 min-h-screen">
+                <div className=" text-sm">
+                    Proyecto actual: <strong>{user.proyecto}</strong> (todos los datos mostrados son de ejemplo)
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-4 flex-1">
+                {user.proyecto === 'AZZU' && (
+                    <>
+                    <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-4 flex-1">
                     {/* Panel 70% */}
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border min-h-[300px]">
                         <PrevTable/>
@@ -30,20 +40,48 @@ export default function Dashboard() {
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border min-h-[300px]">
                         <AlertasRecientesWidget/>
                     </div>
-                </div>
+                    </div>
 
-                <div className="grid auto-rows-fr gap-4 md:grid-cols-3 flex-1">
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
-                        <AgentStatusDonut/>
+                    <div className="grid auto-rows-fr gap-4 md:grid-cols-3 flex-1">
+                        <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
+                            <AgentStatusDonut/>
+                        </div>
+                        <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
+                            <AgentRankingWidget/>
+                        </div>
+                        <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
+                            <CallsPerOperationChart/>
+                        </div>
                     </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
-                        <AgentRankingWidget/>
+                    </>
+                ) }
+                {user.proyecto === 'Button Lovers' && (
+                     <>
+                    <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-4 flex-1">
+                    {/* Panel 70% */}
+                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border min-h-[300px]">
+                        <GraficoProduccionSemanalBL/>
                     </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
-                        <CallsPerOperationChart/>
-                    </div>
-                </div>
 
+                    {/* Panel 30% */}
+                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border min-h-[300px]">
+                        <MovimientosRecientesBL/>
+                    </div>
+                    </div>
+
+                    <div className="grid auto-rows-fr gap-4 md:grid-cols-3 flex-1">
+                        <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
+                            <StockActualProductosBL/>
+                        </div>
+                        <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
+                            <RankingBotonesVendidosBL/>
+                        </div>
+                        <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
+                            <OrdenesPendientesBL/>
+                        </div>
+                    </div>
+                    </>
+                )}
             </div>
         </AppLayout>
     );

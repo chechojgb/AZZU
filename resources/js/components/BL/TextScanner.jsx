@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import Tesseract from "tesseract.js";
 
-export default function TextScanner({ onClose, onSave }) {
+export default function TextScanner({ onClose, onScan  }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isScanning, setIsScanning] = useState(true);
@@ -68,29 +68,38 @@ export default function TextScanner({ onClose, onSave }) {
     }
   };
 
-  const extractData = (text) => {
-  // Limpieza básica
-  text = text.replace(/\s+/g, ' ').trim();
+  const extractData = (rawText) => {
+  let text = rawText.replace(/\s+/g, ' ').trim().toUpperCase();
 
-  // REF.BT 1287 20M 28
-  const lineaRef = text.match(/REF[.:]?\s*([A-Z]{1,4})[\s-]+(\d{2,5})[\s-]+(\d{1,3}M?)\s+([A-Z0-9]{1,4})/i);
+  // Reparar casos de REFBT, REFOJ, REFBR, etc. sin espacio
+  text = text.replace(/REF\s*:?\.?\s*(BT|OJ|BR)/g, 'REF: $1');
+  text = text.replace(/REF(BT|OJ|BR)/g, 'REF: $1');
 
-  // CANTIDAD
-  const cantidadMatch = text.match(/CANT(?:IDAD)?[:.\s]*([0-9]+)/i);
+  // Normalizar variantes de cantidad
+  text = text.replace(/CANTIDAD|CANT\.|CANT-|\sCANT\s+/g, 'CANT:');
 
-  // Código de barras (último grupo de 6-8 dígitos)
-  const barraMatch = text.match(/\b\d{6,8}\b/g);
-  const codigo_barras = barraMatch?.[barraMatch.length - 1] || "";
+  // Buscar línea principal: REF, tipo_producto, código, tamaño, color
+  const lineaMatch = text.match(
+    /REF[:\s]*([A-Z]{2})[\s\-:]*([0-9]{2,5})[\s\-:]*([0-9]{1,3}M?)[\s\-:/]*([A-Z0-9]{1,4})/
+  );
+
+  // Cantidad por empaque
+  const cantidadMatch = text.match(/CANT[:\s\-]*([0-9]{1,5})/);
+
+  // Código de barras (último número de 6–8 dígitos)
+  const barras = text.match(/\b\d{6,8}\b/g);
+  const codigo_barras = barras?.[barras.length - 1] || "";
 
   return {
-    tipo_producto: lineaRef?.[1] || "",
-    codigo_unico: lineaRef?.[2] || "",
-    tamanio: lineaRef?.[3] || "",
-    color_id: lineaRef?.[4] || "",
+    tipo_producto: lineaMatch?.[1] || "",
+    codigo_unico: lineaMatch?.[2] || "",
+    tamanio: lineaMatch?.[3] || "",
+    color_id: lineaMatch?.[4] || "",
     cantidad_por_empaque: cantidadMatch?.[1] || "",
-    codigo_barras,
+    codigo_barras
   };
 };
+
 
   const handleReintentar = () => {
     setExtractedText("");
@@ -102,7 +111,7 @@ export default function TextScanner({ onClose, onSave }) {
 
   const handleGuardar = () => {
     if (extractedData) {
-      onSave(extractedData);
+      onScan(extractedData);
       onClose();
     }
   };

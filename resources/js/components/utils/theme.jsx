@@ -26,6 +26,15 @@ export const themeByProject = {
     bgHover: 'hover:bg-red-300',
     border: 'border-red-500',
   },
+  "Button Lovers": {
+    text: 'text-blue-600',
+    textSafe: 'text-blue-400',
+    bg: 'bg-blue-200',
+    bgSafe: 'bg-blue-100',
+    bgHard: 'bg-blue-400',
+    bgHover: 'hover:bg-blue-300',
+    border: 'border-blue-500',
+  },
 };
 
 
