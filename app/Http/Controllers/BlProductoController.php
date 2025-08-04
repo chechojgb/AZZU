@@ -25,13 +25,14 @@ class BlProductoController extends Controller
                     'id' => $producto->id,
                     'tipo_producto' => $producto->tipo_producto,
                     'tamanio' => $producto->tamanio,
-                    'color_nombre' => $producto->color->nombre,
+                    'color_nombre' => $producto->color->codigo,
                     'descripcion' => $producto->descripcion,
                     'stock_total' => $producto->empaques->sum(function ($empaque) {
                         return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
                     }),
                 ];
             });
+        dd($productos->pluck('descripcion'));
 
         return Inertia::render('BLProductos', [
             'productos' => $productos,
@@ -79,11 +80,30 @@ class BlProductoController extends Controller
                     }),
                 ];
             });
+        $historico = BlMovimiento::with(['empaque.producto', 'usuario'])
+            ->where('tipo', 'entrada')
+            ->get()
+            ->map(function ($movimiento) {
+                return [
+                    'id' => $movimiento->id,
+                    'producto' => $movimiento->empaque->producto->tipo_producto,
+                    'tamanio' => $movimiento->empaque->producto->tamanio,
+                    'color' => $movimiento->empaque->producto->color->nombre,
+                    'cantidad' => $movimiento->cantidad,
+                    'motivo' => $movimiento->motivo,
+                    'usuario' => $movimiento->usuario->name,
+                    'fecha' => $movimiento->created_at->format('d-m-Y H:i'),
+                    'tipo'=> $movimiento->tipo,
+                    'codigo_unico' => $movimiento->empaque->codigo_unico,
+                    'cantidad_por_empaque' => $movimiento->empaque->cantidad_por_empaque,
+                ];
+            });
 
         return Inertia::render('BLHistorico', [
             'productos' => $productos,
             'colores' => BlColor::all(),
-            'user' => auth()->user(), // Para formularios
+            'user' => auth()->user(),
+            'historico' => $historico,
         ]);
     }
 
@@ -110,9 +130,10 @@ class BlProductoController extends Controller
             $descripcion = sprintf('%s %s %s',
                 $validated['tipo_producto'],
                 $validated['tamanio'],
-                $color->nombre
+                $color->codigo
             );
 
+            dd($descripcion);
             $producto = BlProducto::create([
                 'tipo_producto' => $validated['tipo_producto'],
                 'tamanio' => $validated['tamanio'],

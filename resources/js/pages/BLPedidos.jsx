@@ -1,17 +1,52 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-
+import { Link, usePage } from "@inertiajs/react";
+import { themeByProject } from '@/components/utils/theme';
+import { Button } from "flowbite-react";
+import { ClipboardList } from 'lucide-react';
+import { useState } from 'react';
+import AgentModalWrapper from '@/components/agentsModalWrapper';
+import ModalPedidosBL from '@/components/BL/modalPedidosBL';
 const breadcrumbs = [
   { title: "Pedidos BL", href: "/BLproductosInventario/pedidos" }
 ];
 
-export default function BLPedidos({ user }) {
+export default function BLPedidos({ user, productos, colores, clientes }) {
+  const { props } = usePage();
+  const proyecto = props?.auth?.user?.proyecto || 'AZZU';
+  const theme = themeByProject[proyecto];
+  const [modalOpen, setModalOpen] = useState(false);
+  console.log("Colores disponibles:", colores);
+  console.log("Productos disponibles:", productos);
+  console.log("clientes disponibles:", clientes);
+  
+  
+  
+  const openModal = () => {
+      // if (!colores || colores.length === 0) {
+      //   setToast({
+      //     show: true,
+      //     success: false,
+      //     message: "No se pueden agregar productos porque no hay colores disponibles.",
+      //   });
+      //   return;
+      // }
+      setModalOpen(true);
+  };
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Pedidos" />
 
       <div className="p-4 space-y-4">
         <h2 className="text-xl font-semibold">Lista de pedidos</h2>
+        <Button className={`${theme.bgHard} dark:${theme.bg} ${theme.bgHover} dark:${theme.bgHover} mb-4 mr-2`} onClick={() => openModal()}>
+            <ClipboardList  />
+            Agregar nuevo pedido
+        </Button>
 
         <div className="overflow-x-auto rounded-lg shadow-md">
           <table className="w-full text-sm text-left   border ">
@@ -53,7 +88,15 @@ export default function BLPedidos({ user }) {
             </tbody>
           </table>
         </div>
+        {modalOpen && (
+            <AgentModalWrapper closeModal={closeModal}>
+                <ModalPedidosBL clientes={clientes} productos={productos} />
+            </AgentModalWrapper>
+        )}
+
       </div>
+
+
     </AppLayout>
   );
 }
