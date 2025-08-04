@@ -39,6 +39,54 @@ class BlProductoController extends Controller
         ]);
     }
 
+    public function indexAnalisis()
+    {
+        $productos = BlProducto::with(['color', 'empaques.movimientos'])
+            ->get()
+            ->map(function ($producto) {
+                return [
+                    'id' => $producto->id,
+                    'tipo_producto' => $producto->tipo_producto,
+                    'tamanio' => $producto->tamanio,
+                    'color_nombre' => $producto->color->nombre,
+                    'descripcion' => $producto->descripcion,
+                    'stock_total' => $producto->empaques->sum(function ($empaque) {
+                        return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
+                    }),
+                ];
+            });
+
+        return Inertia::render('BLAnalisis', [
+            'productos' => $productos,
+            'colores' => BlColor::all(),
+            'user' => auth()->user(), // Para formularios
+        ]);
+    }
+
+    public function indexHistorico()
+    {
+        $productos = BlProducto::with(['color', 'empaques.movimientos'])
+            ->get()
+            ->map(function ($producto) {
+                return [
+                    'id' => $producto->id,
+                    'tipo_producto' => $producto->tipo_producto,
+                    'tamanio' => $producto->tamanio,
+                    'color_nombre' => $producto->color->nombre,
+                    'descripcion' => $producto->descripcion,
+                    'stock_total' => $producto->empaques->sum(function ($empaque) {
+                        return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
+                    }),
+                ];
+            });
+
+        return Inertia::render('BLHistorico', [
+            'productos' => $productos,
+            'colores' => BlColor::all(),
+            'user' => auth()->user(), // Para formularios
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

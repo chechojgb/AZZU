@@ -28,4 +28,8 @@ class BlEmpaque extends Model
     {
         return $this->movimientos->sum('cantidad') * $this->cantidad_por_empaque;
     }
+    public function pedidoItems(): HasMany
+    {
+        return $this->hasMany(BLPedidoItem::class, 'empaque_id');
+    }
 }

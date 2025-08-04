@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\BLClientesController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -9,6 +10,8 @@ use App\Http\Controllers\SshSessionController;
 use App\Http\Controllers\BlProductoController;
 use App\Http\Controllers\BlEmpaqueController;
 use App\Http\Controllers\BlMovimientoController;
+use App\Http\Controllers\BLPedidosController;
+use App\Models\BLPedido;
 use App\Models\SshSession;
 
 
@@ -158,14 +161,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-
+    //BUTTON LOVERS
 
     Route::prefix('BLproductosInventario')->group(function () {
         Route::get('BLProductos', [BlProductoController::class, 'index'])->name('productos.index');
+        Route::get('BLAnalisis', [BlProductoController::class, 'indexAnalisis'])->name('analisis.index');
+        Route::get('BLHistorico', [BlProductoController::class, 'indexHistorico'])->name('historico.index');
         Route::get('colores', [BlProductoController::class, 'index'])->name('colores.index');
         Route::post('productos', [BlProductoController::class, 'store'])->name('productosBL.store');
         Route::post('colores', [BlProductoController::class, 'storeColor'])->name('coloresBL.store');
         Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productos.update');
+        Route::get('BLPedidos', [BLPedidosController::class, 'index'])->name('pedidos.index');
+        Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
+        
     });
 });
 
