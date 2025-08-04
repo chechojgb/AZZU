@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BLCliente;
 use Illuminate\Http\Request;
 use App\Models\BlProducto;
 use App\Models\BlColor;
@@ -29,10 +30,14 @@ class BLPedidosController extends Controller
                     }),
                 ];
             });
+        
+        $clientes = BLCliente::all();
+
         return Inertia::render('BLPedidos', [
             'productos' => $productos,
             'colores' => BlColor::all(), // Para formularios
             'user' => auth()->user(),
+            'clientes' => $clientes, // Para formularios
         ]);
     }
 }
