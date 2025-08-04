@@ -22,7 +22,8 @@ import {
     BookHeadphones,
     HeadphonesIcon,
     Terminal,
-    CalendarHeart
+    CalendarHeart,
+    ListOrderedIcon
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { userHasArea } from '@/components/utils/useAuthUtils';
@@ -34,32 +35,31 @@ const staticNavItems = [
     {
         title: 'AzzuBoard',
         href: '/dashboard',
-        icon: LayoutGrid,
-        requiredAreas: [1,2, 3],
+        icon: LayoutGrid
     },
     {
         title: 'Tabla de agentes',
         href: '/showTableAgents',
         icon: TableProperties,
-        requiredAreas: [1,2, 3],
+        proyectosPermitidos: ['AZZU'],
     },
     {
         title: 'estado de operaciones',
         href: '/showOperationState',
         icon: BarChartBig,
-        requiredAreas: [1,2, 3],
+        proyectosPermitidos: ['AZZU'],
     },
     {
         title: 'Ranking de agentes',
         href: '/showAgentRankingState',
         icon: HeadphonesIcon,
-        requiredAreas: [1,2, 3],
+        proyectosPermitidos: ['AZZU'],
     },
     {
         title: 'Estado de las llamadas',
         href: '/showCallState',
         icon: BookHeadphones,
-        requiredAreas: [1,2, 3],
+        proyectosPermitidos: ['AZZU'],
     },
     {
         title: 'Usuarios',
@@ -69,7 +69,7 @@ const staticNavItems = [
             { title: 'Agregar', href: '/users/create' }
         ],
         icon: SquareUserRound,
-        requiredAreas: [1,2, 3],
+        proyectosPermitidos: ['AZZU'],
     },
     {
         title: 'Operaciones',
@@ -78,25 +78,37 @@ const staticNavItems = [
             { title: 'Administrar', href: '/areas' },
         ],
         icon: Tags,
-        requiredAreas: [1,2, 3],
+        proyectosPermitidos: ['AZZU'],
     },
     {
         title: 'Button Lovers',
         href: '/BLProductos',
         children: [
             { title: 'Productos', href: '/BLproductosInventario/BLProductos' },
-            { title: 'Analisis', href: '/' },
-            { title: 'Historico', href: '/' },
+            { title: 'Analisis', href: '/BLproductosInventario/BLAnalisis' },
+            { title: 'Historico', href: '/BLproductosInventario/BLHistorico' },
         ],
         icon: CalendarHeart,
-        requiredAreas: [1,2, 3],
+        
+    },
+    {
+        title: 'Pedidos',
+        href: '/BLproductosInventario/BLPedidos',
+        icon: ListOrderedIcon,
+        proyectosPermitidos: ['Button Lovers', 'AZZU'],
+    },
+    {
+        title: 'clientes',
+        href: '/BLproductosInventario/BLClientes',
+        icon: SquareUserRound,
+        proyectosPermitidos: ['Button Lovers', 'AZZU'],
     }
 ];
 
 const footerNavItems = [
     {
         title: 'Home',
-        href: 'https://github.com/laravel/react-starter-kit',
+        href: '/',
         icon: Folder,
     },
     {
@@ -109,6 +121,8 @@ const footerNavItems = [
 export function AppSidebar() {
     const { auth } = usePage<InertiaProps>().props;
     const user = auth?.user ?? { areaRoles: [] };
+    console.log('user', user.proyecto);
+    
     const [sshSessions, setSshSessions] = useState([]);
 
     useEffect(() => {
@@ -118,26 +132,36 @@ export function AppSidebar() {
     }, []);
 
     const visibleNavItems = staticNavItems.filter(item => {
-        const required = item.requiredAreas ?? [];
-        return userHasArea(user, required);
+        // 1. Verificar áreas requeridas
+        if (item.requiredAreas?.length && !userHasArea(user, item.requiredAreas)) {
+            return false;
+        }
+        
+        // 2. Verificar proyectos (omitir si no hay restricción)
+        if (!item.proyectosPermitidos?.length) {
+            return true; // Global si no hay filtro
+        }
+        
+        // 3. Si hay proyectos definidos, verificar coincidencia
+        return item.proyectosPermitidos.includes(user.proyecto as string);
     });
 
-    const terminalNavItem = {
-        title: 'Terminales',
-        href: '/terminales',
-        icon: Terminal,
-        requiredAreas: [1, 2, 3],
-        children: [
-            { title: 'Administrar', href: '/terminal-admin' },
-            ...sshSessions.map(session => ({
-                title: `${session.host}-${session.username}`,
-                href: `/terminales/${session.id}`,
-                key: session.id
-            }))
-        ]
-    };
+    // const terminalNavItem = {
+    //     title: 'Terminales',
+    //     href: '/terminales',
+    //     icon: Terminal,
+    //     requiredAreas: [1, 2, 3],
+    //     children: [
+    //         { title: 'Administrar', href: '/terminal-admin' },
+    //         ...sshSessions.map(session => ({
+    //             title: `${session.host}-${session.username}`,
+    //             href: `/terminales/${session.id}`,
+    //             key: session.id
+    //         }))
+    //     ]
+    // };
 
-    visibleNavItems.push(terminalNavItem);
+    // visibleNavItems.push(terminalNavItem);
 
     return (
         <Sidebar collapsible="icon" variant="inset">

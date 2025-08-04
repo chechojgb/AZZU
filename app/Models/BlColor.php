@@ -16,4 +16,5 @@ class BlColor extends Model
     {
         return $this->hasMany(BlProducto::class, 'color_id');
     }
+    
 }

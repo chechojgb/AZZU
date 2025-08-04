@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\BLPedido;
+
+class BLCliente extends Model
+{
+    protected $table = 'bl_clientes';
+
+    protected $fillable = [
+        'nombre',
+        'nit',
+        'telefono',
+        'email',
+        'direccion'
+    ];
+
+    // Relación: Un cliente tiene muchos pedidos
+    public function pedidos(): HasMany
+    {
+        return $this->hasMany(BLPedido::class, 'cliente_id');
+    }
+}
