@@ -12,10 +12,12 @@ class BLCliente extends Model
 
     protected $fillable = [
         'nombre',
+        'contacto',
         'nit',
         'telefono',
         'email',
-        'direccion'
+        'ciudad',
+        'direccion',
     ];
 
     // Relación: Un cliente tiene muchos pedidos

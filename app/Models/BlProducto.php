@@ -26,6 +26,6 @@ class BlProducto extends Model
     // Accesor: Descripción automática (ej: "BT 20MM Dorado")
     public function getDescripcionAttribute(): string
     {
-        return "{$this->tipo_producto} {$this->tamanio} {$this->color->nombre}";
+        return "{$this->tipo_producto} {$this->tamanio} {$this->color->codigo}";
     }
 }

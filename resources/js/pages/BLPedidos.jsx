@@ -4,9 +4,11 @@ import { Link, usePage } from "@inertiajs/react";
 import { themeByProject } from '@/components/utils/theme';
 import { Button } from "flowbite-react";
 import { ClipboardList } from 'lucide-react';
-import { useState } from 'react';
+import { Toast } from "flowbite-react";
+import { HiCheck, HiX } from "react-icons/hi";
+import { useState, useEffect } from 'react';
 import AgentModalWrapper from '@/components/agentsModalWrapper';
-import ModalPedidosBL from '@/components/BL/modalPedidosBL';
+import ModalPedidosBL from '@/components/BL/modalesBL';
 const breadcrumbs = [
   { title: "Pedidos BL", href: "/BLproductosInventario/pedidos" }
 ];
@@ -19,18 +21,25 @@ export default function BLPedidos({ user, productos, colores, clientes }) {
   console.log("Colores disponibles:", colores);
   console.log("Productos disponibles:", productos);
   console.log("clientes disponibles:", clientes);
-  
+
+  const [toast, setToast] = useState({
+    show: false,
+    success: false,
+    message: "",
+  });
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast({ show: false, success: false, message: '' });
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   
   
   const openModal = () => {
-      // if (!colores || colores.length === 0) {
-      //   setToast({
-      //     show: true,
-      //     success: false,
-      //     message: "No se pueden agregar productos porque no hay colores disponibles.",
-      //   });
-      //   return;
-      // }
       setModalOpen(true);
   };
   const closeModal = () => {
@@ -90,8 +99,22 @@ export default function BLPedidos({ user, productos, colores, clientes }) {
         </div>
         {modalOpen && (
             <AgentModalWrapper closeModal={closeModal}>
-                <ModalPedidosBL clientes={clientes} productos={productos} />
+                <ModalPedidosBL clientes={clientes} productos={productos} onClose={closeModal} setToast={setToast}/>
             </AgentModalWrapper>
+        )}
+        {toast.show && (
+          <div className="fixed bottom-6 right-6 z-51">
+          <Toast>
+              <div
+              className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                  toast.success ? "bg-green-100 text-green-500" : "bg-red-100 text-red-500"
+              }`}
+              >
+              {toast.success ? <HiCheck className="h-5 w-5" /> : <HiX className="h-5 w-5" />}
+              </div>
+              <div className="ml-3 text-sm font-normal">{toast.message}</div>
+          </Toast>
+          </div>
         )}
 
       </div>

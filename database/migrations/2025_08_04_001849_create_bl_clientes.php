@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('bl_clientes', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
+            $table->string('contacto', 100);
             $table->string('nit', 20)->nullable(); // Para facturación
             $table->string('telefono', 15);
             $table->string('email', 50)->nullable();
+            $table->enum('ciudad', ['Bogotá', 'Medellín']);
             $table->text('direccion')->nullable();
             $table->timestamps();
         });

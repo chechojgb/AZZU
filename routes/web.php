@@ -173,6 +173,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productos.update');
         Route::get('BLPedidos', [BLPedidosController::class, 'index'])->name('pedidos.index');
         Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
+        Route::post('clientes', [BLClientesController::class, 'store'])->name('clientesBL.store');
         
     });
 });

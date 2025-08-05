@@ -32,7 +32,7 @@ class BlProductoController extends Controller
                     }),
                 ];
             });
-        dd($productos->pluck('descripcion'));
+        // dd($productos->pluck('descripcion'));
 
         return Inertia::render('BLProductos', [
             'productos' => $productos,
@@ -133,7 +133,7 @@ class BlProductoController extends Controller
                 $color->codigo
             );
 
-            dd($descripcion);
+            // dd($descripcion);
             $producto = BlProducto::create([
                 'tipo_producto' => $validated['tipo_producto'],
                 'tamanio' => $validated['tamanio'],
@@ -184,19 +184,19 @@ class BlProductoController extends Controller
                 'nombre' => $validated['nombre']
             ]);
         }else {
-            return Inertia::render('BLProductos', [
-                'toast' => [
-                    'type' => 'error',
-                    'message' => 'Ese color ya está registrado.',
-                ],
-            ]);
+            return redirect()->back()->with([
+            'toast' => [
+                'type' => 'error',
+                'message' => 'Ese color ya está registrado.',
+            ],
+        ]);
            
         }
-        return Inertia::render('BLProductos', [
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Color guardado correctamente',
-                ],
+        return redirect()->back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Color guardado correctamente',
+            ],
         ]);
         
     }
