@@ -38,4 +38,26 @@ class BLClientesController extends Controller
             'clientes' => $clientes, // Para mostrar los clientes
         ]);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:50',
+            'contacto' => 'required|string|max:50',
+            'nit' => 'required|string|max:20|unique:bl_clientes,nit',
+            'telefono' => 'required|regex:/^[0-9]{7,15}$/', 
+            'email' => 'required|string|email|max:255|unique:bl_clientes,email',
+            'ciudad' => 'nullable|string|max:60',
+            'direccion' => 'required|string|max:50',
+        ]);
+
+        BlCliente::create($validated);
+
+        return redirect()->back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Cliente registrado correctamente',
+            ],
+        ]);
+    }
 }
