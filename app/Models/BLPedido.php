@@ -9,7 +9,7 @@ use App\Models\BLPedidoItem;
 
 class BLPedido extends Model
 {
-        protected $table = 'bl_pedidos';
+    protected $table = 'bl_pedidos';
 
     protected $fillable = [
         'cliente_id',
