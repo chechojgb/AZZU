@@ -13,7 +13,8 @@ use App\Http\Controllers\BlMovimientoController;
 use App\Http\Controllers\BLPedidosController;
 use App\Models\BLPedido;
 use App\Models\SshSession;
-
+// use Illuminate\Container\Attributes\Auth;
+use Illuminate\Support\Facades\Auth;
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
@@ -30,7 +31,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         // return Inertia::render('dashboard');
         return Inertia::render('dashboard', [
-            'user' => auth()->user(),
+            $user = Auth::user(),
+            'user' => $user,
         ]);
     })->name('dashboard');
 
@@ -174,7 +176,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('BLPedidos', [BLPedidosController::class, 'index'])->name('pedidos.index');
         Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
         Route::post('clientes', [BLClientesController::class, 'store'])->name('clientesBL.store');
-        
+        Route::post('pedidos', [BLPedidosController::class, 'store'])->name('pedidosBL.store');
     });
 });
 

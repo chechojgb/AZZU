@@ -9,6 +9,7 @@ import { HiCheck, HiX } from "react-icons/hi";
 import { useState, useEffect } from 'react';
 import AgentModalWrapper from '@/components/agentsModalWrapper';
 import ModalPedidosBL from '@/components/BL/modalesBL';
+import { router } from '@inertiajs/react';
 const breadcrumbs = [
   { title: "Pedidos BL", href: "/BLproductosInventario/pedidos" }
 ];
@@ -21,6 +22,41 @@ export default function BLPedidos({ user, productos, colores, clientes }) {
   console.log("Colores disponibles:", colores);
   console.log("Productos disponibles:", productos);
   console.log("clientes disponibles:", clientes);
+
+  const handleGuardarPedido = (clientData) => {
+    console.log('datos cliente',clientData);
+    router.post(route('pedidosBL.store'), clientData, {
+      preserveState: true,
+      onSuccess: () => {
+        setToast({
+          show: true,
+          success: true,
+          message: "Producto guardado correctamente"
+        });
+        // Refrescar la lista de productos
+        // router.visit(route('clientes.index'));
+      },
+      onError: (errors) => {
+      const primerError = Object.values(errors)[0];
+      setToast({
+        show: true,
+        success: false,
+        message: primerError || "Error al guardar el producto"
+      });
+      },
+      onFinish: (visit) => {
+        // Si hubo error de servidor (status 500 o más)
+        if (visit.response?.status >= 500) {
+          const msg = visit.response?.data?.message || "Error interno del servidor";
+          setToast({
+            show: true,
+            success: false,
+            message: msg
+          });
+        }
+      }
+    });
+  };
 
   const [toast, setToast] = useState({
     show: false,
@@ -99,7 +135,7 @@ export default function BLPedidos({ user, productos, colores, clientes }) {
         </div>
         {modalOpen && (
             <AgentModalWrapper closeModal={closeModal}>
-                <ModalPedidosBL clientes={clientes} productos={productos} onClose={closeModal} setToast={setToast}/>
+                <ModalPedidosBL clientes={clientes} productos={productos} onClose={closeModal} setToast={setToast} onSave={handleGuardarPedido}/>
             </AgentModalWrapper>
         )}
         {toast.show && (

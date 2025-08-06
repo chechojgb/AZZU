@@ -12,6 +12,7 @@ import { HiCheck, HiX } from "react-icons/hi";
 import { Toast } from "flowbite-react";
 import AgregarProductoModal from '@/components/BL/agregarProductosModal';
 import AddDbColores from '@/components/BL/modalAddColoresBL';
+
 // import { log } from 'node:console';
 
 const breadcrumbs = [

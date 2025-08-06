@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BlEmpaque extends Model
 {
     protected $table = 'bl_empaques';
-    protected $fillable = ['producto_id', 'codigo_unico', 'cantidad_por_empaque', 'codigo_barras'];
+    protected $fillable = ['producto_id', 'codigo_unico', 'cantidad_por_empaque', 'codigo_barras', 'estado'];
 
     // Relación: Un empaque pertenece a un producto
     public function producto(): BelongsTo

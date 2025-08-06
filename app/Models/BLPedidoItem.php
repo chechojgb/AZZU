@@ -12,7 +12,8 @@ class BLPedidoItem extends Model
         'pedido_id',
         'empaque_id',
         'cantidad_empaques',
-        'precio_unitario'
+        'precio_unitario',
+        'nota'
     ];
 
     // Relación: Un item pertenece a un pedido
