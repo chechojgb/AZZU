@@ -148,7 +148,7 @@ class BlProductoController extends Controller
             'cantidad_por_empaque' => $validated['cantidad_por_empaque'],
             'codigo_barras' => $validated['codigo_barras'],
             'codigo_unico' => $validated['codigo_unico'],
-            'estado' => 'Disponible'
+            'estado' => 'disponible'
         ]);
 
         

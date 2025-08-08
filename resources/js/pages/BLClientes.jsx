@@ -127,9 +127,9 @@ export default function Clientes({clientes}) {
         setToast({
           show: true,
           success: true,
-          message: "Producto guardado correctamente"
+          message: "cliente guardado correctamente"
         });
-        // Refrescar la lista de productos
+        // Refrescar la lista de clientes
         // router.visit(route('clientes.index'));
       },
       onError: (errors) => {
@@ -137,7 +137,7 @@ export default function Clientes({clientes}) {
       setToast({
         show: true,
         success: false,
-        message: primerError || "Error al guardar el producto"
+        message: primerError || "Error al guardar el cliente"
       });
       },
       onFinish: (visit) => {
