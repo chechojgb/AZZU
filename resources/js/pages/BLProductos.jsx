@@ -12,6 +12,7 @@ import { HiCheck, HiX } from "react-icons/hi";
 import { Toast } from "flowbite-react";
 import AgregarProductoModal from '@/components/BL/agregarProductosModal';
 import AddDbColores from '@/components/BL/modalAddColoresBL';
+import TablaProductosBL from '@/components/BL/tablaProdBL';
 
 // import { log } from 'node:console';
 
@@ -28,6 +29,9 @@ export default function BLProductos({productos, colores}) {
     const { props } = usePage();
     const proyecto = props?.auth?.user?.proyecto || 'AZZU';
     const theme = themeByProject[proyecto];
+    const [search, setSearch] = useState('');
+    console.log(search);
+    
 
     const handleGuardarProducto = (productoData) => {
       console.log(productoData);
@@ -193,25 +197,38 @@ export default function BLProductos({productos, colores}) {
 
           </div>
             
-          <div className="border relative overflow-hidden rounded-xl border">
+          <div className="">
+            {/* Header de la tabla con buscador */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Lista de Productos
+              </h2>
+              <div className="relative w-full sm:w-72">
+                <svg
+                  className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M15.5 10.5a5 5 0 11-10 0 5 5 0 0110 0z" />
+                </svg>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-sm text-gray-900 border border-gray-200 rounded-lg bg-white dark:bg-gray-900 dark:border-gray-700 dark:placeholder-gray-400 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                  placeholder="Buscar producto..."
+                />
+              </div>
+            </div>
+
+            {/* Contenedor de la tabla */}
             <div className="overflow-x-auto">
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableHeadCell>Tipo de producto</TableHeadCell>
-                    <TableHeadCell>Tamaño</TableHeadCell>
-                    <TableHeadCell>Colores</TableHeadCell>
-                    <TableHeadCell>Cantidades</TableHeadCell>
-                    <TableHeadCell>Descripcion</TableHeadCell>
-                    <TableHeadCell >Editar Producto</TableHeadCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody className="divide-y">
-                  <BTOList productos={productos}  openModal={openModalEdit}/>
-                </TableBody>
-              </Table>
+              <TablaProductosBL productos={productos} search={search} />
             </div>
           </div>
+
         </div>
       </div>
         {toast.show && (

@@ -29,7 +29,7 @@ function EntradaBL({ historico }) {
               >
                 <div className="space-y-1">
                   <p className="font-semibold ">
-                    {item.producto} - {item.tamanio} - {item.color}
+                    {item.producto || 'No existe'} - {item.tamanio} - {item.color}
                   </p>
                   <p className="text-xs ">
                     {item.fecha} — {item.tipo || "sin tipo"} —{" "}

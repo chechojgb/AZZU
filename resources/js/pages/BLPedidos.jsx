@@ -14,7 +14,7 @@ const breadcrumbs = [
   { title: "Pedidos BL", href: "/BLproductosInventario/pedidos" }
 ];
 
-export default function BLPedidos({ user, productos, colores, clientes }) {
+export default function BLPedidos({ user, productos, colores, clientes, pedidos }) {
   const { props } = usePage();
   const proyecto = props?.auth?.user?.proyecto || 'AZZU';
   const theme = themeByProject[proyecto];
@@ -22,6 +22,8 @@ export default function BLPedidos({ user, productos, colores, clientes }) {
   console.log("Colores disponibles:", colores);
   console.log("Productos disponibles:", productos);
   console.log("clientes disponibles:", clientes);
+  console.log('pedidos disponibles:', pedidos);
+  
 
   const handleGuardarPedido = (clientData) => {
     console.log('datos cliente',clientData);
@@ -104,35 +106,57 @@ export default function BLPedidos({ user, productos, colores, clientes }) {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                <td className="px-6 py-4">Textiles Zuluaga</td>
-                <td className="px-6 py-4 space-y-1">
-                  <div>Botón Azul <span className="text-gray-500">x300</span></div>
-                  <div>Botón Rojo <span className="text-gray-500">x150</span></div>
-                </td>
-                <td className="px-6 py-4">2025-08-08</td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">
-                    En proceso
-                  </span>
-                </td>
-              </tr>
+              {pedidos.map(cliente => {
+                // Agrupar items por producto_id y sumar cantidades
+                const productosAgrupados = cliente.items.reduce((acc, item) => {
+                const productoId = item.empaque.producto.id;
+                const nombreProducto = item.empaque.producto.descripcion;
 
-              <tr className="border-b hover:bg-gray-50 dark:hover:bg-gray-900">
-                <td className="px-6 py-4">Confecciones Lara</td>
-                <td className="px-6 py-4 space-y-1">
-                  <div>Botón Negro <span className="text-gray-500">x100</span></div>
-                </td>
-                <td className="px-6 py-4">2025-08-10</td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-                    Entregado
-                  </span>
-                </td>
-              </tr>
+                if (!acc[productoId]) {
+                  acc[productoId] = {
+                    nombre: nombreProducto,
+                    cantidad: 0
+                  };
+                }
+                acc[productoId].cantidad += item.cantidad_empaques;
+                return acc;
+                }, {});
+                const listaProductos = Object.values(productosAgrupados);
+                const estadosStyle = {
+                  pendiente: 'text-yellow-800 bg-yellow-100',
+                  entregado: 'text-green-800 bg-green-100',
+                  cancelado: 'text-red-800 bg-red-100'
+                }
+                return (
+                      <tr
+                        className="border-b hover:bg-gray-50 dark:hover:bg-gray-900"
+                        key={cliente.id}
+                      >
+                        <td className="px-6 py-4">{cliente.cliente.nombre}</td>
+
+                        <td className="px-6 py-4 space-y-1">
+                          {listaProductos.map((prod, idx) => (
+                            <div key={idx}>
+                              {prod.nombre}{" "}
+                              <span className="text-gray-500">x{prod.cantidad}</span>
+                            </div>
+                          ))}
+                        </td>
+
+                        <td className="px-6 py-4">{cliente.fecha_pedido}</td>
+
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold ${estadosStyle[cliente.estado] || 'text-gray-800 bg-gray-100'} rounded-full`}>
+                            {cliente.estado}
+                          </span>
+                        </td>
+                      </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+        {/* //MODALES Y TOAST */}
         {modalOpen && (
             <AgentModalWrapper closeModal={closeModal}>
                 <ModalPedidosBL clientes={clientes} productos={productos} onClose={closeModal} setToast={setToast} onSave={handleGuardarPedido}/>
