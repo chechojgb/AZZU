@@ -8,10 +8,11 @@ use App\Models\BlProducto;
 use App\Models\BlColor;
 use App\Models\BlEmpaque;
 use App\Models\BlMovimiento;
-use Illuminate\Container\Attributes\Auth;
+// use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 
 class BlProductoController extends Controller
@@ -42,6 +43,7 @@ class BlProductoController extends Controller
 
     public function indexAnalisis()
     {
+        $user = Auth::user();
         $productos = BlProducto::with(['color', 'empaques.movimientos'])
             ->get()
             ->map(function ($producto) {
@@ -60,12 +62,13 @@ class BlProductoController extends Controller
         return Inertia::render('BLAnalisis', [
             'productos' => $productos,
             'colores' => BlColor::all(),
-            'user' => auth()->user(), // Para formularios
+            'user' => $user, // Para formularios
         ]);
     }
 
     public function indexHistorico()
     {
+        $user = Auth::user();
         $productos = BlProducto::with(['color', 'empaques.movimientos'])
             ->get()
             ->map(function ($producto) {
@@ -82,11 +85,12 @@ class BlProductoController extends Controller
             });
         $historico = BlMovimiento::with(['empaque.producto', 'usuario'])
             ->where('tipo', 'entrada')
+            ->whereHas('empaque.producto')
             ->get()
             ->map(function ($movimiento) {
                 return [
                     'id' => $movimiento->id,
-                    'producto' => $movimiento->empaque->producto->tipo_producto,
+                    'producto' => $movimiento->empaque->producto->tipo_producto ,
                     'tamanio' => $movimiento->empaque->producto->tamanio,
                     'color' => $movimiento->empaque->producto->color->nombre,
                     'cantidad' => $movimiento->cantidad,
@@ -102,7 +106,7 @@ class BlProductoController extends Controller
         return Inertia::render('BLHistorico', [
             'productos' => $productos,
             'colores' => BlColor::all(),
-            'user' => auth()->user(),
+            'user' => $user,
             'historico' => $historico,
         ]);
     }

@@ -8,14 +8,16 @@ use App\Models\BlColor;
 use App\Models\BlEmpaque;
 use App\Models\BlMovimiento;
 use App\Models\BLCliente; // Assuming you have a Cliente model
-use Illuminate\Container\Attributes\Auth;
+// use Illuminate\Container\Attributes\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class BLClientesController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
         $clientes = BLCliente::all();
         $productos = BlProducto::with(['color', 'empaques.movimientos'])
             ->get()
@@ -34,7 +36,7 @@ class BLClientesController extends Controller
         return Inertia::render('BLClientes', [
             'productos' => $productos,
             'colores' => BlColor::all(), // Para formularios
-            'user' => auth()->user(),
+            'user' => $user,
             'clientes' => $clientes, // Para mostrar los clientes
         ]);
     }

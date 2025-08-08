@@ -21,6 +21,7 @@ export default function ModalPedidosBL({ onClose, onSave, clientes, productos, s
     { producto_id: '', cantidad: 1 },
   ]);
 
+  
   const handleProductoChange = (index, field, value) => {
     const nuevos = [...productosSeleccionados];
     
@@ -101,7 +102,7 @@ export default function ModalPedidosBL({ onClose, onSave, clientes, productos, s
   console.log('productos seleccionados:', productosResumen);
 
   return (
-    <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+    <div className="max-h-[90vh] flex flex-col">
       {/* Encabezado */}
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800">Nuevo Pedido</h2>
@@ -197,7 +198,7 @@ export default function ModalPedidosBL({ onClose, onSave, clientes, productos, s
                 </div>
 
                 {/* Cantidad */}
-                <div className="md:col-span-3 space-y-1">
+                <div className="md:col-span-6 space-y-1">
                   <label className="block text-xs font-medium text-gray-500">Cantidad</label>
                   <div className="relative">
                     <input
@@ -209,7 +210,7 @@ export default function ModalPedidosBL({ onClose, onSave, clientes, productos, s
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
                     {item.producto_id && (
-                      <span className="absolute right-3 top-2 text-xs text-gray-500">
+                      <span className="absolute right-2 top-2 text-xs text-gray-500">
                         Stock: {productos.find(p => String(p.id) === String(item.producto_id))?.stock_total || 'N/A'}
                       </span>
                     )}

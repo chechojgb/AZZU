@@ -40,12 +40,16 @@ class BLPedidosController extends Controller
             });
         
         $clientes = BLCliente::all();
+        $pedidos = BLPedido::with([
+            'items.empaque.producto', 'cliente'
+        ])->get();
 
         return Inertia::render('BLPedidos', [
             'productos' => $productos,
             'colores' => BlColor::all(), // Para formularios
             'user' => $user,
             'clientes' => $clientes, // Para formularios
+            'pedidos' => $pedidos,
         ]);
     }
 
