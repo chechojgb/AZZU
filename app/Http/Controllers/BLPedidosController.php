@@ -17,6 +17,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BLPedidosController extends Controller
 {
@@ -51,7 +52,9 @@ class BLPedidosController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        logger()->info('Iniciando creación de pedido', ['user_id' => $user->id]);
 
+        // Validación de datos
         $validated = $request->validate([
             'cliente_id' => 'required|numeric|exists:bl_clientes,id',
             'fecha_acordada' => 'required|date',
@@ -64,7 +67,7 @@ class BLPedidosController extends Controller
         DB::beginTransaction();
 
         try {
-            // Crear el pedido principal
+            // Crear pedido principal
             $pedido = BLPedido::create([
                 'cliente_id' => $validated['cliente_id'],
                 'fecha_pedido' => $validated['fecha_acordada'],
@@ -73,46 +76,77 @@ class BLPedidosController extends Controller
                 'usuario_id' => $user->id,
             ]);
 
+            logger()->info('Pedido principal creado', ['pedido_id' => $pedido->id]);
+
+            // Procesar cada producto
             foreach ($validated['productos'] as $producto) {
+                $productoId = $producto['producto_id'];
                 $cantidadSolicitada = $producto['cantidad'];
 
-                // Buscar empaques disponibles para ese producto (ordenados por fecha ascendente)
-                $empaquesDisponibles = BLEmpaque::where('producto_id', $producto['producto_id'])
-                    ->where('estado', 'disponible')
-                    ->orderBy('created_at')
-                    ->get();
+                $estadoBuscado = 'disponible';
+                $query = BLEmpaque::where('producto_id', $productoId)
+                    ->whereRaw('LOWER(estado) = ?', [$estadoBuscado])
+                    ->orderBy('created_at');
+
+                if (DB::getDriverName() !== 'sqlite') {
+                    $query->lockForUpdate();
+                }
+
+                $empaquesDisponibles = $query->get();
+
+                logger()->info('Empaques disponibles', [
+                    'producto_id' => $productoId,
+                    'count' => $empaquesDisponibles->count(),
+                    'ids' => $empaquesDisponibles->pluck('id')
+                ]);
 
                 $itemsPedido = [];
                 $cantidadAsignada = 0;
 
                 foreach ($empaquesDisponibles as $empaque) {
-                    if ($cantidadAsignada >= $cantidadSolicitada) {
-                        break;
+                    if ($cantidadAsignada >= $cantidadSolicitada) break;
+
+                    $cantidadPorEmpaque = $empaque->cantidad_por_empaque ?? $empaque->cantidad ?? 0;
+                    $cantidadRestante = $cantidadSolicitada - $cantidadAsignada;
+
+                    // Por defecto se toma el empaque completo
+                    $cantidadParaEsteItem = $cantidadPorEmpaque;
+                    $notaItem = null;
+
+                    // Si solo necesitamos una parte de este empaque
+                    if ($cantidadRestante < $cantidadPorEmpaque) {
+                        $cantidadParaEsteItem = $cantidadRestante;
+                        $notaItem = "Bolsa de {$cantidadPorEmpaque}, se toman {$cantidadRestante}, sobran " . ($cantidadPorEmpaque - $cantidadRestante);
                     }
 
-                    $cantidadAsignada += $empaque->cantidad;
-
                     $itemsPedido[] = [
-                        'pedido_id' => $pedido->id,
-                        'cantidad_empaques' => $empaque->cantidad,
+                        'cantidad_empaques' => $cantidadParaEsteItem,
                         'empaque_id' => $empaque->id,
-                        'nota' => null,
+                        'nota' => $notaItem,
                     ];
 
-                    // Marcar empaque como "asignado"
+                    $cantidadAsignada += $cantidadParaEsteItem;
+
+                    // Marcar empaque como asignado
                     $empaque->estado = 'asignado';
                     $empaque->save();
+
+                    logger()->info('Empaque asignado', [
+                        'empaque_id' => $empaque->id,
+                        'cantidad_asignada' => $cantidadParaEsteItem,
+                        'nota' => $notaItem
+                    ]);
                 }
 
-                // Si no se alcanzó la cantidad, se anota en el último ítem
-                if ($cantidadAsignada < $cantidadSolicitada && count($itemsPedido) > 0) {
-                    $faltante = $cantidadSolicitada - $cantidadAsignada;
-                    $itemsPedido[count($itemsPedido) - 1]['nota'] = "Faltan $faltante unidades para completar este pedido";
-                }
-
-                // Insertar ítems del producto (si hay alguno)
-                if (count($itemsPedido) > 0) {
-                    BLPedidoItem::create($itemsPedido);
+                // Si no hay empaques asignados
+                if (empty($itemsPedido)) {
+                    logger()->warning('No se asignaron empaques', ['producto_id' => $productoId]);
+                } else {
+                    $pedido->items()->createMany($itemsPedido);
+                    logger()->info('Items creados', [
+                        'producto_id' => $productoId,
+                        'count' => count($itemsPedido)
+                    ]);
                 }
             }
 
@@ -126,6 +160,10 @@ class BLPedidosController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            logger()->error('Error al crear pedido', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,
@@ -134,6 +172,9 @@ class BLPedidosController extends Controller
             ], 500);
         }
     }
+
+
+
 
 
 

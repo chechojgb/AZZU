@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('pedido_id')->constrained('bl_pedidos');
             $table->foreignId('empaque_id')->constrained('bl_empaques');
             $table->integer('cantidad_empaques'); // Ej: 2 empaques de 500 unidades = 1000 botones
-            $table->decimal('precio_unitario', 10, 2); // Precio por empaque
+            // $table->decimal('precio_unitario', 10, 2); // Precio por empaque
             $table->timestamps();
         });
     }
