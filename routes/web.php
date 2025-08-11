@@ -177,6 +177,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
         Route::post('clientes', [BLClientesController::class, 'store'])->name('clientesBL.store');
         Route::post('pedidos', [BLPedidosController::class, 'store'])->name('pedidosBL.store');
+        Route::get('BLPedidosShow/{id}', [BLPedidosController::class, 'show'])->name('pedidosBL.show');
+        
     });
 });
 

@@ -6,6 +6,7 @@ import {
   Label,
   Textarea,
 } from 'flowbite-react';
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function ModalPedidosBL({ onClose, onSave, clientes, productos, setToast  }) {
 
@@ -418,6 +419,91 @@ export function ModalAddClientesBL({ onClose, onSave }) {
       </form>
 
       {/* Botones */}
+    </div>
+  );
+}
+
+
+export function ModalViewPedidosBL({ onClose, pedido }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-lg max-w-lg w-full p-6 relative animate-fadeIn"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Botón Cerrar */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+        >
+          <XMarkIcon className="h-6 w-6" />
+        </button>
+
+        {/* Título */}
+        <h2 className="text-2xl font-semibold text-gray-800 border-b pb-3">
+          Detalles del Pedido
+        </h2>
+
+        {/* Contenido del pedido */}
+        <div className="mt-4 space-y-3">
+          <p>
+            <span className="font-semibold">ID:</span> {pedido.id}
+          </p>
+          <p>
+            <span className="font-semibold">Cliente:</span>{" "}
+            {pedido.cliente?.nombre}
+          </p>
+          <p>
+            <span className="font-semibold">Fecha:</span> {pedido.fecha_pedido}
+          </p>
+          <p>
+            <span className="font-semibold">Estado:</span>{" "}
+            <span
+              className={`px-3 py-1 text-sm rounded-full ${
+                pedido.estado === "completado"
+                  ? "bg-green-100 text-green-700"
+                  : pedido.estado === "pendiente"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {pedido.estado}
+            </span>
+          </p>
+        </div>
+
+        {/* Lista de items */}
+        {pedido.items && pedido.items.length > 0 && (
+          <div className="mt-5">
+            <h3 className="text-lg font-semibold mb-2">Productos</h3>
+            <ul className="divide-y divide-gray-200">
+              {pedido.items.map((item) => (
+                <li key={item.id} className="py-2 flex justify-between text-sm">
+                  <span>
+                    {item.empaque?.producto?.nombre || "Producto sin nombre"}
+                  </span>
+                  <span className="text-gray-500">
+                    x{item.cantidad_empaques}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Botón Cerrar inferior */}
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
