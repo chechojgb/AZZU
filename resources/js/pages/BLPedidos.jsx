@@ -10,19 +10,21 @@ import { useState, useEffect } from 'react';
 import AgentModalWrapper from '@/components/agentsModalWrapper';
 import ModalPedidosBL from '@/components/BL/modalesBL';
 import { router } from '@inertiajs/react';
+import TablaPedidosBL from '@/components/BL/tablaPedidosBL';
 const breadcrumbs = [
   { title: "Pedidos BL", href: "/BLproductosInventario/pedidos" }
 ];
+
 
 export default function BLPedidos({ user, productos, colores, clientes, pedidos }) {
   const { props } = usePage();
   const proyecto = props?.auth?.user?.proyecto || 'AZZU';
   const theme = themeByProject[proyecto];
   const [modalOpen, setModalOpen] = useState(false);
-  console.log("Colores disponibles:", colores);
-  console.log("Productos disponibles:", productos);
-  console.log("clientes disponibles:", clientes);
-  console.log('pedidos disponibles:', pedidos);
+  // console.log("Colores disponibles:", colores);
+  // console.log("Productos disponibles:", productos);
+  // console.log("clientes disponibles:", clientes);
+  // console.log('pedidos disponibles:', pedidos);
   
 
   const handleGuardarPedido = (clientData) => {
@@ -96,65 +98,7 @@ export default function BLPedidos({ user, productos, colores, clientes, pedidos 
         </Button>
 
         <div className="overflow-x-auto rounded-lg shadow-md">
-          <table className="w-full text-sm text-left   border ">
-            <thead className="text-xs uppercase bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
-              <tr>
-                <th scope="col" className="px-6 py-3">Cliente</th>
-                <th scope="col" className="px-6 py-3">Productos</th>
-                <th scope="col" className="px-6 py-3">Fecha acordada</th>
-                <th scope="col" className="px-6 py-3">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedidos.map(cliente => {
-                // Agrupar items por producto_id y sumar cantidades
-                const productosAgrupados = cliente.items.reduce((acc, item) => {
-                const productoId = item.empaque.producto.id;
-                const nombreProducto = item.empaque.producto.descripcion;
-
-                if (!acc[productoId]) {
-                  acc[productoId] = {
-                    nombre: nombreProducto,
-                    cantidad: 0
-                  };
-                }
-                acc[productoId].cantidad += item.cantidad_empaques;
-                return acc;
-                }, {});
-                const listaProductos = Object.values(productosAgrupados);
-                const estadosStyle = {
-                  pendiente: 'text-yellow-800 bg-yellow-100',
-                  entregado: 'text-green-800 bg-green-100',
-                  cancelado: 'text-red-800 bg-red-100'
-                }
-                return (
-                      <tr
-                        className="border-b hover:bg-gray-50 dark:hover:bg-gray-900"
-                        key={cliente.id}
-                      >
-                        <td className="px-6 py-4">{cliente.cliente.nombre}</td>
-
-                        <td className="px-6 py-4 space-y-1">
-                          {listaProductos.map((prod, idx) => (
-                            <div key={idx}>
-                              {prod.nombre}{" "}
-                              <span className="text-gray-500">x{prod.cantidad}</span>
-                            </div>
-                          ))}
-                        </td>
-
-                        <td className="px-6 py-4">{cliente.fecha_pedido}</td>
-
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold ${estadosStyle[cliente.estado] || 'text-gray-800 bg-gray-100'} rounded-full`}>
-                            {cliente.estado}
-                          </span>
-                        </td>
-                      </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <TablaPedidosBL pedidos={pedidos}/>
         </div>
         {/* //MODALES Y TOAST */}
         {modalOpen && (
@@ -162,6 +106,7 @@ export default function BLPedidos({ user, productos, colores, clientes, pedidos 
                 <ModalPedidosBL clientes={clientes} productos={productos} onClose={closeModal} setToast={setToast} onSave={handleGuardarPedido}/>
             </AgentModalWrapper>
         )}
+        
         {toast.show && (
           <div className="fixed bottom-6 right-6 z-51">
           <Toast>

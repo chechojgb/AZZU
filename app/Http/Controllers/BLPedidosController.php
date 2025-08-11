@@ -33,11 +33,18 @@ class BLPedidosController extends Controller
                     'tamanio' => $producto->tamanio,
                     'color_nombre' => $producto->color->nombre,
                     'descripcion' => $producto->descripcion,
-                    'stock_total' => $producto->empaques->sum(function ($empaque) {
-                        return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
+                    'stock_total' => $producto->empaques
+                        ->where('estado', 'disponible') // Filtra solo empaques disponibles
+                        ->sum(function ($empaque) {
+                            return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
                     }),
                 ];
-            });
+            })
+            ->filter(function ($producto) {
+                return $producto['stock_total'] > 0; // Opcional: solo productos con stock
+            })
+            ->values();
+            
         
         $clientes = BLCliente::all();
         $pedidos = BLPedido::with([
@@ -86,62 +93,48 @@ class BLPedidosController extends Controller
             foreach ($validated['productos'] as $producto) {
                 $productoId = $producto['producto_id'];
                 $cantidadSolicitada = $producto['cantidad'];
-
                 $estadoBuscado = 'disponible';
                 $query = BLEmpaque::where('producto_id', $productoId)
                     ->whereRaw('LOWER(estado) = ?', [$estadoBuscado])
                     ->orderBy('created_at');
-
                 if (DB::getDriverName() !== 'sqlite') {
                     $query->lockForUpdate();
                 }
-
                 $empaquesDisponibles = $query->get();
-
                 logger()->info('Empaques disponibles', [
                     'producto_id' => $productoId,
                     'count' => $empaquesDisponibles->count(),
                     'ids' => $empaquesDisponibles->pluck('id')
                 ]);
-
                 $itemsPedido = [];
                 $cantidadAsignada = 0;
-
                 foreach ($empaquesDisponibles as $empaque) {
                     if ($cantidadAsignada >= $cantidadSolicitada) break;
-
                     $cantidadPorEmpaque = $empaque->cantidad_por_empaque ?? $empaque->cantidad ?? 0;
                     $cantidadRestante = $cantidadSolicitada - $cantidadAsignada;
-
                     // Por defecto se toma el empaque completo
                     $cantidadParaEsteItem = $cantidadPorEmpaque;
                     $notaItem = null;
-
                     // Si solo necesitamos una parte de este empaque
                     if ($cantidadRestante < $cantidadPorEmpaque) {
                         $cantidadParaEsteItem = $cantidadRestante;
                         $notaItem = "Bolsa de {$cantidadPorEmpaque}, se toman {$cantidadRestante}, sobran " . ($cantidadPorEmpaque - $cantidadRestante);
                     }
-
                     $itemsPedido[] = [
                         'cantidad_empaques' => $cantidadParaEsteItem,
                         'empaque_id' => $empaque->id,
                         'nota' => $notaItem,
                     ];
-
                     $cantidadAsignada += $cantidadParaEsteItem;
-
                     // Marcar empaque como asignado
                     $empaque->estado = 'asignado';
                     $empaque->save();
-
                     logger()->info('Empaque asignado', [
                         'empaque_id' => $empaque->id,
                         'cantidad_asignada' => $cantidadParaEsteItem,
                         'nota' => $notaItem
                     ]);
                 }
-
                 // Si no hay empaques asignados
                 if (empty($itemsPedido)) {
                     logger()->warning('No se asignaron empaques', ['producto_id' => $productoId]);
@@ -155,26 +148,37 @@ class BLPedidosController extends Controller
             }
 
             DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pedido creado correctamente',
-                'pedido_id' => $pedido->id
-            ], 201);
-
+            return redirect()->back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Pedido creado correctamente.',
+            ],
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             logger()->error('Error al crear pedido', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al crear el pedido',
-                'error' => $e->getMessage()
-            ], 500);
+            return redirect()->back()->with([
+                'toast' => [
+                    'type' => 'error',
+                    'message' => 'Error al crear el pedido.',
+                ],
+            ]);
         }
+    }
+
+    public function show($id)
+    {
+        $pedido = BLPedido::with([
+            'items.empaque.producto', 'cliente'
+        ])
+        ->findOrFail($id);
+
+        return response()->json([
+            'pedido' => $pedido
+        ]);
     }
 
 
