@@ -25,6 +25,6 @@ class BLPedidoItem extends Model
     // Relación: Un item referencia un empaque específico
     public function empaque(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(BLEmpaque::class, 'empaque_id');
+        return $this->belongsTo(BlEmpaque::class, 'empaque_id');
     }
 }
