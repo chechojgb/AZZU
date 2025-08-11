@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bl_pedido_items', function (Blueprint $table) {
-             Schema::table('tu_tabla', function (Blueprint $table) {
-                $table->dropColumn('precio_unitario');
-            });
+            $table->dropColumn('precio_unitario');
         });
     }
 
