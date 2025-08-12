@@ -172,7 +172,7 @@ class BLPedidosController extends Controller
     public function show($id)
     {
         $pedido = BLPedido::with([
-            'items.empaque.producto', 'cliente'
+            'items.empaque.producto', 'cliente', 'usuarioCreador'
         ])
         ->findOrFail($id);
 
