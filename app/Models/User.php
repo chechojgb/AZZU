@@ -30,6 +30,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Area::class);
     }
+    public function pedidos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        // Un usuario puede tener muchos pedidos
+        return $this->hasMany(BLPedido::class, 'usuario_id');
+    }
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 

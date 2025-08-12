@@ -36,4 +36,9 @@ class BLPedido extends Model
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
+    public function usuarioCreador(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        // Un pedido pertenece a un usuario
+        return $this->belongsTo(User::class, 'usuario_id');
+    }
 }
