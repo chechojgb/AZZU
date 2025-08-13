@@ -73,6 +73,9 @@ import { ModalAddClientesBL } from '@/components/BL/modalesBL';
 import { router } from '@inertiajs/react';
 import { Toast } from "flowbite-react";
 import { HiCheck, HiX } from "react-icons/hi";
+import CustomerDetailsContainer from '@/components/BL/DetailsCustomerModal';
+import BigModalWrapper from '@/components/BL/BigmodalWrapper';
+import axios from "axios";
 
 const breadcrumbs = [
   { title: "Clientes", href: "/clientesBL" }
@@ -85,7 +88,9 @@ export default function Clientes({clientes}) {
   const proyecto = props?.auth?.user?.proyecto || 'AZZU';
   const theme = themeByProject[proyecto];
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpenClient, setModalOpenClient] = useState(false);
   console.log('clientes', clientes);
+  const [clienteDetails, setClienteDetails] = useState(null);
   const [toast, setToast] = useState({
         show: false,
         success: false,
@@ -159,7 +164,21 @@ export default function Clientes({clientes}) {
   };
   const closeModal = () => {
     setModalOpen(false);
+    setModalOpenClient(false)
+    setClienteDetails(null);
   };
+  const openModalClient = async (id)=> {
+    try {
+      const response = await axios.get(`BLClientesShow/${id}`); 
+      setClienteDetails(response.data.clientesDetails);
+      setModalOpenClient(true);
+    } catch (error) {
+      console.error("Error al cargar el cliente", error);
+    }
+  }
+
+
+
   
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -201,7 +220,7 @@ export default function Clientes({clientes}) {
                     )}
                   </td> */}
                   <td className="px-6 py-4">
-                    <button className="text-blue-600 hover:underline mr-2">Ver</button>
+                    <button className="text-blue-600 hover:underline mr-2" onClick={() => openModalClient(cliente.id)} >Ver</button>
                     <button className="text-yellow-600 hover:underline mr-2">Editar</button>
                     <button className="text-red-600 hover:underline">Eliminar</button>
                   </td>
@@ -211,9 +230,15 @@ export default function Clientes({clientes}) {
           </table>
         </div>
         {modalOpen && (
-            <AgentModalWrapper closeModal={closeModal}>
+          <AgentModalWrapper closeModal={closeModal}>
                 <ModalAddClientesBL  onClose={closeModal} onSave={handleGuardarCliente}/>
-            </AgentModalWrapper>
+          </AgentModalWrapper>
+        )}
+        {modalOpenClient && (
+          <BigModalWrapper closeModal={closeModal}>
+            <CustomerDetailsContainer closeModal={closeModal} clienteDetails={clienteDetails}/>
+            {/* <ModalAddClientesBL  onClose={closeModal} onSave={handleGuardarCliente}/> */}
+          </BigModalWrapper>
         )}
         {toast.show && (
           <div className="fixed bottom-6 right-6 z-51">
