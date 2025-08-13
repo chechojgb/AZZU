@@ -125,11 +125,11 @@ export function AppSidebar() {
     
     const [sshSessions, setSshSessions] = useState([]);
 
-    useEffect(() => {
-        axios.get('/terminal/index')
-            .then((res) => setSshSessions(res.data))
-            .catch((err) => console.error('Error loading SSH sessions', err));
-    }, []);
+    // useEffect(() => {
+    //     axios.get('/terminal/index')
+    //         .then((res) => setSshSessions(res.data))
+    //         .catch((err) => console.error('Error loading SSH sessions', err));
+    // }, []);
 
     const visibleNavItems = staticNavItems.filter(item => {
         // 1. Verificar áreas requeridas

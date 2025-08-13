@@ -62,4 +62,15 @@ class BLClientesController extends Controller
             ],
         ]);
     }
+
+    public function show($id)
+    {
+        $clientesDetails = BLCliente::with([
+            'pedidos.items.empaque.producto',
+        ])
+        ->findOrFail($id);
+        return response()->json([
+            'clientesDetails' => $clientesDetails
+        ]);
+    }
 }
