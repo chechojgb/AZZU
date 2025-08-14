@@ -24,7 +24,9 @@ import {
 } from 'react-icons/hi';
 
 const CustomerDetailsContainer = ({clienteDetails}) => {
-  console.log('detalles del cliente:',clienteDetails);
+  const orders = clienteDetails.pedidos;
+  const cantidadOrders = orders.length;
+  console.log('detalles del cliente:',clienteDetails, orders);
   
   const [customer] = useState({
     id: 'CUST-78945',
@@ -41,16 +43,7 @@ const CustomerDetailsContainer = ({clienteDetails}) => {
     favoriteCategory: 'Electrónica',
     satisfaction: 4.5
   });
-
-  const [orders] = useState([
-    { id: 'ORD-98765', date: '12/05/2023', amount: 189.99, status: 'Entregado', items: 3 },
-    { id: 'ORD-98764', date: '05/05/2023', amount: 245.5, status: 'Entregado', items: 5 },
-    { id: 'ORD-98763', date: '28/04/2023', amount: 89.99, status: 'Cancelado', items: 2 },
-    { id: 'ORD-98762', date: '15/04/2023', amount: 320.75, status: 'Entregado', items: 4 },
-    { id: 'ORD-98761', date: '02/04/2023', amount: 156.3, status: 'Entregado', items: 3 }
-  ]);
-
-
+  
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
@@ -88,7 +81,7 @@ const CustomerDetailsContainer = ({clienteDetails}) => {
         <Card className="lg:col-span-2 bg-white dark:bg-gray-950 shadow-lg border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
           <h5 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">Estadísticas del Cliente</h5>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <StatCard icon={<HiOutlineShoppingBag />} label="Pedidos totales" value={customer.totalOrders} color="text-blue-500" />
+            <StatCard icon={<HiOutlineShoppingBag />} label="Pedidos totales" value={cantidadOrders} color="text-blue-500" />
             <StatCard icon={<HiOutlineCurrencyDollar />} label="Total gastado" value={`$${customer.totalSpent.toFixed(2)}`} color="text-green-500" />
             <StatCard icon={<HiOutlineClock />} label="Último pedido" value={customer.lastOrder} color="text-purple-500" />
           </div>
@@ -113,7 +106,6 @@ const CustomerDetailsContainer = ({clienteDetails}) => {
       <Card className="bg-white dark:bg-gray-950 shadow-lg border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
           <h5 className="text-xl font-bold text-gray-900 dark:text-white">Pedidos Recientes</h5>
-          <Button color="light" size="sm">Ver todos ({customer.totalOrders})</Button>
         </div>
 
         <div className="overflow-x-auto">
@@ -130,18 +122,24 @@ const CustomerDetailsContainer = ({clienteDetails}) => {
             </TableHead>
             <TableBody className="divide-y divide-gray-200 dark:divide-gray-700">
               {orders.map((order) => (
+                
                 <TableRow key={order.id} className="transition hover:bg-gray-50 dark:hover:bg-gray-800">
                   <TableCell className="font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">{order.id}</TableCell>
-                  <TableCell>{order.date}</TableCell>
-                  <TableCell>{order.items}</TableCell>
-                  <TableCell>${order.amount.toFixed(2)}</TableCell>
+                  <TableCell>{order.fecha_pedido}</TableCell>
                   <TableCell>
-                    <Badge color={order.status === 'Entregado' ? 'success' : order.status === 'Cancelado' ? 'failure' : 'warning'} className="px-2 py-1 rounded-full">
-                      {order.status}
-                    </Badge>
+                    <ul>
+                      {order.items.map(item => (
+                        <li key={item.id}>
+                          Empaque: {item?.empaque?.codigo_unico}, {item?.empaque?.producto?.descripcion}
+                        </li>
+                      ))}
+                    </ul>
                   </TableCell>
+                  <TableCell>$</TableCell>
                   <TableCell>
-                    <Button size="xs" gradientduotone="cyanToBlue">Detalles</Button>
+                    <Badge color={order.estado === 'entregado' ? 'success' : order.status === 'cancelado' ? 'failure' : 'warning'} className="px-2 py-1 rounded-full">
+                      {order?.estado}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               ))}
