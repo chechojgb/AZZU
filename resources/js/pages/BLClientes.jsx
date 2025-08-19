@@ -75,6 +75,7 @@ import { Toast } from "flowbite-react";
 import { HiCheck, HiX } from "react-icons/hi";
 import CustomerDetailsContainer from '@/components/BL/DetailsCustomerModal';
 import BigModalWrapper from '@/components/BL/BigmodalWrapper';
+import EditarClienteForm from '@/components/BL/EditClientModal';
 import axios from "axios";
 
 const breadcrumbs = [
@@ -89,7 +90,8 @@ export default function Clientes({clientes}) {
   const theme = themeByProject[proyecto];
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOpenClient, setModalOpenClient] = useState(false);
-  console.log('clientes', clientes);
+  const [modalOpenClientEdit, setModalOpenClientEdit] = useState(false);
+  // console.log('clientes', clientes);
   const [clienteDetails, setClienteDetails] = useState(null);
   const [toast, setToast] = useState({
         show: false,
@@ -158,20 +160,64 @@ export default function Clientes({clientes}) {
       }
     });
   };
+  const handleEditarCliente = (clientData) => {
+    console.log('datos cliente',clientData);
+    router.post(route('clientesBL.update'), clientData, {
+      preserveState: true,
+      onSuccess: () => {
+        setToast({
+          show: true,
+          success: true,
+          message: "cliente editado correctamente"
+        });
+        // Refrescar la lista de clientes
+        // router.visit(route('clientes.index'));
+      },
+      onError: (errors) => {
+      const primerError = Object.values(errors)[0];
+      setToast({
+        show: true,
+        success: false,
+        message: primerError || "Error al editar el cliente"
+      });
+      },
+      onFinish: (visit) => {
+        // Si hubo error de servidor (status 500 o más)
+        if (visit.response?.status >= 500) {
+          const msg = visit.response?.data?.message || "Error interno del servidor";
+          setToast({
+            show: true,
+            success: false,
+            message: msg
+          });
+        }
+      }
+    });
+  };
 
   const openModal = () => {
       setModalOpen(true);
   };
   const closeModal = () => {
     setModalOpen(false);
-    setModalOpenClient(false)
-    setClienteDetails(null);
+    setModalOpenClient(false);
+    setClienteDetails(false);
+    setModalOpenClientEdit(false);
   };
   const openModalClient = async (id)=> {
     try {
       const response = await axios.get(`BLClientesShow/${id}`); 
       setClienteDetails(response.data.clientesDetails);
       setModalOpenClient(true);
+    } catch (error) {
+      console.error("Error al cargar el cliente", error);
+    }
+  }
+  const openModalEditClient = async(id) => {
+    try {
+      const response = await axios.get(`BLClientesShow/${id}`); 
+      setClienteDetails(response.data.clientesDetails);
+      setModalOpenClientEdit(true);
     } catch (error) {
       console.error("Error al cargar el cliente", error);
     }
@@ -221,7 +267,7 @@ export default function Clientes({clientes}) {
                   </td> */}
                   <td className="px-6 py-4">
                     <button className="text-blue-600 hover:underline mr-2" onClick={() => openModalClient(cliente.id)} >Ver</button>
-                    <button className="text-yellow-600 hover:underline mr-2">Editar</button>
+                    <button className="text-yellow-600 hover:underline mr-2" onClick={()=> openModalEditClient(cliente.id)}>Editar</button>
                     <button className="text-red-600 hover:underline">Eliminar</button>
                   </td>
                 </tr>
@@ -240,6 +286,12 @@ export default function Clientes({clientes}) {
             {/* <ModalAddClientesBL  onClose={closeModal} onSave={handleGuardarCliente}/> */}
           </BigModalWrapper>
         )}
+        {modalOpenClientEdit && (
+          <AgentModalWrapper closeModal={closeModal}>
+              <EditarClienteForm closeModal={closeModal} clienteDetails={clienteDetails} onSave={handleEditarCliente} />
+          </AgentModalWrapper>
+        )
+        }
         {toast.show && (
           <div className="fixed bottom-6 right-6 z-51">
           <Toast>
