@@ -12,6 +12,8 @@ use App\Models\BLCliente; // Assuming you have a Cliente model
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class BLClientesController extends Controller
 {
@@ -53,7 +55,7 @@ class BLClientesController extends Controller
             'direccion' => 'required|string|max:50',
         ]);
 
-        BlCliente::create($validated);
+        BLCliente::create($validated);
 
         return redirect()->back()->with([
             'toast' => [
@@ -73,4 +75,44 @@ class BLClientesController extends Controller
             'clientesDetails' => $clientesDetails
         ]);
     }
+
+public function update(Request $request, BLCliente $cliente)
+{
+    dd($request);
+    $validator = Validator::make($request->all(), [
+        'nombre' => 'required|string|max:50',
+        'contacto' => 'required|string|max:50',
+        'nit' => [
+            'required',
+            'string',
+            'max:20',
+            Rule::unique('bl_clientes')->ignore($cliente->id),
+        ],
+        'telefono' => 'required|regex:/^(\+)?[0-9\s\-]{7,15}$/',
+        'email' => [
+            'required',
+            'string',
+            'email',
+            'max:255',
+            Rule::unique('bl_clientes')->ignore($cliente->id),
+        ],
+        'ciudad' => 'nullable|string|max:60',
+        'direccion' => 'required|string|max:50',
+    ], [
+        'nit.unique' => 'Este NIT ya está registrado por otro cliente.',
+        'email.unique' => 'Este correo electrónico ya está registrado por otro cliente.',
+        'telefono.regex' => 'El teléfono debe contener entre 7 y 15 dígitos.',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
+    }
+
+    $cliente->update($validator->validated());
+    
+    return redirect()->back()->with('success', 'Cliente actualizado correctamente');
+}
 }
