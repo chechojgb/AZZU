@@ -161,7 +161,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('BLPedidos', [BLPedidosController::class, 'index'])->name('pedidos.index');
         Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
         Route::post('clientes', [BLClientesController::class, 'store'])->name('clientesBL.store');
-        Route::post('clientes', [BLClientesController::class, 'update'])->name('clientesBL.update');
+        Route::post('cliente/{cliente}', [BLClientesController::class, 'update'])->name('clientesBL.update');
         Route::post('pedidos', [BLPedidosController::class, 'store'])->name('pedidosBL.store');
         Route::get('BLPedidosShow/{id}', [BLPedidosController::class, 'show'])->name('pedidosBL.show');
         Route::get('BLClientesShow/{id}', [BLClientesController::class, 'show'])->name('ClientesBL.show');

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Label, TextInput } from "flowbite-react";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 
-const EditarClienteForm = ({ clienteDetails, onSave, onCancel }) => {
+const EditarClienteForm = ({ clienteDetails, onSave, onCancel, onClose }) => {
   const [formData, setFormData] = useState({
     nombre: clienteDetails.nombre || "",
     nit: clienteDetails.nit || "",
@@ -11,6 +11,7 @@ const EditarClienteForm = ({ clienteDetails, onSave, onCancel }) => {
     telefono: clienteDetails.telefono || "",
     ciudad: clienteDetails.ciudad || "",
     direccion: clienteDetails.direccion || "",
+    id: clienteDetails.id,
   });
 
   const handleChange = (e) => {
@@ -141,7 +142,7 @@ const EditarClienteForm = ({ clienteDetails, onSave, onCancel }) => {
       <div className="flex justify-end gap-3 pt-4">
         <Button
           color="light"
-          onClick={onCancel}
+          onClick={onClose}
           type="button"
           className="rounded-xl shadow-md hover:shadow-lg transition-all hover:scale-105"
         >

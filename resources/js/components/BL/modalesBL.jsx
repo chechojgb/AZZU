@@ -449,7 +449,7 @@ export function ModalAddClientesBL({ onClose, onSave }) {
         <Button color="gray" type="button" onClick={onClose}>
           Cancelar
         </Button>
-        <Button type="submit" gradientMonochrome="blue" onClick={handleSubmit}>
+        <Button type="submit" gradientmonochrome="blue" onClick={handleSubmit}>
           Guardar Cliente
         </Button>
       </div>

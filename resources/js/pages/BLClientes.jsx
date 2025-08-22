@@ -162,7 +162,7 @@ export default function Clientes({clientes}) {
   };
   const handleEditarCliente = (clientData) => {
     console.log('datos cliente',clientData);
-    router.post(route('clientesBL.update'), clientData, {
+    router.post(route(`clientesBL.update`, clientData.id), clientData, {
       preserveState: true,
       onSuccess: () => {
         setToast({
@@ -288,7 +288,7 @@ export default function Clientes({clientes}) {
         )}
         {modalOpenClientEdit && (
           <AgentModalWrapper closeModal={closeModal}>
-              <EditarClienteForm closeModal={closeModal} clienteDetails={clienteDetails} onSave={handleEditarCliente} />
+              <EditarClienteForm onClose={closeModal} clienteDetails={clienteDetails} onSave={handleEditarCliente}  />
           </AgentModalWrapper>
         )
         }
