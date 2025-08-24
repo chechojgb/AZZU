@@ -19,7 +19,9 @@ const breadcrumbs = [
     },
 ];
 
-export default function Dashboard({user}) {
+export default function Dashboard({user, productos, pedidos}) {    
+    console.log(pedidos);
+    
     return (
         <AppLayout breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }]}>
             <Head title="Dashboard" />
@@ -71,7 +73,7 @@ export default function Dashboard({user}) {
 
                     <div className="grid auto-rows-fr gap-4 md:grid-cols-3 flex-1">
                         <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
-                            <StockActualProductosBL/>
+                            <StockActualProductosBL productosStock={productos}/>
                         </div>
                         <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
                             <RankingBotonesVendidosBL/>
