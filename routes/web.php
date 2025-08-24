@@ -11,10 +11,13 @@ use App\Http\Controllers\BlProductoController;
 use App\Http\Controllers\BlEmpaqueController;
 use App\Http\Controllers\BlMovimientoController;
 use App\Http\Controllers\BLPedidosController;
+use App\Http\Controllers\DashboardController;
 use App\Models\BLPedido;
+use App\Models\BlProducto;
 use App\Models\SshSession;
 // use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\Auth;
+use Tests\Feature\DashboardTest;
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
@@ -28,13 +31,16 @@ Route::get('/AR', function () {
 })->name('homeAR');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        // return Inertia::render('dashboard');
-        return Inertia::render('dashboard', [
-            $user = Auth::user(),
-            'user' => $user,
-        ]);
-    })->name('dashboard');
+    // Route::get('dashboard', function () {
+    //     // return Inertia::render('dashboard');
+    //     return Inertia::render('dashboard', [
+    //         $user = Auth::user(),
+    //         $productos = BlProducto::get(),
+    //         'user' => $user,
+    //         'productos' => $productos,
+    //     ]);
+    // })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('perfil', function () {
         return Inertia::render('Perfil');
