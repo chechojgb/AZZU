@@ -3,28 +3,30 @@ import { useLoadStatus } from '../context/loadContext';
 import { themeByProject } from '../utils/theme';
 import { usePage } from '@inertiajs/react';
 
-const ordenes = [
-  {
-    numero: 'ORD-1001',
-    cliente: 'Confecciones Diana',
-    fecha: '2025-08-02',
-    estado: 'Pendiente',
-  },
-  {
-    numero: 'ORD-1002',
-    cliente: 'Boutique La Estrella',
-    fecha: '2025-08-01',
-    estado: 'Pendiente',
-  },
-  {
-    numero: 'ORD-1003',
-    cliente: 'Fábrica El Botonazo',
-    fecha: '2025-07-31',
-    estado: 'Pendiente',
-  },
-];
+// const ordenes = [
+//   {
+//     numero: 'ORD-1001',
+//     cliente: 'Confecciones Diana',
+//     fecha: '2025-08-02',
+//     estado: 'Pendiente',
+//   },
+//   {
+//     numero: 'ORD-1002',
+//     cliente: 'Boutique La Estrella',
+//     fecha: '2025-08-01',
+//     estado: 'Pendiente',
+//   },
+//   {
+//     numero: 'ORD-1003',
+//     cliente: 'Fábrica El Botonazo',
+//     fecha: '2025-07-31',
+//     estado: 'Pendiente',
+//   },
+// ];
 
-export default function OrdenesPendientesBL() {
+export default function OrdenesPendientesBL({ordenes}) {
+  console.log(ordenes);
+  
     const { props } = usePage();
     const proyecto = props?.auth?.user?.proyecto || 'AZZU';
     const theme = themeByProject[proyecto];
@@ -35,7 +37,7 @@ export default function OrdenesPendientesBL() {
       </h3>
 
       <ul className="space-y-4">
-        {ordenes.map((orden, index) => (
+        {Object.values(ordenes).map((orden, index) => (
           <li
             key={index}
             className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
@@ -46,8 +48,8 @@ export default function OrdenesPendientesBL() {
                 <Clock className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-medium text-gray-800 dark:text-gray-100">{orden.numero}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{orden.cliente}</p>
+                <p className="font-medium text-gray-800 dark:text-gray-100">ORD-{orden.id}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{orden.fecha_pedido}</p>
               </div>
             </div>
             <div className="text-right text-sm text-gray-500 dark:text-gray-400">

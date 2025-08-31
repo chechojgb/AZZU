@@ -19,9 +19,9 @@ const breadcrumbs = [
     },
 ];
 
-export default function Dashboard({user, productos, pedidos}) {    
-    console.log(pedidos);
-    
+export default function Dashboard({user, productos, pedidos, pedidosEspera, movimientos}) {    
+    // console.log('movimientos',movimientos);
+        
     return (
         <AppLayout breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }]}>
             <Head title="Dashboard" />
@@ -67,7 +67,7 @@ export default function Dashboard({user, productos, pedidos}) {
 
                     {/* Panel 30% */}
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border min-h-[300px]">
-                        <MovimientosRecientesBL/>
+                        <MovimientosRecientesBL movimientos={movimientos}/>
                     </div>
                     </div>
 
@@ -76,10 +76,10 @@ export default function Dashboard({user, productos, pedidos}) {
                             <StockActualProductosBL productosStock={productos}/>
                         </div>
                         <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
-                            <RankingBotonesVendidosBL/>
+                            <RankingBotonesVendidosBL pedidos={pedidos}/>
                         </div>
                         <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border ">
-                            <OrdenesPendientesBL/>
+                            <OrdenesPendientesBL ordenes={pedidosEspera}/>
                         </div>
                     </div>
                     </>

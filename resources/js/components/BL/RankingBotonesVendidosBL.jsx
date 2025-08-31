@@ -1,16 +1,8 @@
 import { Medal } from 'lucide-react';
 
-const botonesVendidos = [
-  { nombre: 'Botón Z6', cantidad: 1200 },
-  { nombre: 'Botón R4', cantidad: 950 },
-  { nombre: 'Botón M1', cantidad: 800 },
-  { nombre: 'Botón L2', cantidad: 650 },
-  { nombre: 'Botón N8', cantidad: 500 },
-];
-
 const coloresRanking = ['text-yellow-500', 'text-gray-400', 'text-orange-700'];
 
-export default function RankingBotonesVendidosBL() {
+export default function RankingBotonesVendidosBL({ pedidos }) {
   return (
     <div className="relative p-4 h-full">
       <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
@@ -27,9 +19,9 @@ export default function RankingBotonesVendidosBL() {
             </tr>
           </thead>
           <tbody>
-            {botonesVendidos.map((boton, index) => (
+            {pedidos.map((boton, index) => (
               <tr
-                key={index}
+                key={boton.id}
                 className={`${
                   index % 2 === 0
                     ? 'bg-gray-50 dark:bg-gray-800'

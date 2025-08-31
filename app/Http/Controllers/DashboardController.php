@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlMovimiento;
 use App\Models\BLPedido;
 use App\Models\BlProducto;
 use Illuminate\Http\Request;
@@ -33,32 +34,42 @@ class DashboardController extends Controller
         $rankingProductos = BLPedido::with(['items.empaque.producto'])
             ->get()
             ->flatMap(function ($pedido) {
-                return $pedido->items->map(function ($item) {
-                    $cantidad = $item->cantidad_empaques ;
-                    return [
-                        'producto_id' => $item->empaque->producto->id,
-                        'nombre' => $item->empaque->producto->descripcion,
-                        'cantidad' => $cantidad,
-                    ];
-                });
+                return $pedido->items
+                    ->filter(fn($item) => $item->empaque)
+                    ->map(function ($item) {
+                        $cantidad = $item->empaque->cantidad_por_empaque;
+
+                        return [
+                            'producto_id' => $item->empaque->producto->id,
+                            'nombre'       => $item->empaque->producto->descripcion,
+                            'cantidad'     => $cantidad,
+                        ];
+                    });
             })
             ->groupBy('producto_id')
             ->map(function ($items, $productoId) {
                 return [
-                    'id' => $productoId,
-                    'nombre' => $items->first()['nombre'],
-                    'cantidad' => $items->sum('cantidad'),
+                    'id'      => $productoId,
+                    'nombre'  => $items->first()['nombre'],
+                    'cantidad'=> $items->sum('cantidad'),
                 ];
             })
             ->sortByDesc('cantidad')
             ->values()
-            ->take(5); // top 5
-
+            ->take(5);
+        
+        $pedidosEspera = BLPedido::get()
+            ->where('estado', 'pendiente');
+        $movimientos = BlMovimiento::with(['empaque.producto'])->get()
+            ->take(6);
+        // dd($movimientos);
 
         return Inertia::render('dashboard', [
             'productos' => $productos,
             'user' => $user,
-            'pedidos' => $rankingProductos
+            'pedidos' => $rankingProductos,
+            'pedidosEspera' => $pedidosEspera,
+            'movimientos' => $movimientos
         ]);
     }
 }
