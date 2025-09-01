@@ -221,4 +221,15 @@ class BlProductoController extends Controller
             ]
         ]);
     }
+
+    public function show($id)
+    {
+        $productDetails = BlProducto::with(['color'])
+        ->findOrFail($id);
+        $colores = BlColor::get();
+        return response()->json([
+            'productDetails' => $productDetails,
+            'colores' => $colores
+        ]);
+    }
 }
