@@ -9,6 +9,7 @@ use App\Http\Controllers\PostProxyController;
 use App\Http\Controllers\SshSessionController;
 use App\Http\Controllers\BlProductoController;
 use App\Http\Controllers\BlEmpaqueController;
+use App\Http\Controllers\BLMarcacionController;
 use App\Http\Controllers\BlMovimientoController;
 use App\Http\Controllers\BLPedidosController;
 use App\Http\Controllers\DashboardController;
@@ -158,20 +159,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('BLproductosInventario')->group(function () {
         Route::get('BLProductos', [BlProductoController::class, 'index'])->name('productos.index');
-        Route::get('BLAnalisis', [BlProductoController::class, 'indexAnalisis'])->name('analisis.index');
-        Route::get('BLHistorico', [BlProductoController::class, 'indexHistorico'])->name('historico.index');
         Route::get('colores', [BlProductoController::class, 'index'])->name('colores.index');
-        Route::post('productos', [BlProductoController::class, 'store'])->name('productosBL.store');
-        Route::post('colores', [BlProductoController::class, 'storeColor'])->name('coloresBL.store');
-        Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productos.update');
         Route::get('BLPedidos', [BLPedidosController::class, 'index'])->name('pedidos.index');
         Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
+        Route::get('BLAnalisis', [BlProductoController::class, 'indexAnalisis'])->name('analisis.index');
+        Route::get('BLHistorico', [BlProductoController::class, 'indexHistorico'])->name('historico.index');
         Route::post('clientes', [BLClientesController::class, 'store'])->name('clientesBL.store');
-        Route::post('cliente/{cliente}', [BLClientesController::class, 'update'])->name('clientesBL.update');
+        Route::post('productos', [BlProductoController::class, 'store'])->name('productosBL.store');
         Route::post('pedidos', [BLPedidosController::class, 'store'])->name('pedidosBL.store');
+        Route::post('colores', [BlProductoController::class, 'storeColor'])->name('coloresBL.store');
         Route::get('BLPedidosShow/{id}', [BLPedidosController::class, 'show'])->name('pedidosBL.show');
         Route::get('BLClientesShow/{id}', [BLClientesController::class, 'show'])->name('ClientesBL.show');
         Route::get('BLProductShow/{id}', [BlProductoController::class, 'show'])->name('ProductBL.show');
+        Route::post('cliente/{cliente}', [BLClientesController::class, 'update'])->name('clientesBL.update');
+        Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productBL.update');
+        Route::get('BLMarcacion', [BLMarcacionController::class, 'index'])->name('marcacion.index');
     });
 });
 

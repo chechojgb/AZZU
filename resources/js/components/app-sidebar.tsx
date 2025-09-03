@@ -23,7 +23,8 @@ import {
     HeadphonesIcon,
     Terminal,
     CalendarHeart,
-    ListOrderedIcon
+    ListOrderedIcon,
+    BadgeCheck
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { userHasArea } from '@/components/utils/useAuthUtils';
@@ -101,6 +102,12 @@ const staticNavItems = [
         title: 'clientes',
         href: '/BLproductosInventario/BLClientes',
         icon: SquareUserRound,
+        proyectosPermitidos: ['Button Lovers', 'AZZU'],
+    },
+    {
+        title: 'Marcacion',
+        href: '/BLproductosInventario/BLMarcacion',
+        icon: BadgeCheck,
         proyectosPermitidos: ['Button Lovers', 'AZZU'],
     }
 ];
