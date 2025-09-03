@@ -11,6 +11,10 @@ import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import EditarProductForm from './EditProductModal';
 import AgentModalWrapper from '../agentsModalWrapper';
+import { router } from '@inertiajs/react';
+import { Toast } from "flowbite-react";
+import { useEffect } from 'react';
+import { HiCheck, HiX } from "react-icons/hi";
 
 export default function TablaProductosBL({ productos, openModal, search }) {
   const { props } = usePage();
@@ -19,6 +23,22 @@ export default function TablaProductosBL({ productos, openModal, search }) {
   const [productDetail, setProductDetail] = useState(null);
   const [colores, setColores] = useState(null);
   const [modalOpenProductEdit, setModalOpenProductEdit] = useState(false);
+  const [toast, setToast] = useState({
+    show: false,
+    success: false,
+    message: "",
+  });
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast({ show: false, success: false, message: '' });
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const openModalEditProduct = async(id) => {
     try {
       const response = await axios.get(`BLProductShow/${id}`); 
@@ -32,16 +52,18 @@ export default function TablaProductosBL({ productos, openModal, search }) {
   const closeModal = () => {
     setModalOpenProductEdit(false);
   };
-  const handleEditarProducto = (clientData) => {
-    console.log('datos producto',clientData);
-    router.post(route(`clientesBL.update`, clientData.id), clientData, {
+  const handleEditarProducto = (productData) => {
+    console.log("➡️ productData recibido:", productData);
+    console.log("➡️ id:", productData?.id);
+    router.put(route(`productBL.update`, {producto: productData.id}), productData, {
       preserveState: true,
       onSuccess: () => {
         setToast({
           show: true,
           success: true,
-          message: "cliente editado correctamente"
+          message: "producto editado correctamente"
         });
+        // closeModal();
         // Refrescar la lista de clientes
         // router.visit(route('clientes.index'));
       },
@@ -50,7 +72,7 @@ export default function TablaProductosBL({ productos, openModal, search }) {
       setToast({
         show: true,
         success: false,
-        message: primerError || "Error al editar el cliente"
+        message: primerError || "Error al editar el producto"
       });
       },
       onFinish: (visit) => {
@@ -153,6 +175,20 @@ export default function TablaProductosBL({ productos, openModal, search }) {
           </AgentModalWrapper>
         )
       }
+      {toast.show && (
+        <div className="fixed bottom-6 right-6 z-51">
+        <Toast>
+            <div
+            className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                toast.success ? "bg-green-100 text-green-500" : "bg-red-100 text-red-500"
+            }`}
+            >
+            {toast.success ? <HiCheck className="h-5 w-5" /> : <HiX className="h-5 w-5" />}
+            </div>
+            <div className="ml-3 text-sm font-normal">{toast.message}</div>
+        </Toast>
+        </div>
+      )}
     </>
   );
 }

@@ -214,12 +214,7 @@ class BlProductoController extends Controller
             'color_id' => 'required|exists:bl_colores,id',
         ]));
 
-        return redirect()->back()->with([
-            'toast' => [
-                'type' => 'success',
-                'message' => 'Producto actualizado'
-            ]
-        ]);
+        return redirect()->back()->with('success', 'Producto actualizado correctamente');
     }
 
     public function show($id)

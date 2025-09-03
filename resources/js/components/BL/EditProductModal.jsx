@@ -32,7 +32,7 @@ const EditarProductForm = ({ productDetail, onSave, onCancel, onClose, colores }
   const handleSubmit = (e) => {
     e.preventDefault();
     // pasamos la descripcion calculada al guardar
-    onSave({ ...formData, descripcion });
+    onSave({ ...formData, descripcion, id: productDetail.id });
   };
 
   const hasColors = colores && colores.length > 0;
