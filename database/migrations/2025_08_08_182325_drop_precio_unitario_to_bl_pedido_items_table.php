@@ -9,12 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('bl_pedido_items', function (Blueprint $table) {
-            $table->dropColumn('precio_unitario');
-        });
-    }
+    // public function up(): void
+    // {
+    //     Schema::table('bl_pedido_items', function (Blueprint $table) {
+    //         $table->dropColumn('precio_unitario');
+    //     });
+    // }
 
     /**
      * Reverse the migrations.
