@@ -13,6 +13,7 @@ use App\Http\Controllers\BLMarcacionController;
 use App\Http\Controllers\BlMovimientoController;
 use App\Http\Controllers\BLPedidosController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MarcacionController;
 use App\Models\BLPedido;
 use App\Models\BlProducto;
 use App\Models\SshSession;
@@ -174,6 +175,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('cliente/{cliente}', [BLClientesController::class, 'update'])->name('clientesBL.update');
         Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productBL.update');
         Route::get('BLMarcacion', [BLMarcacionController::class, 'index'])->name('marcacion.index');
+        Route::post('/bl_marcaciones', [MarcacionController::class, 'store'])->name('bl_marcaciones.store');
     });
 });
 

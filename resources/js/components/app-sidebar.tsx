@@ -90,6 +90,7 @@ const staticNavItems = [
             { title: 'Historico', href: '/BLproductosInventario/BLHistorico' },
         ],
         icon: CalendarHeart,
+        proyectosPermitidos: ['Button Lovers', 'AZZU'],
         
     },
     {
@@ -108,7 +109,7 @@ const staticNavItems = [
         title: 'Marcacion',
         href: '/BLproductosInventario/BLMarcacion',
         icon: BadgeCheck,
-        proyectosPermitidos: ['Button Lovers', 'AZZU'],
+        proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
     }
 ];
 
