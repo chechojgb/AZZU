@@ -1,26 +1,24 @@
 // resources/js/pages/BLHistorico.jsx
 
 import AppLayout from "@/layouts/app-layout";
-import { Head } from "@inertiajs/react";
-import { useState, useMemo } from "react";
+import { Head, router } from "@inertiajs/react";
+import { useState } from "react";
 import { Button } from "flowbite-react";
-import { router } from '@inertiajs/react';
 
 const breadcrumbs = [
   { title: "Marcacion BL", href: "/BLproductosInventario/BLMarcacion" }
 ];
 
 export default function MarcadoPage({ orderCustomer, buttonUser }) {
-  // console.log('marcadores:',buttonUser);
-  
   const [marcados, setMarcados] = useState([]);
+  const [seleccionados, setSeleccionados] = useState([]);
+  const [precios, setPrecios] = useState({});
 
   const [nuevo, setNuevo] = useState({
     cliente: "",
     clienteId: null,
     pedido: "",
     pedidoId: null,
-    itemsMarcados: [], // [{itemId, referencia, cantidad, nota}]
     trabajador: "",
     trabajadorId: null,
     fecha: "",
@@ -54,7 +52,6 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
       clienteId: cliente.id,
       pedido: "",
       pedidoId: null,
-      itemsMarcados: [],
       trabajador: "",
       trabajadorId: null,
       fecha: "",
@@ -62,6 +59,7 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
     setPedidosDisponibles(cliente.pedidos || []);
     setItemsDisponibles([]);
     setSugerencias([]);
+    setSeleccionados([]);
   };
 
   // --- Pedido ---
@@ -70,65 +68,39 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
       ...nuevo,
       pedido: `#${pedido.id} - ${pedido.estado}`,
       pedidoId: pedido.id,
-      itemsMarcados: []
     });
     setItemsDisponibles(pedido.items || []);
+    setSeleccionados([]);
   };
 
-  // --- Items ---
-  const toggleItem = (item, checked) => {
-    let updated;
-
-    if (checked) {
-      // agregar item marcado con su cantidad total
-      updated = [
-        ...nuevo.itemsMarcados,
-        {
-          itemId: item.id,
-          referencia: item.empaque?.producto?.descripcion,
-          cantidad: item.cantidad_empaques,
-          nota: item.nota,
-        }
-      ];
-    } else {
-      // quitar item
-      updated = nuevo.itemsMarcados.filter(i => i.itemId !== item.id);
+  // --- Guardar todo ---
+  const guardarMarcaciones = () => {
+    if (!nuevo.clienteId || !nuevo.pedidoId || !nuevo.trabajadorId || !nuevo.fecha) {
+      alert("Debes seleccionar cliente, pedido, trabajador y fecha antes de marcar.");
+      return;
     }
 
-    setNuevo({ ...nuevo, itemsMarcados: updated });
-  };
+    if (seleccionados.length === 0) {
+      alert("Debes seleccionar al menos un item.");
+      return;
+    }
 
+    const payload = seleccionados.map((itemId) => {
+      const item = itemsDisponibles.find(i => i.id === itemId);
+      return {
+        pedido_item_id: item.id,
+        user_id: nuevo.trabajadorId,
+        cantidad: item.cantidad_empaques,
+        fecha: nuevo.fecha,
+        pedido_id: nuevo.pedidoId,
+        precio_unitario: nuevo.proyecto === "Button LoversMN" ? precios[itemId] || 0 : null, 
+      };
+    });
 
-  // --- Total y Resumen ---
-  const totalMarcados = useMemo(() => {
-    return nuevo.itemsMarcados.reduce((acc, i) => acc + i.cantidad, 0);
-  }, [nuevo.itemsMarcados]);
-
-  const resumenMarcados = useMemo(() => {
-    return nuevo.itemsMarcados
-      .map(i => `${i.cantidad} ${i.referencia}`)
-      .join(" + ");
-  }, [nuevo.itemsMarcados]);
-
-  // --- Guardar ---
-  const agregarMarcado = () => {
-    if (!nuevo.clienteId || !nuevo.pedidoId || nuevo.itemsMarcados.length === 0 || !nuevo.trabajadorId || !nuevo.fecha) return;
-
-    router.post("/BLproductosInventario/bl_marcaciones", nuevo, {
+    router.post("/BLproductosInventario/bl_marcaciones", { marcaciones: payload }, {
       onSuccess: () => {
-        setNuevo({
-          cliente: "",
-          clienteId: null,
-          pedido: "",
-          pedidoId: null,
-          itemsMarcados: [],
-          trabajador: "",
-          trabajadorId: null,
-          fecha: "",
-        });
-        setPedidosDisponibles([]);
-        setItemsDisponibles([]);
-        setSugerencias([]);
+        console.log("Marcaciones guardadas:", payload);
+        setSeleccionados([]);
       },
     });
   };
@@ -190,6 +162,7 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
               </select>
             </div>
 
+            {/* Trabajador */}
             <div>
               <select
                 name="trabajador"
@@ -200,8 +173,18 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
                     setNuevo({
                       ...nuevo,
                       trabajador: user.name,
-                      trabajadorId: user.id
+                      trabajadorId: user.id,
+                      proyecto: user.proyecto, // 👈 guardamos el proyecto
                     });
+
+                    // inicializar precios si es Button LoversMN
+                    if (user.proyecto === "Button LoversMN") {
+                      const preciosIniciales = {};
+                      itemsDisponibles.forEach(i => {
+                        preciosIniciales[i.id] = "";
+                      });
+                      setPrecios(preciosIniciales);
+                    }
                   }
                 }}
                 className="border rounded-lg p-2 w-full"
@@ -214,6 +197,8 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
                 ))}
               </select>
             </div>
+
+            {/* Fecha */}
             <input
               type="date"
               name="fecha"
@@ -233,47 +218,65 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
                     <th className="px-2 py-1">Referencia</th>
                     <th className="px-2 py-1">Cantidad</th>
                     <th className="px-2 py-1">Nota</th>
+                    {nuevo.proyecto === "Button LoversMN" && (
+                      <th className="px-2 py-1">💲 Precio Unitario</th>
+                    )}
                     <th className="px-2 py-1">Seleccionar</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {itemsDisponibles.map((item) => {
-                    const checked = nuevo.itemsMarcados.some(i => i.itemId === item.id);
-                    return (
-                      <tr key={item.id} className="border-t">
-                        <td className="px-2 py-1">{item.empaque?.producto?.descripcion}</td>
-                        <td className="px-2 py-1">{item.cantidad_empaques}</td>
-                        <td className="px-2 py-1">{item.nota || "—"}</td>
-                        <td className="px-2 py-1 text-center">
+                  {itemsDisponibles.map((item) => (
+                    <tr key={item.id} className="border-t">
+                      <td className="px-2 py-1">{item.empaque?.producto?.descripcion}</td>
+                      <td className="px-2 py-1">{item.cantidad_empaques}</td>
+                      <td className="px-2 py-1">{item.nota || "—"}</td>
+
+                      {nuevo.proyecto === "Button LoversMN" && (
+                        <td className="px-2 py-1">
                           <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(e) => toggleItem(item, e.target.checked)}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={precios[item.id] || ""}
+                            onChange={(e) =>
+                              setPrecios({ ...precios, [item.id]: e.target.value })
+                            }
+                            className="border rounded-lg p-1 w-24"
                           />
                         </td>
-                      </tr>
-                    );
-                  })}
+                      )}
+
+                      <td className="px-2 py-1 text-center">
+                        <input
+                          type="checkbox"
+                          checked={seleccionados.includes(item.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSeleccionados([...seleccionados, item.id]);
+                            } else {
+                              setSeleccionados(seleccionados.filter(id => id !== item.id));
+                            }
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
 
-              {/* Contador y resumen */}
-              <div className="mt-3 p-2 bg-gray-100 rounded-lg">
-                <p className="font-semibold">
-                  Total a marcar: {totalMarcados}
-                </p>
-                {resumenMarcados && (
-                  <p className="text-sm text-gray-700">
-                    Detalle: {resumenMarcados}
-                  </p>
-                )}
+              {/* Save button */}
+              <div className="mt-4 flex justify-end">
+                <Button
+                  color="blue"
+                  disabled={seleccionados.length === 0}
+                  onClick={guardarMarcaciones}
+                >
+                  💾 Guardar Marcaciones
+                </Button>
               </div>
             </div>
           )}
 
-          <div className="mt-4">
-            <Button onClick={agregarMarcado}>Agregar</Button>
-          </div>
         </div>
 
         {/* Tabla resultado */}

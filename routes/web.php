@@ -175,7 +175,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('cliente/{cliente}', [BLClientesController::class, 'update'])->name('clientesBL.update');
         Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productBL.update');
         Route::get('BLMarcacion', [BLMarcacionController::class, 'index'])->name('marcacion.index');
-        Route::post('/bl_marcaciones', [MarcacionController::class, 'store'])->name('bl_marcaciones.store');
+        Route::post('/bl_marcaciones', [BLMarcacionController::class, 'store'])->name('bl_marcaciones.store');
     });
 });
 
