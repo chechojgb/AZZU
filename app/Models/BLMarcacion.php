@@ -14,6 +14,8 @@ class BLMarcacion extends Model
         'user_id',
         'cantidad',
         'fecha',
+        'precio_unitario',
+        'costo_total'
     ];
 
     protected $casts = [
@@ -34,6 +36,6 @@ class BLMarcacion extends Model
 
     public function trabajador()
     {
-        return $this->belongsTo(User::class, 'trabajador_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
