@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BLCliente;
 use App\Models\BLMarcacion;
+use App\Models\BLPedido;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,7 +15,7 @@ class BLMarcacionController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $orderCustomer = BLCliente::with('pedidos.items.empaque.producto')->get();
+        $orderCustomer = BLCliente::with(['pedidos.items.empaque.producto', 'pedidos.items.marcaciones.trabajador'])->get();
         $buttonUser = User::whereIn('proyecto', ['Button LoversM', 'Button LoversMN'])->get();
         return Inertia::render('BLMarcacion', [
             'user' => $user,

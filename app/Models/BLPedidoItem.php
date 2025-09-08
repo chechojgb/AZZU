@@ -27,4 +27,9 @@ class BLPedidoItem extends Model
     {
         return $this->belongsTo(BlEmpaque::class, 'empaque_id');
     }
+    
+    public function marcaciones()
+    {
+        return $this->hasMany(BLMarcacion::class, 'pedido_item_id');
+    }
 }
