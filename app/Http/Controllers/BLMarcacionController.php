@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\BLCliente;
 use App\Models\BLMarcacion;
 use App\Models\BLPedido;
+use App\Models\BLPedidoItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BLMarcacionController extends Controller
 {
@@ -33,17 +35,24 @@ class BLMarcacionController extends Controller
             'marcaciones.*.cantidad' => 'required|integer|min:1',
             'marcaciones.*.fecha' => 'required|date',
             'marcaciones.*.pedido_id' => 'required|exists:bl_pedidos,id',
-            'marcaciones.*.precio_unitario' => 'required|numeric|min:0',
+            'marcaciones.*.precio_unitario' => 'nullable|numeric|min:0',
         ]);
 
         foreach ($validated['marcaciones'] as $data) {
-            // calcular el costo_total de esta marcación
+            $data['precio_unitario'] = $data['precio_unitario'] ?? 0;
+            // calcular costo_total
             $data['costo_total'] = $data['cantidad'] * $data['precio_unitario'];
-            // guardar en BD
+
+            // 1️⃣ Guardar la marcación
             BLMarcacion::create($data);
+
+            // 2️⃣ Actualizar estado del item a "en_proceso"
+            DB::table('bl_pedido_items')
+                ->where('id', $data['pedido_item_id'])
+                ->update(['estado' => 'en_proceso']);
         }
 
-        return redirect()->back()->with('success', 'Marcaciones registradas correctamente.');
+        return redirect()->back()->with('success', 'Marcaciones registradas y items actualizados.');
     }
 
     public function update(Request $request, $id)
@@ -72,5 +81,17 @@ class BLMarcacionController extends Controller
         return response()->json([
             'message' => 'Asignación eliminada correctamente'
         ]);
+    }
+
+    public function actualizarEstado(BLPedidoItem $item, Request $request)
+    {
+        $request->validate([
+            'estado' => 'required|in:pendiente,en proceso,completado'
+        ]);
+
+        $item->estado = $request->estado;
+        $item->save();
+
+        return response()->json(['message' => 'Estado actualizado correctamente']);
     }
 }

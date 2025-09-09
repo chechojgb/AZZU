@@ -176,6 +176,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('productos/{producto}', [BlProductoController::class, 'update'])->name('productBL.update');
         Route::get('BLMarcacion', [BLMarcacionController::class, 'index'])->name('marcacion.index');
         Route::post('/bl_marcaciones', [BLMarcacionController::class, 'store'])->name('bl_marcaciones.store');
+        Route::patch('/actualizar-estado/{item}', [BLMarcacionController::class, 'actualizarEstado'])->name('bl-historicos.actualizar-estado');
     });
 });
 
