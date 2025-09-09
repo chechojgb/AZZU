@@ -32,6 +32,20 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
       default: return [];
     }
   };
+  const actualizarEstadoItem = (itemId, nuevoEstado) => {
+    router.patch(`/BLproductosInventario/actualizar-estado/${itemId}`, {
+      estado: nuevoEstado
+    }, {
+      onSuccess: () => {
+        // Recargar los datos después de actualizar
+        router.reload();
+      },
+      onError: (errors) => {
+        alert('Error al actualizar el estado: ' + (errors.message || 'Error desconocido'));
+      }
+    });
+  };
+  
   console.log(orderCustomer);
   
   const {
@@ -202,12 +216,19 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
           
           <FiltrosMarcaciones 
             filtroActivo={filtroActivo} 
-            onChangeFiltro={setFiltroActivo} 
+            onChangeFiltro={setFiltroActivo}
+            contadores={{
+              enProceso: enProceso.length,
+              completados: completados.length,
+              pendientes: pendientes.length
+            }}
           />
           
           <ResultTable 
             datos={datosMostrar()} 
-            tipo={filtroActivo} 
+            tipo={filtroActivo}
+            onActualizarEstado={actualizarEstadoItem}
+            mostrarAcciones={filtroActivo === 'enProceso' || filtroActivo === 'todos'}
           />
         </div>
       </div>

@@ -15,32 +15,24 @@ export const useProcesarMarcaciones = (orderCustomer) => {
           const itemData = {
             id: item.id,
             cliente: cliente.nombre,
+            clienteId: cliente.id,
             pedido: `#${pedido.id} - ${pedido.estado}`,
+            pedidoId: pedido.id,
             referencia: item.empaque?.producto?.descripcion || "Sin descripción",
             cantidad: item.cantidad_empaques,
             nota: item.nota || "—",
-            fecha_pedido: pedido.fecha_pedido,
-            itemId: item.id,
-            pedidoId: pedido.id
+            estado: item.estado || 'pendiente',
+            // Información de marcaciones si existe
+            marcaciones: item.marcaciones || [],
+            trabajador: item.marcaciones?.[item.marcaciones.length - 1]?.trabajador?.name || null,
+            fecha_marcacion: item.marcaciones?.[item.marcaciones.length - 1]?.fecha || null
           };
           
-          if (item.marcaciones && item.marcaciones.length > 0) {
-            const ultimaMarcacion = item.marcaciones[item.marcaciones.length - 1];
-            
-            const marcacionData = {
-              ...itemData,
-              trabajador: ultimaMarcacion.trabajador?.name || "Desconocido",
-              fecha_marcacion: ultimaMarcacion.fecha,
-              marcacionId: ultimaMarcacion.id
-            };
-            
-            // Lógica para determinar si está completado o en proceso
-            // (Ajusta según tus criterios específicos)
-            if (ultimaMarcacion.cantidad >= item.cantidad_empaques) {
-              completados.push(marcacionData);
-            } else {
-              enProceso.push(marcacionData);
-            }
+          // Clasificar según el estado
+          if (item.estado === 'en_proceso') {
+            enProceso.push(itemData);
+          } else if (item.estado === 'completado' || item.estado === 'marcado') {
+            completados.push(itemData);
           } else {
             pendientes.push(itemData);
           }
