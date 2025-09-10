@@ -11,6 +11,10 @@ import FechaSelector from "@/components/BLHistorico/FechaSelector";
 import ItemsTable from "@/components/BLHistorico/ItemsTable";
 import ResultTable from "@/components/BLHistorico/ResultTable";
 import FiltrosMarcaciones from "@/components/BLHistorico/FiltrosMarcaciones";
+import {
+    BookText,
+    SaveAll
+} from 'lucide-react';
 
 // Hooks
 import { useMarcaciones } from "@/components/BLHistorico/hooks/useMarcaciones";
@@ -144,13 +148,13 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Histórico de Productos" />
-      <div className="p-6 max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">📋 Registro de Marcado</h1>
+      <div className="w-full p-2 sm:p-6 sm:max-w-6xl sm:mx-auto">
+        <h1 className="text-lg font-semibold border-b border-gray-300 dark:border-gray-600 pb-2 mb-2 flex items-center gap-2"><BookText/> Registro de Marcado</h1>
 
         {/* Formulario */}
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4 mb-6">
           <h2 className="text-lg font-semibold mb-4">Agregar Marcado</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             <ClienteSelector
               nuevo={nuevo}
@@ -182,7 +186,7 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
 
           {/* Items del pedido */}
           {itemsDisponibles.length > 0 && (
-            <>
+            <div className="mt-4 overflow-x-auto">
               <ItemsTable
                 itemsDisponibles={itemsDisponibles}
                 seleccionados={seleccionados}
@@ -199,10 +203,10 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
                   disabled={seleccionados.length === 0}
                   onClick={guardarMarcaciones}
                 >
-                  💾 Guardar Marcaciones
+                  <SaveAll/> Guardar Marcaciones
                 </Button>
               </div>
-            </>
+            </div>
           )}
         </div>
 
@@ -223,13 +227,14 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
               pendientes: pendientes.length
             }}
           />
-          
-          <ResultTable 
-            datos={datosMostrar()} 
-            tipo={filtroActivo}
-            onActualizarEstado={actualizarEstadoItem}
-            mostrarAcciones={filtroActivo === 'enProceso' || filtroActivo === 'todos'}
-          />
+          <div className="mt-6 overflow-x-auto">
+            <ResultTable 
+              datos={datosMostrar()} 
+              tipo={filtroActivo}
+              onActualizarEstado={actualizarEstadoItem}
+              mostrarAcciones={filtroActivo === 'enProceso' || filtroActivo === 'todos'}
+            />
+          </div>
         </div>
       </div>
     </AppLayout>
