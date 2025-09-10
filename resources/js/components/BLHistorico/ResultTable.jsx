@@ -47,13 +47,13 @@ const ResultTable = ({ datos, tipo, onActualizarEstado, mostrarAcciones = true }
           </button>
         </div>
       )}
-      
+
       <div className="overflow-x-auto shadow-md rounded-2xl">
-        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <table className="w-full text-xs sm:text-sm text-left text-gray-600 dark:text-gray-300">
           <thead className={`text-xs uppercase ${getColorEncabezado(tipo)}`}>
             <tr>
               {mostrarAcciones && (
-                <th className="px-4 py-3">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 sticky top-0 bg-inherit z-10">
                   {itemsEnProceso.length > 0 && (
                     <input
                       type="checkbox"
@@ -70,22 +70,26 @@ const ResultTable = ({ datos, tipo, onActualizarEstado, mostrarAcciones = true }
                   )}
                 </th>
               )}
-              <th className="px-4 py-3">Cliente</th>
-              <th className="px-4 py-3">Pedido</th>
-              <th className="px-4 py-3">Referencia</th>
-              <th className="px-4 py-3">Cantidad</th>
-              <th className="px-4 py-3">Nota</th>
-              <th className="px-4 py-3">Estado</th>
-              {tipo !== 'pendientes' && <th className="px-4 py-3">Trabajador</th>}
-              {tipo !== 'pendientes' && <th className="px-4 py-3">Fecha Marcación</th>}
-              {/* {mostrarAcciones && <th className="px-4 py-3">Acciones</th>} */}
+              <th className="px-2 sm:px-4 py-2 sm:py-3">Cliente</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3">Pedido</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3">Referencia</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3">Cantidad</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3">Nota</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3">Estado</th>
+              {tipo !== 'pendientes' && <th className="px-2 sm:px-4 py-2 sm:py-3">Trabajador</th>}
+              {tipo !== 'pendientes' && <th className="px-2 sm:px-4 py-2 sm:py-3">Fecha Marcación</th>}
             </tr>
           </thead>
           <tbody>
-            {datos.map((item) => (
-              <tr key={item.id} className={`border-b ${getColorFila(item.estado)}`}>
+            {datos.map((item, idx) => (
+              <tr
+                key={item.id}
+                className={`border-b ${getColorFila(item.estado)} ${
+                  idx % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : "bg-white dark:bg-gray-900"
+                }`}
+              >
                 {mostrarAcciones && (
-                  <td className="px-4 py-3">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3">
                     {item.estado === 'en_proceso' && (
                       <input
                         type="checkbox"
@@ -96,46 +100,24 @@ const ResultTable = ({ datos, tipo, onActualizarEstado, mostrarAcciones = true }
                     )}
                   </td>
                 )}
-                <td className="px-4 py-3">{item.cliente}</td>
-                <td className="px-4 py-3">{item.pedido}</td>
-                <td className="px-4 py-3">{item.referencia}</td>
-                <td className="px-4 py-3">{item.cantidad}</td>
-                <td className="px-4 py-3">{item.nota}</td>
-                <td className="px-4 py-3">
+                <td className="px-2 sm:px-4 py-2 sm:py-3">{item.cliente}</td>
+                <td className="px-2 sm:px-4 py-2 sm:py-3">{item.pedido}</td>
+                <td className="px-2 sm:px-4 py-2 sm:py-3">{item.referencia}</td>
+                <td className="px-2 sm:px-4 py-2 sm:py-3">{item.cantidad}</td>
+                <td className="px-2 sm:px-4 py-2 sm:py-3">{item.nota}</td>
+                <td className="px-2 sm:px-4 py-2 sm:py-3">
                   <span className={`px-2 py-1 rounded-full text-xs ${getBadgeColor(item.estado)}`}>
                     {item.estado}
                   </span>
                 </td>
                 {tipo !== 'pendientes' && (
-                  <td className="px-4 py-3">{item.trabajador || 'N/A'}</td>
+                  <td className="px-2 sm:px-4 py-2 sm:py-3">{item.trabajador || 'N/A'}</td>
                 )}
                 {tipo !== 'pendientes' && (
-                  <td className="px-4 py-3">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3">
                     {item.fecha_marcacion ? new Date(item.fecha_marcacion).toLocaleDateString() : 'N/A'}
                   </td>
                 )}
-                {/* {mostrarAcciones && (
-                  <td className="px-4 py-3">
-                    {item.estado === 'en_proceso' && (
-                      <button
-                        onClick={() => onActualizarEstado(item.id, 'completado')}
-                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm font-medium"
-                        title="Marcar como completado"
-                      >
-                        ✅ Completar
-                      </button>
-                    )}
-                    {item.estado === 'pendiente' && (
-                      <button
-                        onClick={() => onActualizarEstado(item.id, 'en_proceso')}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm font-medium"
-                        title="Marcar como en proceso"
-                      >
-                        ⏳ Iniciar
-                      </button>
-                    )}
-                  </td>
-                )} */}
               </tr>
             ))}
           </tbody>
@@ -143,13 +125,14 @@ const ResultTable = ({ datos, tipo, onActualizarEstado, mostrarAcciones = true }
       </div>
     </div>
   );
+
 };
 
 // Funciones auxiliares
 const getTipoTexto = (tipo) => {
   const textos = {
     enProceso: 'en_proceso',
-    completados: 'completados',
+    completados: 'completado',
     pendientes: 'pendientes',
     todos: ''
   };
