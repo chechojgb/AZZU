@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
+
 
 class BLPedidosController extends Controller
 {
@@ -180,6 +182,8 @@ class BLPedidosController extends Controller
             'pedido' => $pedido
         ]);
     }
+
+
 
 
 

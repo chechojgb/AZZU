@@ -19,7 +19,9 @@ const breadcrumbs = [
     },
 ];
 
-export default function Dashboard({user, productos, pedidos, pedidosEspera, movimientos}) {    
+export default function Dashboard({user, productos, pedidos, pedidosEspera, movimientos, produccion}) {    
+    console.log('produccion:',produccion);
+    
     // console.log('movimientos',movimientos);
         
     return (
@@ -62,7 +64,7 @@ export default function Dashboard({user, productos, pedidos, pedidosEspera, movi
                     <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-4 flex-1">
                     {/* Panel 70% */}
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border min-h-[300px]">
-                        <GraficoProduccionSemanalBL/>
+                        <GraficoProduccionSemanalBL produccion={produccion}/>
                     </div>
 
                     {/* Panel 30% */}
