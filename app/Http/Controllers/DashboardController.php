@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\BlMovimiento;
 use App\Models\BLPedido;
+use App\Models\BLPedidoItem;
 use App\Models\BlProducto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
@@ -63,13 +66,52 @@ class DashboardController extends Controller
         $movimientos = BlMovimiento::with(['empaque.producto'])->get()
             ->take(6);
         // dd($movimientos);
+        $produccion = $this->produccionSemanal();
+
 
         return Inertia::render('dashboard', [
             'productos' => $productos,
             'user' => $user,
             'pedidos' => $rankingProductos,
             'pedidosEspera' => $pedidosEspera,
-            'movimientos' => $movimientos
+            'movimientos' => $movimientos,
+            'produccion' => $produccion
         ]);
     }
+
+    public function produccionSemanal()
+{
+    $dias = [
+        'Monday'    => 'Lun',
+        'Tuesday'   => 'Mar',
+        'Wednesday' => 'Mié',
+        'Thursday'  => 'Jue',
+        'Friday'    => 'Vie',
+        'Saturday'  => 'Sáb',
+        'Sunday'    => 'Dom',
+    ];
+
+    return BLPedidoItem::where('estado', 'completado')
+        ->get()
+        ->groupBy(function ($item) {
+            // 👇 agrupamos usando updated_at
+            return \Carbon\Carbon::parse($item->updated_at)
+                ->setTimezone('America/Bogota')
+                ->format('Y-m-d');
+        })
+        ->map(function ($grupo, $fecha) use ($dias) {
+            $carbon = \Carbon\Carbon::parse($fecha);
+            return [
+                'fecha'       => $fecha,                          // fecha agrupada
+                'dia'         => $dias[$carbon->format('l')],     // día abreviado
+                'produccion'  => $grupo->sum('cantidad_empaques'),
+                'timestamps'  => $grupo->pluck('updated_at'),     // 👈 todos los updated_at originales
+            ];
+        })
+        ->values();
+}
+
+
+
+
 }

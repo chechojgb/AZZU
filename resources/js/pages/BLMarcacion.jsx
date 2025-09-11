@@ -11,6 +11,7 @@ import FechaSelector from "@/components/BLHistorico/FechaSelector";
 import ItemsTable from "@/components/BLHistorico/ItemsTable";
 import ResultTable from "@/components/BLHistorico/ResultTable";
 import FiltrosMarcaciones from "@/components/BLHistorico/FiltrosMarcaciones";
+import FiltroUsuario from "@/components/BLHistorico/FiltroUsuario";
 import {
     BookText,
     SaveAll
@@ -26,7 +27,14 @@ const breadcrumbs = [
 
 export default function MarcadoPage({ orderCustomer, buttonUser }) {
   const [filtroActivo, setFiltroActivo] = useState('todos');
-  const { enProceso, completados, pendientes } = useProcesarMarcaciones(orderCustomer);
+  const [usuarioFiltro, setUsuarioFiltro] = useState(null);
+  const { enProceso, completados, pendientes, usuarios } = useProcesarMarcaciones(orderCustomer);
+  console.log("📋 Datos procesados:", {
+    enProceso: enProceso.map(item => ({ id: item.id, estado: item.estado, trabajador: item.trabajador })),
+    completados: completados.map(item => ({ id: item.id, estado: item.estado, trabajador: item.trabajador })),
+    pendientes: pendientes.map(item => ({ id: item.id, estado: item.estado })),
+    usuarios: usuarios
+  });
   const datosMostrar = () => {
     switch (filtroActivo) {
       case 'enProceso': return enProceso;
@@ -227,6 +235,13 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
               pendientes: pendientes.length
             }}
           />
+          {filtroActivo === 'completados' && usuarios.length > 0 && (
+            <FiltroUsuario
+              usuarios={usuarios}
+              usuarioFiltro={usuarioFiltro}
+              onChangeUsuarioFiltro={setUsuarioFiltro}
+            />
+          )}
           <div className="mt-6 overflow-x-auto">
             <ResultTable 
               datos={datosMostrar()} 
