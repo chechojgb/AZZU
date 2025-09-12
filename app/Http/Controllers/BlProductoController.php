@@ -4,16 +4,19 @@
 // app/Http/Controllers/BlProductoController.php
 namespace App\Http\Controllers;
 
+use App\Models\BLCliente;
 use App\Models\BlProducto;
 use App\Models\BlColor;
 use App\Models\BlEmpaque;
 use App\Models\BlMovimiento;
+use App\Models\BLPedido;
+use App\Models\BLPedidoItem;
 // use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-
+use Carbon\Carbon;
 
 class BlProductoController extends Controller
 {
@@ -44,24 +47,26 @@ class BlProductoController extends Controller
     public function indexAnalisis()
     {
         $user = Auth::user();
-        $productos = BlProducto::with(['color', 'empaques.movimientos'])
-            ->get()
-            ->map(function ($producto) {
-                return [
-                    'id' => $producto->id,
-                    'tipo_producto' => $producto->tipo_producto,
-                    'tamanio' => $producto->tamanio,
-                    'color_nombre' => $producto->color->nombre,
-                    'descripcion' => $producto->descripcion,
-                    'stock_total' => $producto->empaques->sum(function ($empaque) {
-                        return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
-                    }),
-                ];
-            });
+        $pedidosMes = BLPedido::whereBetween('created_at', [
+            Carbon::now()->startOfMonth(),
+            Carbon::now()->endOfMonth()
+        ])->count();
+        $cantidadProduccion = BLPedidoItem::where('estado', 'completado')->sum('cantidad_empaques');
+        $clientesActivos = BLCliente::get()->count('id');
+        $cantidadProductosStock = BlEmpaque::where('estado', 'disponible')->sum('cantidad_por_empaque');
+        $rankingClientes = BLCliente::withCount('pedidos')->orderByDesc('pedidos_count')->get();
+        // dd($rankingClientes);
+        // dd($cantidadProductosStock);
+        // dd($clientesActivos);
+        // dd($cantidadProduccion);
+        // dd($pedidosMes);
 
         return Inertia::render('BLAnalisis', [
-            'productos' => $productos,
-            'colores' => BlColor::all(),
+            'pedidosMes' => $pedidosMes,
+            'cantidadProduccion' => $cantidadProduccion,
+            'clientesActivos' => $clientesActivos,
+            'cantidadProductosStock' => $cantidadProductosStock,
+            'rankingClientes' => $rankingClientes,
             'user' => $user, // Para formularios
         ]);
     }

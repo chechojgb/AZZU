@@ -18,7 +18,9 @@ const datosComparativa = [
   { periodo: 'Agosto', valor: 530 },
 ];
 
-export default function BLAnalisis() {
+export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActivos, cantidadProductosStock, rankingClientes}) {
+  console.log(rankingClientes);
+  
   return (
     <AppLayout breadcrumbs={[{ title: 'Análisis', href: '/BLproductosInventario/analisis' }]}>
       <Head title="Análisis" />
@@ -29,28 +31,28 @@ export default function BLAnalisis() {
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-gray-500">Pedidos este mes</p>
-              <p className="text-2xl font-bold">512</p>
+              <p className="text-2xl font-bold">{pedidosMes}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-gray-500">Producción total</p>
-              <p className="text-2xl font-bold">10,320</p>
+              <p className="text-2xl font-bold">{cantidadProduccion}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-gray-500">Clientes activos</p>
-              <p className="text-2xl font-bold">24</p>
+              <p className="text-2xl font-bold">{clientesActivos}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-gray-500">Productos en stock</p>
-              <p className="text-2xl font-bold">3,245</p>
+              <p className="text-2xl font-bold">{cantidadProductosStock}</p>
             </CardContent>
           </Card>
         </div>
@@ -73,16 +75,16 @@ export default function BLAnalisis() {
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto"> {/* Contenido desplazable */}
                     <ul className="grid gap-2">
-                        {datosClientes.map((item, idx) => (
+                        {rankingClientes.map((item, idx) => (
                         <li
                             key={idx}
                             className="flex items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                         >
                             <div className="flex items-center gap-3">
                             <div className="text-lg font-bold text-gray-400 w-6 text-right">{idx + 1}</div>
-                            <div className="text-sm font-semibold text-gray-800 dark:text-white">{item.cliente}</div>
+                            <div className="text-sm font-semibold text-gray-800 dark:text-white">{item.nombre}</div>
                             </div>
-                            <div className="text-sm font-bold text-blue-600">{item.total}</div>
+                            <div className="text-sm font-bold text-blue-600">{item.pedidos_count}</div>
                         </li>
                         ))}
                     </ul>
