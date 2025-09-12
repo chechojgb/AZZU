@@ -79,7 +79,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function produccionSemanal()
+public function produccionSemanal()
 {
     $dias = [
         'Monday'    => 'Lun',
@@ -91,24 +91,35 @@ class DashboardController extends Controller
         'Sunday'    => 'Dom',
     ];
 
-    return BLPedidoItem::where('estado', 'completado')
+    // Rango de la semana actual (Lunes a Domingo)
+    $inicioSemana = \Carbon\Carbon::now('America/Bogota')->startOfWeek();
+    $finSemana    = \Carbon\Carbon::now('America/Bogota')->endOfWeek();
+
+    // Obtener registros agrupados por fecha usando updated_at
+    $registros = BLPedidoItem::where('estado', 'completado')
+        ->whereBetween('updated_at', [$inicioSemana, $finSemana])
         ->get()
         ->groupBy(function ($item) {
-            // 👇 agrupamos usando updated_at
             return \Carbon\Carbon::parse($item->updated_at)
                 ->setTimezone('America/Bogota')
                 ->format('Y-m-d');
-        })
-        ->map(function ($grupo, $fecha) use ($dias) {
-            $carbon = \Carbon\Carbon::parse($fecha);
-            return [
-                'fecha'       => $fecha,                          // fecha agrupada
-                'dia'         => $dias[$carbon->format('l')],     // día abreviado
-                'produccion'  => $grupo->sum('cantidad_empaques'),
-                'timestamps'  => $grupo->pluck('updated_at'),     // 👈 todos los updated_at originales
-            ];
-        })
-        ->values();
+        });
+
+    // Crear la estructura de la semana completa
+    $data = collect();
+    for ($fecha = $inicioSemana->copy(); $fecha <= $finSemana; $fecha->addDay()) {
+        $fechaStr = $fecha->format('Y-m-d');
+        $grupo = $registros->get($fechaStr, collect());
+
+        $data->push([
+            'fecha'      => $fechaStr,
+            'dia'        => $dias[$fecha->format('l')],
+            'produccion' => $grupo->sum('cantidad_empaques'),
+            'timestamps' => $grupo->pluck('updated_at'),
+        ]);
+    }
+
+    return $data->values();
 }
 
 
