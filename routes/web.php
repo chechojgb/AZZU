@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\BLanalisisController;
 use App\Http\Controllers\BLClientesController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -163,7 +164,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('colores', [BlProductoController::class, 'index'])->name('colores.index');
         Route::get('BLPedidos', [BLPedidosController::class, 'index'])->name('pedidos.index');
         Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
-        Route::get('BLAnalisis', [BlProductoController::class, 'indexAnalisis'])->name('analisis.index');
+        Route::get('BLAnalisis', [BLanalisisController::class, 'index'])->name('analisis.index');
         Route::get('BLHistorico', [BlProductoController::class, 'indexHistorico'])->name('historico.index');
         Route::post('clientes', [BLClientesController::class, 'store'])->name('clientesBL.store');
         Route::post('productos', [BlProductoController::class, 'store'])->name('productosBL.store');
