@@ -4,7 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import GraficoProduccionSemanalBL from '@/components/BL/GraficoProduccionSemanal';
 import { Separator } from '@/components/ui/separator';
 import { CardHeader } from "@/components/ui/card";
-
+import GraficoProduccionBL from '@/components/BL/graficoProduccionBL';
+import { useState } from 'react';
 const datosClientes = [
   { cliente: 'Cliente A', total: 120 },
   { cliente: 'Cliente B', total: 95 },
@@ -18,7 +19,11 @@ const datosComparativa = [
   { periodo: 'Agosto', valor: 530 },
 ];
 
-export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActivos, cantidadProductosStock, rankingClientes}) {
+export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActivos, cantidadProductosStock, rankingClientes, semanal, mensual, trimestral}) {
+  console.log('trimestal main:', trimestral);
+  
+  const [data, setData] = useState({ semanal: [], mensual: [], trimestral: [] });
+  const [tipo, setTipo] = useState("semanal");
   console.log(rankingClientes);
   
   return (
@@ -61,7 +66,7 @@ export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActi
           <div className="lg:col-span-2 h-[300px]">
             <Card className="h-full">
               <CardContent className="h-full">
-                <GraficoProduccionSemanalBL />
+                <GraficoProduccionBL semanal={semanal} mensual={mensual} trimestal={trimestral}/>
               </CardContent>
             </Card>
           </div>

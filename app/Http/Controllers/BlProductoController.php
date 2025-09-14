@@ -44,32 +44,6 @@ class BlProductoController extends Controller
         ]);
     }
 
-    public function indexAnalisis()
-    {
-        $user = Auth::user();
-        $pedidosMes = BLPedido::whereBetween('created_at', [
-            Carbon::now()->startOfMonth(),
-            Carbon::now()->endOfMonth()
-        ])->count();
-        $cantidadProduccion = BLPedidoItem::where('estado', 'completado')->sum('cantidad_empaques');
-        $clientesActivos = BLCliente::get()->count('id');
-        $cantidadProductosStock = BlEmpaque::where('estado', 'disponible')->sum('cantidad_por_empaque');
-        $rankingClientes = BLCliente::withCount('pedidos')->orderByDesc('pedidos_count')->get();
-        // dd($rankingClientes);
-        // dd($cantidadProductosStock);
-        // dd($clientesActivos);
-        // dd($cantidadProduccion);
-        // dd($pedidosMes);
-
-        return Inertia::render('BLAnalisis', [
-            'pedidosMes' => $pedidosMes,
-            'cantidadProduccion' => $cantidadProduccion,
-            'clientesActivos' => $clientesActivos,
-            'cantidadProductosStock' => $cantidadProductosStock,
-            'rankingClientes' => $rankingClientes,
-            'user' => $user, // Para formularios
-        ]);
-    }
 
     public function indexHistorico()
     {
