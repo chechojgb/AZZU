@@ -6,21 +6,10 @@ import { Separator } from '@/components/ui/separator';
 import { CardHeader } from "@/components/ui/card";
 import GraficoProduccionBL from '@/components/BL/graficoProduccionBL';
 import { useState } from 'react';
-const datosClientes = [
-  { cliente: 'Cliente A', total: 120 },
-  { cliente: 'Cliente B', total: 95 },
-  { cliente: 'Cliente C', total: 70 },
-  { cliente: 'Cliente D', total: 40 },
-  { cliente: 'Cliente E', total: 25 },
-];
 
-const datosComparativa = [
-  { periodo: 'Julio', valor: 420 },
-  { periodo: 'Agosto', valor: 530 },
-];
 
-export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActivos, cantidadProductosStock, rankingClientes, semanal, mensual, trimestral}) {
-  console.log('trimestal main:', trimestral);
+export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActivos, cantidadProductosStock, rankingClientes, semanal, mensual, trimestral, comparativa}) {
+  console.log('comparativa main:', comparativa);
   
   const [data, setData] = useState({ semanal: [], mensual: [], trimestral: [] });
   const [tipo, setTipo] = useState("semanal");
@@ -66,7 +55,7 @@ export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActi
           <div className="lg:col-span-2 h-[300px]">
             <Card className="h-full">
               <CardContent className="h-full">
-                <GraficoProduccionBL semanal={semanal} mensual={mensual} trimestal={trimestral}/>
+                <GraficoProduccionBL semanal={semanal} mensual={mensual} trimestral={trimestral} />
               </CardContent>
             </Card>
           </div>
@@ -105,13 +94,13 @@ export default function BLAnalisis({pedidosMes, cantidadProduccion, clientesActi
             <CardContent className="p-4">
               <h3 className="text-lg font-semibold mb-4">Comparativa entre periodos</h3>
                 <div className="grid grid-cols-2 gap-2">
-                {datosComparativa.map((item, idx) => (
+                {comparativa.map((item, idx) => (
                     <div
                     key={idx}
                     className="p-3 rounded-md shadow bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-blue-900"
                     >
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{item.periodo}</p>
-                    <p className="text-2xl font-bold text-blue-700">{item.valor}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{item.mes}</p>
+                    <p className="text-2xl font-bold text-blue-700">{item.produccion}</p>
                     </div>
                 ))}
                 </div>

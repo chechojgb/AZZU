@@ -12,6 +12,7 @@ import ItemsTable from "@/components/BLHistorico/ItemsTable";
 import ResultTable from "@/components/BLHistorico/ResultTable";
 import FiltrosMarcaciones from "@/components/BLHistorico/FiltrosMarcaciones";
 import FiltroUsuario from "@/components/BLHistorico/FiltroUsuario";
+import TablaProductosBL from "@/components/BL/tablaProdBL";
 import {
     BookText,
     SaveAll
@@ -217,40 +218,10 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
             </div>
           )}
         </div>
-
-        <div className="mt-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">Historial de Marcaciones</h2>
-            <div className="text-sm text-gray-500">
-              Mostrando: {datosMostrar().length} items
-            </div>
-          </div>
-          
-          <FiltrosMarcaciones 
-            filtroActivo={filtroActivo} 
-            onChangeFiltro={setFiltroActivo}
-            contadores={{
-              enProceso: enProceso.length,
-              completados: completados.length,
-              pendientes: pendientes.length
-            }}
-          />
-          {filtroActivo === 'completados' && usuarios.length > 0 && (
-            <FiltroUsuario
-              usuarios={usuarios}
-              usuarioFiltro={usuarioFiltro}
-              onChangeUsuarioFiltro={setUsuarioFiltro}
-            />
-          )}
-          <div className="mt-6 overflow-x-auto">
-            <ResultTable 
-              datos={datosMostrar()} 
-              tipo={filtroActivo}
-              onActualizarEstado={actualizarEstadoItem}
-              mostrarAcciones={filtroActivo === 'enProceso' || filtroActivo === 'todos'}
-            />
-          </div>
+        <div className="overflow-x-auto">
+          <TablaProductosBL productos={productos} search={search} />
         </div>
+   
       </div>
     </AppLayout>
   );
