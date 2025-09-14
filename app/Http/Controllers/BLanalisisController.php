@@ -40,6 +40,7 @@ class BLanalisisController extends Controller
             'semanal'    => $this->produccionSemanal(),
             'mensual'    => $this->produccionMensual(),
             'trimestral' => $this->produccionTrimestral(),
+            'comparativa' => $this->comparativaPeriodos(),
             'user' => $user, // Para formularios
         ]);
     }
@@ -153,6 +154,49 @@ class BLanalisisController extends Controller
 
         return $data->values();
     }
+    public function comparativaPeriodos()
+    {
+        $meses = [
+            '01' => 'Enero',
+            '02' => 'Febrero',
+            '03' => 'Marzo',
+            '04' => 'Abril',
+            '05' => 'Mayo',
+            '06' => 'Junio',
+            '07' => 'Julio',
+            '08' => 'Agosto',
+            '09' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre',
+        ];
+
+        $ahora = \Carbon\Carbon::now('America/Bogota');
+        $mesActual = $ahora->copy()->startOfMonth();
+        $mesAnterior = $ahora->copy()->subMonth()->startOfMonth();
+
+        // Producción del mes actual
+        $produccionActual = \App\Models\BLPedidoItem::where('estado', 'completado')
+            ->whereBetween('updated_at', [$mesActual, $ahora->copy()->endOfMonth()])
+            ->sum('cantidad_empaques');
+
+        // Producción del mes anterior
+        $produccionAnterior = \App\Models\BLPedidoItem::where('estado', 'completado')
+            ->whereBetween('updated_at', [$mesAnterior, $mesAnterior->copy()->endOfMonth()])
+            ->sum('cantidad_empaques');
+
+        return [
+            [
+                'mes'        => $meses[$mesAnterior->format('m')],
+                'produccion' => $produccionAnterior,
+            ],
+            [
+                'mes'        => $meses[$mesActual->format('m')],
+                'produccion' => $produccionActual,
+            ],
+        ];
+    }
+
 
 
 }

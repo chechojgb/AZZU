@@ -46,7 +46,7 @@ export default function GraficoProduccionBL({ semanal, mensual, trimestral }) {
           <XAxis dataKey="dia" stroke="#888888" /> {/* usa 'dia' del mes */}
           <YAxis stroke="#888888" />
           <Tooltip />
-          <Bar dataKey="produccion" fill="#10b981" barSize={40} />
+          <Bar dataKey="produccion" fill="#3b82f6" barSize={40} />
         </BarChart>
       );
     }
@@ -61,8 +61,8 @@ export default function GraficoProduccionBL({ semanal, mensual, trimestral }) {
           <Area
             type="monotone"
             dataKey="produccion"
-            stroke="#6366f1"
-            fill="#818cf8"
+            stroke="#3b82f6"
+            fill="#4e90f9ff"
             fillOpacity={0.4}
           />
         </AreaChart>

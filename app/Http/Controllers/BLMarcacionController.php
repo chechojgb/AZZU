@@ -19,6 +19,7 @@ class BLMarcacionController extends Controller
         $user = Auth::user();
         $orderCustomer = BLCliente::with(['pedidos.items.empaque.producto', 'pedidos.items.marcaciones.trabajador'])->get();
         $buttonUser = User::whereIn('proyecto', ['Button LoversM', 'Button LoversMN'])->get();
+        // dd($buttonUser);
         return Inertia::render('BLMarcacion', [
             'user' => $user,
             'orderCustomer' => $orderCustomer,
