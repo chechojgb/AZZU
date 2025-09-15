@@ -1,4 +1,6 @@
 // resources/js/components/BLHistorico/TrabajadorSelector.jsx
+import { Select } from "flowbite-react";
+
 const TrabajadorSelector = ({ 
   nuevo, 
   buttonUser, 
@@ -8,7 +10,7 @@ const TrabajadorSelector = ({
 }) => {
   return (
     <div>
-      <select
+      <Select
         name="trabajador"
         value={nuevo.trabajadorId || ""}
         onChange={(e) => {
@@ -31,15 +33,19 @@ const TrabajadorSelector = ({
             }
           }
         }}
-        className="border rounded-lg p-2 w-full"
+        className="w-full text-sm bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
       >
         <option value="">Seleccionar Trabajador</option>
         {buttonUser.map((u) => (
-          <option key={u.id} value={u.id}>
+          <option 
+            key={u.id} 
+            value={u.id} 
+            className="text-gray-700 dark:text-gray-200"
+          >
             {u.name}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 };
