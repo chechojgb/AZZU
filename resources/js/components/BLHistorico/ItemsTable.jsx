@@ -7,11 +7,20 @@ const ItemsTable = ({
   precios, 
   setPrecios 
 }) => {
+
+  const toggleSeleccion = (id, checked) => {
+    if (checked) {
+      setSeleccionados([...seleccionados, id]);
+    } else {
+      setSeleccionados(seleccionados.filter(itemId => itemId !== id));
+    }
+  };
+
   return (
-    <div className="mt-4">
+    <div className="mt-4 overflow-x-auto">
       <h3 className="font-medium mb-2">Items del Pedido</h3>
-      <table className="w-full text-sm border rounded-lg">
-        <thead className="bg-gray-100">
+      <table className="w-full text-sm border rounded-lg bg-white dark:bg-gray-900/50">
+        <thead className="bg-gray-100 dark:bg-gray-900">
           <tr>
             <th className="px-2 py-1">Referencia</th>
             <th className="px-2 py-1">Cantidad</th>
@@ -19,48 +28,65 @@ const ItemsTable = ({
             {nuevo.proyecto === "Button LoversMN" && (
               <th className="px-2 py-1">💲 Precio Unitario</th>
             )}
-            <th className="px-2 py-1">Seleccionar</th>
+            <th className="px-2 py-1 text-center">Acción</th>
           </tr>
         </thead>
         <tbody>
           {itemsDisponibles.map((item) => {
-            const yaMarcado = item.marcaciones && item.marcaciones.length > 0;
+            const trabajador = item.marcaciones?.at(-1)?.trabajador?.name || "—";
+            const esMarcado = item.estado === "completado";
+            const esProceso = item.estado === "en proceso";
 
             return (
-              <tr key={item.id} className="border-t">
+              <tr
+                key={item.id}
+                className={`border-t ${
+                  esMarcado 
+                    ? "bg-green-50 dark:bg-gray-900/50"
+                    : esProceso
+                    ? "bg-yellow-50 dark:bg-gray-900/30"
+                    : ""
+                }`}
+              >
                 <td className="px-2 py-1">{item.empaque?.producto?.descripcion}</td>
                 <td className="px-2 py-1">{item.cantidad_empaques}</td>
                 <td className="px-2 py-1">{item.nota || "—"}</td>
+
+                {/* Precios solo para Button LoversMN */}
                 {nuevo.proyecto === "Button LoversMN" && (
                   <td className="px-2 py-1">
                     <input
                       type="number"
                       value={precios[item.id] || ""}
-                      onChange={(e) => setPrecios({
-                        ...precios,
-                        [item.id]: e.target.value
-                      })}
-                      className="border rounded p-1 w-20"
-                      disabled={yaMarcado}
+                      onChange={(e) =>
+                        setPrecios({
+                          ...precios,
+                          [item.id]: e.target.value,
+                        })
+                      }
+                      className={`border rounded p-1 w-20 ${
+                        (esMarcado || esProceso) ? "bg-gray-100 dark:bg-gray-700 text-gray-400" : ""
+                      }`}
+                      disabled={esMarcado || esProceso}
                     />
                   </td>
                 )}
+
+                {/* Acción */}
                 <td className="px-2 py-1 text-center">
-                  {yaMarcado ? (
-                    <span className="text-red-500 font-semibold">
-                      En proceso por {item.marcaciones.slice(-1)[0]?.trabajador?.name}
+                  {esMarcado ? (
+                    <span className="text-green-100/60 font-semibold">
+                      Marcado por: {trabajador}
+                    </span>
+                  ) : esProceso ? (
+                    <span className="text-yellow-100/70 font-semibold">
+                      En proceso por: {trabajador}
                     </span>
                   ) : (
                     <input
                       type="checkbox"
                       checked={seleccionados.includes(item.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSeleccionados([...seleccionados, item.id]);
-                        } else {
-                          setSeleccionados(seleccionados.filter(id => id !== item.id));
-                        }
-                      }}
+                      onChange={(e) => toggleSeleccion(item.id, e.target.checked)}
                     />
                   )}
                 </td>

@@ -122,22 +122,7 @@ export default function BLProductos({productos, colores}) {
         setModalOpenEdit(false)
     };
 
-  // useEffect(() => {
-  //     router.visit(route('productos.index'), {
-  //         preserveState: true,  // ← Clave para mantener la página actual
-  //         only: ['productos', 'colores'], // Solo recibir estos datos
-  //         onSuccess: (res) => {
-  //             setProductos(res.props.productos);
-  //             setColores(res.props.colores);
-  //             console.log("Productos cargados:", res.props.productos);
-  //             setLoading(false);
-  //         },
-  //         onError: (err) => {
-  //             console.error('Error:', err);
-  //             setLoading(false);
-  //         }
-  //     });
-  // }, []);
+
 
   console.log("colores cargados:", colores);
 

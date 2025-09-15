@@ -19,11 +19,13 @@ class BLMarcacionController extends Controller
         $user = Auth::user();
         $orderCustomer = BLCliente::with(['pedidos.items.empaque.producto', 'pedidos.items.marcaciones.trabajador'])->get();
         $buttonUser = User::whereIn('proyecto', ['Button LoversM', 'Button LoversMN'])->get();
+        $itemsPedidos = BLPedidoItem::with(['pedido.cliente', 'empaque.producto', 'marcaciones.trabajador'])->get();
         // dd($buttonUser);
         return Inertia::render('BLMarcacion', [
             'user' => $user,
             'orderCustomer' => $orderCustomer,
-            'buttonUser' => $buttonUser
+            'buttonUser' => $buttonUser,
+            'itemsPedidos' => $itemsPedidos
         ]);
     }
 
@@ -89,10 +91,13 @@ class BLMarcacionController extends Controller
         $request->validate([
             'estado' => 'required|in:pendiente,en proceso,completado'
         ]);
-
         $item->estado = $request->estado;
         $item->save();
-
-        return response()->json(['message' => 'Estado actualizado correctamente']);
+        return redirect()->back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Estado actualizado correctamente',
+            ],
+        ]);
     }
 }

@@ -12,7 +12,7 @@ import ItemsTable from "@/components/BLHistorico/ItemsTable";
 import ResultTable from "@/components/BLHistorico/ResultTable";
 import FiltrosMarcaciones from "@/components/BLHistorico/FiltrosMarcaciones";
 import FiltroUsuario from "@/components/BLHistorico/FiltroUsuario";
-import TablaProductosBL from "@/components/BL/tablaProdBL";
+import TablaMarcacionBL from "@/components/BL/tablaMarcacionBL";
 import {
     BookText,
     SaveAll
@@ -20,46 +20,25 @@ import {
 
 // Hooks
 import { useMarcaciones } from "@/components/BLHistorico/hooks/useMarcaciones";
-import { useProcesarMarcaciones } from "@/components/BLHistorico/hooks/useProcesarMarcaciones";
 
 const breadcrumbs = [
   { title: "Marcacion BL", href: "/BLproductosInventario/BLMarcacion" }
 ];
 
-export default function MarcadoPage({ orderCustomer, buttonUser }) {
-  const [filtroActivo, setFiltroActivo] = useState('todos');
-  const [usuarioFiltro, setUsuarioFiltro] = useState(null);
-  const { enProceso, completados, pendientes, usuarios } = useProcesarMarcaciones(orderCustomer);
-  console.log("📋 Datos procesados:", {
-    enProceso: enProceso.map(item => ({ id: item.id, estado: item.estado, trabajador: item.trabajador })),
-    completados: completados.map(item => ({ id: item.id, estado: item.estado, trabajador: item.trabajador })),
-    pendientes: pendientes.map(item => ({ id: item.id, estado: item.estado })),
-    usuarios: usuarios
+export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos }) {
+  const [search, setSearch] = useState('');
+  const [estadoFiltro, setEstadoFiltro] = useState("");
+  const [trabajadorFiltro, setTrabajadorFiltro] = useState("");
+  const itemsFiltrados = itemsPedidos.filter((item) => {
+    // Filtrar por estado (si aplica)
+    const coincideEstado = estadoFiltro === "" ? true : item.estado === estadoFiltro;
+
+    // Filtrar por trabajador (si aplica)
+    const coincideTrabajador =trabajadorFiltro === "" ? true : item.marcaciones?.[0]?.trabajador?.id === parseInt(trabajadorFiltro);
+
+    // El item debe cumplir con ambos filtros
+    return coincideEstado && coincideTrabajador;
   });
-  const datosMostrar = () => {
-    switch (filtroActivo) {
-      case 'enProceso': return enProceso;
-      case 'completados': return completados;
-      case 'pendientes': return pendientes;
-      case 'todos': return [...enProceso, ...completados, ...pendientes];
-      default: return [];
-    }
-  };
-  const actualizarEstadoItem = (itemId, nuevoEstado) => {
-    router.patch(`/BLproductosInventario/actualizar-estado/${itemId}`, {
-      estado: nuevoEstado
-    }, {
-      onSuccess: () => {
-        // Recargar los datos después de actualizar
-        router.reload();
-      },
-      onError: (errors) => {
-        alert('Error al actualizar el estado: ' + (errors.message || 'Error desconocido'));
-      }
-    });
-  };
-  
-  console.log(orderCustomer);
   
   const {
     marcados,
@@ -157,7 +136,7 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Histórico de Productos" />
-      <div className="w-full p-2 sm:p-6 sm:max-w-6xl sm:mx-auto">
+      <div className="w-full p-2 sm:p-6 ">
         <h1 className="text-lg font-semibold border-b border-gray-300 dark:border-gray-600 pb-2 mb-2 flex items-center gap-2"><BookText/> Registro de Marcado</h1>
 
         {/* Formulario */}
@@ -218,8 +197,72 @@ export default function MarcadoPage({ orderCustomer, buttonUser }) {
             </div>
           )}
         </div>
-        <div className="overflow-x-auto">
-          <TablaProductosBL productos={productos} search={search} />
+        
+        <div className="">
+          {/* Header de la tabla con buscador */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div className="">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Lista de items
+              </h2>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Filtrar por estado:
+                </label>
+                <select
+                  value={estadoFiltro}
+                  onChange={(e) => setEstadoFiltro(e.target.value)}
+                  className="border rounded-lg px-2 py-1 text-sm dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="">Todos</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en proceso">En proceso</option>
+                  <option value="completado">Completado</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Filtrar por trabajador:
+                </label>
+                <select
+                  value={trabajadorFiltro}
+                  onChange={(e) => setTrabajadorFiltro(e.target.value)}
+                  className="border rounded-lg px-2 py-1 text-sm dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="">Seleccionar trabajador</option>
+                  {buttonUser.map((trabajador) => (
+                    <option key={trabajador.id} value={trabajador.id}>
+                      {trabajador.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="relative w-full sm:w-72">
+              <svg
+                className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M15.5 10.5a5 5 0 11-10 0 5 5 0 0110 0z" />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 text-sm text-gray-900 border border-gray-200 rounded-lg bg-white dark:bg-gray-900 dark:border-gray-700 dark:placeholder-gray-400 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                placeholder="Buscar producto..."
+              />
+            </div>
+          </div>
+
+
+          {/* Contenedor de la tabla */}
+          <div className="overflow-x-auto">
+            <TablaMarcacionBL itemsPedidos={itemsFiltrados} search={search} estadoFiltro={estadoFiltro}/>
+          </div>
         </div>
    
       </div>
