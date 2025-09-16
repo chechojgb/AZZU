@@ -26,7 +26,13 @@ class BlEmpaque extends Model
     // Accesor: Total de unidades en stock para este empaque
     public function getStockUnidadesAttribute(): int
     {
-        return $this->movimientos->sum('cantidad') * $this->cantidad_por_empaque;
+        $entradas = $this->movimientos()->where('tipo', 'entrada')->sum('cantidad');
+        $salidas  = $this->movimientos()->where('tipo', 'salida')->sum('cantidad');
+        $ajustes  = $this->movimientos()->where('tipo', 'ajuste')->sum('cantidad');
+
+        $totalEmpaques = $entradas - $salidas + $ajustes;
+
+        return $totalEmpaques * $this->cantidad_por_empaque;
     }
     public function pedidoItems(): HasMany
     {

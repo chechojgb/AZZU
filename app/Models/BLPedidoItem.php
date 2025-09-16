@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class BLPedidoItem extends Model
 {
@@ -31,5 +33,10 @@ class BLPedidoItem extends Model
     public function marcaciones()
     {
         return $this->hasMany(BLMarcacion::class, 'pedido_item_id');
+    }
+
+    public function movimientos(): MorphMany
+    {
+        return $this->morphMany(BlMovimiento::class, 'movible');
     }
 }

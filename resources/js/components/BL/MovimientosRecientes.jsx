@@ -1,53 +1,6 @@
-import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Users, Package, ClipboardList } from 'lucide-react';
 
-// const movimientos = [
-//   {
-//     tipo: 'Entrada',
-//     producto: 'Botón Z6',
-//     cantidad: 500,
-//     fecha: '2025-08-02',
-//     icono: <ArrowDownCircle className="text-green-600 w-5 h-5" />,
-//   },
-//   {
-//     tipo: 'Salida',
-//     producto: 'Botón R4',
-//     cantidad: 300,
-//     fecha: '2025-08-02',
-//     icono: <ArrowUpCircle className="text-red-600 w-5 h-5" />,
-//   },
-//   {
-//     tipo: 'Entrada',
-//     producto: 'Botón L2',
-//     cantidad: 200,
-//     fecha: '2025-08-01',
-//     icono: <ArrowDownCircle className="text-green-600 w-5 h-5" />,
-//   },
-//   {
-//     tipo: 'Salida',
-//     producto: 'Botón M1',
-//     cantidad: 100,
-//     fecha: '2025-07-31',
-//     icono: <ArrowUpCircle className="text-red-600 w-5 h-5" />,
-//   },
-//   {
-//     tipo: 'Entrada',
-//     producto: 'Botón Z1',
-//     cantidad: 200,
-//     fecha: '2025-08-01',
-//     icono: <ArrowDownCircle className="text-green-600 w-5 h-5" />,
-//   },
-//   {
-//     tipo: 'Entrada',
-//     producto: 'Botón Z1',
-//     cantidad: 1000,
-//     fecha: '2025-08-02',
-//     icono: <ArrowDownCircle className="text-green-600 w-5 h-5" />,
-//   },
-//   // Puedes duplicar más para probar el scroll
-// ];
-
-export default function MovimientosRecientesBL({movimientos}) {
-  console.log('movimientos',movimientos);
+export default function MovimientosRecientesBL({ movimientos }) {
   return (
     <div className="relative flex flex-col h-full p-5">
       {/* Header */}
@@ -58,12 +11,41 @@ export default function MovimientosRecientesBL({movimientos}) {
       {/* Lista scrollable */}
       <div className="flex-1 overflow-y-auto pr-1">
         <ul className="space-y-4 text-sm text-gray-800 dark:text-gray-300">
-          {Object.values(movimientos).map((mov, i) => {
+          {movimientos.map((mov, i) => {
+            // Icono según tipo de movimiento
             let icono;
-            if (mov.tipo === "entrada") {
-              icono = <ArrowUpCircle className="text-green-600 w-5 h-5" />;
+            switch (mov.tipo) {
+              case "entrada":
+                icono = <ArrowDownCircle className="text-green-600 w-5 h-5" />;
+                break;
+              case "salida":
+                icono = <ArrowUpCircle className="text-red-600 w-5 h-5" />;
+                break;
+              case "pedido":
+                icono = <ClipboardList className="text-blue-600 w-5 h-5" />;
+                break;
+              case "marcacion":
+                icono = <Package className="text-yellow-600 w-5 h-5" />;
+                break;
+              case "cliente":
+                icono = <Users className="text-purple-600 w-5 h-5" />;
+                break;
+              default:
+                icono = <Package className="text-gray-400 w-5 h-5" />;
+            }
+
+            // Nombre dinámico según tipo de movible
+            let nombre;
+            if (mov.empaque?.producto?.descripcion) {
+              nombre = mov.empaque.producto.descripcion;
+            } else if (mov.movible?.nombre) {
+              nombre = mov.movible.nombre;
+            } else if (mov.movible?.descripcion) {
+              nombre = mov.movible.descripcion;
+            }else if (mov?.motivo){
+              nombre = mov.motivo;
             } else {
-              icono = <ArrowDownCircle className="text-red-600 w-5 h-5" />;
+              nombre = "Sin información";
             }
 
             return (
@@ -74,19 +56,17 @@ export default function MovimientosRecientesBL({movimientos}) {
                   </div>
                   <div>
                     <p className="font-medium">
-                      {mov.tipo}: {mov?.empaque?.producto?.descripcion}
+                      {mov.tipo.toUpperCase()}: {nombre}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Fecha: {mov.created_at.slice(0, 10)}
+                      Fecha: {new Date(mov.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{mov.fecha}</div>
               </li>
             );
           })}
         </ul>
-
       </div>
     </div>
   );

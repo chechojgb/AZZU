@@ -88,11 +88,18 @@ class BLMarcacionController extends Controller
 
     public function actualizarEstado(BLPedidoItem $item, Request $request)
     {
+        $user = Auth::id();
         $request->validate([
             'estado' => 'required|in:pendiente,en proceso,completado'
         ]);
         $item->estado = $request->estado;
         $item->save();
+        $item->movimientos()->create([
+            'tipo' => 'pedido', // identificamos que el movimiento es de un pedido
+            'cantidad' => $item->cantidad_empaques, // opcional: cantidad afectada
+            'motivo' => "Cambio de estado a {$request->estado}", // motivo descriptivo
+            'usuario_id' => $user, // usuario que hizo el cambio
+        ]);
         return redirect()->back()->with([
             'toast' => [
                 'type' => 'success',

@@ -9,10 +9,32 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BlMovimiento extends Model
 {
     protected $table = 'bl_movimientos';
-    protected $fillable = ['empaque_id', 'tipo', 'cantidad', 'motivo', 'lote', 'usuario_id'];
+    protected $fillable = [
+        'empaque_id',
+        'tipo',
+        'cantidad',
+        'motivo',
+        'lote',
+        'usuario_id',
+        'movible_id',
+        'movible_type',
+    ];
 
     // Tipos de movimiento permitidos
-    public const TIPOS = ['entrada', 'salida', 'ajuste'];
+
+    const TIPOS = [
+        'entrada',
+        'salida',
+        'ajuste',
+        'pedido',
+        'marcacion',
+        'cliente',
+    ];
+
+    public function movible()
+    {
+        return $this->morphTo();
+    }
 
     // Relación: Un movimiento pertenece a un empaque
     public function empaque(): BelongsTo
