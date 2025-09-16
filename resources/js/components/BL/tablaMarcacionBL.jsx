@@ -125,7 +125,7 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
 
   return (
     <>
-      <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-8">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>

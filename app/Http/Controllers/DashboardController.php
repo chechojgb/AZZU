@@ -63,8 +63,7 @@ class DashboardController extends Controller
         
         $pedidosEspera = BLPedido::get()
             ->where('estado', 'pendiente');
-        $movimientos = BlMovimiento::with(['empaque.producto'])->get()
-            ->take(6);
+        $movimientos = BlMovimiento::with(['empaque.producto'])->orderByDesc('created_at')->take(6)->get();
         // dd($movimientos);
         $produccion = $this->produccionSemanal();
 
