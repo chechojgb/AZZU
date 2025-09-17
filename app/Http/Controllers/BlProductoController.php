@@ -62,7 +62,7 @@ class BlProductoController extends Controller
                     }),
                 ];
             });
-        $historico = BlMovimiento::with(['empaque.producto', 'usuario'])
+        $entrada = BlMovimiento::with(['empaque.producto', 'usuario'])
             ->where('tipo', 'entrada')
             ->whereHas('empaque.producto')
             ->get()
@@ -81,12 +81,21 @@ class BlProductoController extends Controller
                     'cantidad_por_empaque' => $movimiento->empaque->cantidad_por_empaque,
                 ];
             });
+        $marcacion = BlMovimiento::with(['empaque.producto', 'usuario'])
+            ->where('tipo', 'pedido')
+            ->whereIn('motivo', [
+                'Cambio de estado a en proceso',
+                'Cambio de estado a completado'
+            ])
+            ->get();
+        // dd($marcacion);
 
         return Inertia::render('BLHistorico', [
             'productos' => $productos,
             'colores' => BlColor::all(),
             'user' => $user,
-            'historico' => $historico,
+            'marcacion' => $marcacion,
+            'entrada' => $entrada
         ]);
     }
 
