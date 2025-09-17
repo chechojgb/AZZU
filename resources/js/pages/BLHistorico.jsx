@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, PackageCheck, ArrowDown, ArrowUp } from "lucide-react";
 import EntradaBL from "@/components/BL/historicoBL";
+import { MarcacionBL } from "@/components/BL/historicoBL";
 
 const breadcrumbs = [{ title: "Histórico", href: "/BLproductosInventario/historico" }];
 
@@ -73,8 +74,9 @@ function Seccion({ title, icon: Icon, color, data }) {
   );
 }
 
-export default function BLHistorico({historico}) {
-  console.log("Datos del histórico:", historico);
+export default function BLHistorico({entrada, marcacion}) {
+  console.log("Datos del histórico:", entrada);
+  console.log("Datos de marcacion:", marcacion);
   
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -83,13 +85,8 @@ export default function BLHistorico({historico}) {
         <h1 className="text-2xl font-bold">Histórico de movimientos</h1>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <EntradaBL historico={historico} />
-          <Seccion
-            title="Salidas de Productos"
-            icon={ArrowUp}
-            color="text-red-500"
-            data={salidas}
-          />
+          <EntradaBL historico={entrada} />
+          <MarcacionBL marcacion={marcacion}/>
           <Seccion
             title="Pedidos Entregados"
             icon={PackageCheck}
