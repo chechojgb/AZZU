@@ -7,34 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, PackageCheck, ArrowDown, ArrowUp } from "lucide-react";
 import EntradaBL from "@/components/BL/historicoBL";
 import { MarcacionBL } from "@/components/BL/historicoBL";
+import { EntregaBL } from "@/components/BL/historicoBL";
 
 const breadcrumbs = [{ title: "Histórico", href: "/BLproductosInventario/historico" }];
-
-const entregados = [
-  { id: 1, cliente: "ModaClick", fecha: "2024-03-15", producto: "Botón Z6", cantidad: 1000 },
-  { id: 2, cliente: "Diseños SAS", fecha: "2024-04-02", producto: "Botón V3", cantidad: 2500 },
-  { id: 3, cliente: "Ejemplo", fecha: "2024-04-05", producto: "Botón F2", cantidad: 1200 },
-  { id: 4, cliente: "Ejemplo", fecha: "2024-04-06", producto: "Botón G9", cantidad: 1100 },
-  { id: 5, cliente: "Ejemplo", fecha: "2024-04-07", producto: "Botón X4", cantidad: 1400 },
-  { id: 6, cliente: "Ejemplo", fecha: "2024-04-08", producto: "Botón W1", cantidad: 1800 },
-  // agrega más para probar el scroll
-];
-
-const entradas = [
-  { id: 1, fecha: "2024-03-01", producto: "Botón Z6", cantidad: 2000 },
-  { id: 2, fecha: "2024-04-01", producto: "Botón V3", cantidad: 3000 },
-  { id: 3, fecha: "2024-04-03", producto: "Botón K9", cantidad: 1000 },
-  { id: 4, fecha: "2024-04-04", producto: "Botón H3", cantidad: 1500 },
-  { id: 5, fecha: "2024-04-05", producto: "Botón Y1", cantidad: 1200 },
-];
-
-const salidas = [
-  { id: 1, fecha: "2024-03-10", producto: "Botón Z6", cantidad: 1000 },
-  { id: 2, fecha: "2024-04-10", producto: "Botón V3", cantidad: 500 },
-  { id: 3, fecha: "2024-04-11", producto: "Botón L2", cantidad: 1300 },
-  { id: 4, fecha: "2024-04-12", producto: "Botón M4", cantidad: 1100 },
-  { id: 5, fecha: "2024-04-13", producto: "Botón D7", cantidad: 1600 },
-];
 
 function Seccion({ title, icon: Icon, color, data }) {
   return (
@@ -74,9 +49,10 @@ function Seccion({ title, icon: Icon, color, data }) {
   );
 }
 
-export default function BLHistorico({entrada, marcacion}) {
+export default function BLHistorico({entrada, marcacion, entrega}) {
   console.log("Datos del histórico:", entrada);
   console.log("Datos de marcacion:", marcacion);
+  console.log("Datos de entrega:", entrega);
   
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -85,14 +61,9 @@ export default function BLHistorico({entrada, marcacion}) {
         <h1 className="text-2xl font-bold">Histórico de movimientos</h1>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <EntradaBL historico={entrada} />
+          <EntradaBL historico={entrada || []} />
           <MarcacionBL marcacion={marcacion}/>
-          <Seccion
-            title="Pedidos Entregados"
-            icon={PackageCheck}
-            color="text-blue-500"
-            data={entregados}
-          />
+          <EntregaBL entrega={entrega}/>
         </div>
       </div>
     </AppLayout>

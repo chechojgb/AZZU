@@ -24,7 +24,9 @@ import {
     Terminal,
     CalendarHeart,
     ListOrderedIcon,
-    BadgeCheck
+    BadgeCheck,
+    BadgeDollarSign,
+    PcCase
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { userHasArea } from '@/components/utils/useAuthUtils';
@@ -110,7 +112,20 @@ const staticNavItems = [
         href: '/BLproductosInventario/BLMarcacion',
         icon: BadgeCheck,
         proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
+    },
+    {
+        title: 'Inventario de Desempaque',
+        href: '/BLproductosInventario/BLMarcacion',
+        icon: PcCase,
+        proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
+    },
+    {
+        title: 'Cuentas de cobro',
+        href: '/BLproductosInventario/BLMarcacion',
+        icon: BadgeDollarSign,
+        proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
     }
+
 ];
 
 const footerNavItems = [
@@ -144,12 +159,10 @@ export function AppSidebar() {
         if (item.requiredAreas?.length && !userHasArea(user, item.requiredAreas)) {
             return false;
         }
-        
         // 2. Verificar proyectos (omitir si no hay restricción)
         if (!item.proyectosPermitidos?.length) {
             return true; // Global si no hay filtro
         }
-        
         // 3. Si hay proyectos definidos, verificar coincidencia
         return item.proyectosPermitidos.includes(user.proyecto as string);
     });

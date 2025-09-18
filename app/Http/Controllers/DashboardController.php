@@ -17,8 +17,15 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $productos = BlProducto::with(['color', 'empaques.movimientos'])
+        $productos = BlProducto::with('color')
+            ->withSum(['empaques as stock_total' => function ($q) {
+                $q->where('estado', 'disponible');
+            }], 'cantidad_por_empaque')
             ->get()
+            ->filter(function ($producto) {
+                return $producto->stock_total > 0; // ✅ filtrar en memoria
+            })
+            ->take(10)
             ->map(function ($producto) {
                 return [
                     'id' => $producto->id,
@@ -26,13 +33,9 @@ class DashboardController extends Controller
                     'tamanio' => $producto->tamanio,
                     'color_nombre' => $producto->color->codigo,
                     'descripcion' => $producto->descripcion,
-                    'stock_total' => $producto->empaques->sum(function ($empaque) {
-                        return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
-                    }),
+                    'stock_total' => $producto->stock_total ?? 0,
                 ];
-            })
-            ->where('stock_total', '>', 1)
-            ->take(10);
+            });
         // dd($productos->pluck('descripcion'));
         $rankingProductos = BLPedido::with(['items.empaque.producto'])
             ->get()
@@ -63,7 +66,7 @@ class DashboardController extends Controller
         
         $pedidosEspera = BLPedido::get()
             ->where('estado', 'pendiente');
-        $movimientos = BlMovimiento::with(['empaque.producto'])->orderByDesc('created_at')->take(6)->get();
+        $movimientos = BlMovimiento::with(['movible'])->orderByDesc('created_at')->take(6)->get();
         // dd($movimientos);
         $produccion = $this->produccionSemanal();
 
@@ -78,48 +81,48 @@ class DashboardController extends Controller
         ]);
     }
 
-public function produccionSemanal()
-{
-    $dias = [
-        'Monday'    => 'Lun',
-        'Tuesday'   => 'Mar',
-        'Wednesday' => 'Mié',
-        'Thursday'  => 'Jue',
-        'Friday'    => 'Vie',
-        'Saturday'  => 'Sáb',
-        'Sunday'    => 'Dom',
-    ];
+    public function produccionSemanal()
+    {
+        $dias = [
+            'Monday'    => 'Lun',
+            'Tuesday'   => 'Mar',
+            'Wednesday' => 'Mié',
+            'Thursday'  => 'Jue',
+            'Friday'    => 'Vie',
+            'Saturday'  => 'Sáb',
+            'Sunday'    => 'Dom',
+        ];
 
-    // Rango de la semana actual (Lunes a Domingo)
-    $inicioSemana = \Carbon\Carbon::now('America/Bogota')->startOfWeek();
-    $finSemana    = \Carbon\Carbon::now('America/Bogota')->endOfWeek();
+        // Rango de la semana actual (Lunes a Domingo)
+        $inicioSemana = \Carbon\Carbon::now('America/Bogota')->startOfWeek();
+        $finSemana    = \Carbon\Carbon::now('America/Bogota')->endOfWeek();
 
-    // Obtener registros agrupados por fecha usando updated_at
-    $registros = BLPedidoItem::where('estado', 'completado')
-        ->whereBetween('updated_at', [$inicioSemana, $finSemana])
-        ->get()
-        ->groupBy(function ($item) {
-            return \Carbon\Carbon::parse($item->updated_at)
-                ->setTimezone('America/Bogota')
-                ->format('Y-m-d');
-        });
+        // Obtener registros agrupados por fecha usando updated_at
+        $registros = BLPedidoItem::where('estado', 'completado')
+            ->whereBetween('updated_at', [$inicioSemana, $finSemana])
+            ->get()
+            ->groupBy(function ($item) {
+                return \Carbon\Carbon::parse($item->updated_at)
+                    ->setTimezone('America/Bogota')
+                    ->format('Y-m-d');
+            });
 
-    // Crear la estructura de la semana completa
-    $data = collect();
-    for ($fecha = $inicioSemana->copy(); $fecha <= $finSemana; $fecha->addDay()) {
-        $fechaStr = $fecha->format('Y-m-d');
-        $grupo = $registros->get($fechaStr, collect());
+        // Crear la estructura de la semana completa
+        $data = collect();
+        for ($fecha = $inicioSemana->copy(); $fecha <= $finSemana; $fecha->addDay()) {
+            $fechaStr = $fecha->format('Y-m-d');
+            $grupo = $registros->get($fechaStr, collect());
 
-        $data->push([
-            'fecha'      => $fechaStr,
-            'dia'        => $dias[$fecha->format('l')],
-            'produccion' => $grupo->sum('cantidad_empaques'),
-            'timestamps' => $grupo->pluck('updated_at'),
-        ]);
+            $data->push([
+                'fecha'      => $fechaStr,
+                'dia'        => $dias[$fecha->format('l')],
+                'produccion' => $grupo->sum('cantidad_empaques'),
+                'timestamps' => $grupo->pluck('updated_at'),
+            ]);
+        }
+
+        return $data->values();
     }
-
-    return $data->values();
-}
 
 
 

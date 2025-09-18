@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class BlEmpaque extends Model
 {
@@ -18,9 +19,9 @@ class BlEmpaque extends Model
     }
 
     // Relación: Un empaque puede tener muchos movimientos
-    public function movimientos(): HasMany
+    public function movimientos(): MorphMany
     {
-        return $this->hasMany(BlMovimiento::class, 'empaque_id');
+        return $this->morphMany(BlMovimiento::class, 'movible');
     }
 
     // Accesor: Total de unidades en stock para este empaque
