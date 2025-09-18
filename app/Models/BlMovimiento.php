@@ -37,10 +37,10 @@ class BlMovimiento extends Model
     }
 
     // Relación: Un movimiento pertenece a un empaque
-    public function empaque(): BelongsTo
-    {
-        return $this->belongsTo(BlEmpaque::class, 'empaque_id');
-    }
+    // public function empaque(): BelongsTo
+    // {
+    //     return $this->belongsTo(BlEmpaque::class, 'empaque_id');
+    // }
 
     // Relación: Un movimiento puede tener un usuario asociado (opcional)
     public function usuario(): BelongsTo

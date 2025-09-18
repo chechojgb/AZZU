@@ -20,7 +20,7 @@ const breadcrumbs = [
 ];
 
 export default function Dashboard({user, productos, pedidos, pedidosEspera, movimientos, produccion}) {    
-    console.log('produccion:',produccion);
+    console.log('productos:',productos);
     
     // console.log('movimientos',movimientos);
         

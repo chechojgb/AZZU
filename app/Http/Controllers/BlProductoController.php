@@ -49,39 +49,46 @@ class BlProductoController extends Controller
     {
         $user = Auth::user();
         $productos = BlProducto::with(['color', 'empaques.movimientos'])
-            ->get()
-            ->map(function ($producto) {
-                return [
-                    'id' => $producto->id,
-                    'tipo_producto' => $producto->tipo_producto,
-                    'tamanio' => $producto->tamanio,
-                    'color_nombre' => $producto->color->nombre,
-                    'descripcion' => $producto->descripcion,
-                    'stock_total' => $producto->empaques->sum(function ($empaque) {
-                        return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
-                    }),
-                ];
-            });
-        $entrada = BlMovimiento::with(['empaque.producto', 'usuario'])
-            ->where('tipo', 'entrada')
-            ->whereHas('empaque.producto')
-            ->get()
-            ->map(function ($movimiento) {
+        ->get()
+        ->map(function ($producto) {
+            return [
+                'id' => $producto->id,
+                'tipo_producto' => $producto->tipo_producto,
+                'tamanio' => $producto->tamanio,
+                'color_nombre' => $producto->color->nombre,
+                'descripcion' => $producto->descripcion,
+                'stock_total' => $producto->empaques->sum(function ($empaque) {
+                    return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
+                }),
+            ];
+        });
+        $entrada = BlMovimiento::with(['movible.empaque.producto.color', 'usuario'])
+        ->where('tipo', 'entrada')
+        ->get()
+        ->map(function ($movimiento) {
+            if ($movimiento->movible instanceof \App\Models\BLPedidoItem) {
+                $item = $movimiento->movible;
+                $producto = $item->empaque->producto;
+
                 return [
                     'id' => $movimiento->id,
-                    'producto' => $movimiento->empaque->producto->tipo_producto ,
-                    'tamanio' => $movimiento->empaque->producto->tamanio,
-                    'color' => $movimiento->empaque->producto->color->nombre,
+                    'pedido_id' => $item->pedido_id,
+                    'producto' => $producto->tipo_producto,
+                    'tamanio' => $producto->tamanio,
+                    'color' => $producto->color->nombre,
+                    'cantidad_empaques' => $item->cantidad_empaques,
                     'cantidad' => $movimiento->cantidad,
                     'motivo' => $movimiento->motivo,
                     'usuario' => $movimiento->usuario->name,
                     'fecha' => $movimiento->created_at->format('d-m-Y H:i'),
-                    'tipo'=> $movimiento->tipo,
-                    'codigo_unico' => $movimiento->empaque->codigo_unico,
-                    'cantidad_por_empaque' => $movimiento->empaque->cantidad_por_empaque,
+                    'tipo' => $movimiento->tipo,
                 ];
-            });
-        $marcacion = BlMovimiento::with(['empaque.producto', 'usuario'])
+            }
+
+            return null; // si el movible no es un BLPedidoItem
+        })
+        ->filter();
+        $marcacion = BlMovimiento::with(['movible', 'usuario'])
             ->where('tipo', 'pedido')
             ->whereIn('motivo', [
                 'Cambio de estado a en proceso',
@@ -89,13 +96,15 @@ class BlProductoController extends Controller
             ])
             ->get();
         // dd($marcacion);
+        $entrega = BLPedido::with('cliente')->where('estado', 'entregado')->get();
 
         return Inertia::render('BLHistorico', [
             'productos' => $productos,
             'colores' => BlColor::all(),
             'user' => $user,
             'marcacion' => $marcacion,
-            'entrada' => $entrada
+            'entrada' => $entrada,
+            'entrega' => $entrega
         ]);
     }
 
