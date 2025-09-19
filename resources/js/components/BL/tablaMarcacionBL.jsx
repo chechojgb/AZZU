@@ -11,7 +11,7 @@ import { usePage } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
 import { Toast } from "flowbite-react";
 import { useEffect } from 'react';
-import { HiCheck, HiX } from "react-icons/hi";
+import { HiCheck, HiX, HiDownload } from "react-icons/hi";
 
 export default function TablaMarcacionBL({itemsPedidos, search}) {
   const { props } = usePage();
@@ -31,6 +31,29 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
       return () => clearTimeout(timer);
     }
   }, [toast]);
+  const exportToExcel = () => {
+    if (itemsPedidos.length === 0) {
+      setToast({ show: true, success: false, message: "No hay datos para exportar" });
+      return;
+    }
+    
+    const dataForExcel = itemsPedidos.map(item => ({
+      'Cliente': item.pedido?.cliente?.nombre || '',
+      'Pedido': `PED #${item.pedido_id || ''} - ${item.empaque?.producto?.descripcion || '—'}`,
+      'Cantidad': item.cantidad_empaques,
+      'Nota': item.nota || '',
+      'Estado': item.estado,
+      'Completado por': item.marcaciones?.[0]?.trabajador?.name || 'Sin asignar',
+      'Fecha': item.fecha ? new Date(item.fecha).toLocaleDateString() : ''
+    }));
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(dataForExcel);
+    XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
+    XLSX.writeFile(wb, `Pedidos_${new Date().toISOString().split('T')[0]}.xlsx`);
+    
+    setToast({ show: true, success: true, message: "Datos exportados correctamente" });
+  };
 
   const columns = [
     { accessorKey: 'pedido.cliente.nombre', header: 'cliente' },
@@ -101,6 +124,21 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
     {
       header: 'Completado por',
       accessorFn: row => row.marcaciones?.[0]?.trabajador?.name ?? 'Sin asignar'
+    },
+    {
+      accessorKey: 'updated_at',
+      header: 'Fecha',
+      cell: ({ row }) => {
+        const fechaRaw = row.original.updated_at; // viene como 2025-09-17T18:42:53.000000Z
+        const fechaObj = new Date(fechaRaw);
+
+        // Lo mostramos en formato local
+        return fechaObj.toLocaleDateString("es-CO", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+      }
     }
   ];
 
@@ -125,6 +163,16 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
 
   return (
     <>
+      <div className="bg-white p-4 flex justify-end">
+        <button
+          onClick={exportToExcel}
+          disabled={itemsPedidos.length === 0}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm disabled:opacity-50"
+        >
+          <HiDownload className="h-4 w-4" />
+          Exportar a Excel
+        </button>
+      </div>
       <table className="min-w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-8">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
           {table.getHeaderGroups().map(headerGroup => (

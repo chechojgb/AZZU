@@ -29,16 +29,61 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
   const [search, setSearch] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState("");
   const [trabajadorFiltro, setTrabajadorFiltro] = useState("");
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
+  
+  const filtrarPorFecha = (item, inicio, fin) => {
+    if (!inicio && !fin) return true; // Si no hay filtros de fecha
+    
+    const fechaItem = new Date(item.updated_at);
+    
+    if (inicio && fin) {
+      const start = new Date(inicio);
+      const end = new Date(fin);
+      end.setHours(23, 59, 59); // Incluir todo el día final
+      return fechaItem >= start && fechaItem <= end;
+    }
+    
+    if (inicio) {
+      const start = new Date(inicio);
+      return fechaItem >= start;
+    }
+    
+    if (fin) {
+      const end = new Date(fin);
+      end.setHours(23, 59, 59);
+      return fechaItem <= end;
+    }
+    
+    return true;
+  };
   const itemsFiltrados = itemsPedidos.filter((item) => {
-    // Filtrar por estado (si aplica)
+    // Filtrar por estado
     const coincideEstado = estadoFiltro === "" ? true : item.estado === estadoFiltro;
-
-    // Filtrar por trabajador (si aplica)
-    const coincideTrabajador =trabajadorFiltro === "" ? true : item.marcaciones?.[0]?.trabajador?.id === parseInt(trabajadorFiltro);
-
-    // El item debe cumplir con ambos filtros
-    return coincideEstado && coincideTrabajador;
+    
+    // Filtrar por trabajador
+    const coincideTrabajador = trabajadorFiltro === "" ? true : 
+    item.marcaciones?.[0]?.trabajador?.id === parseInt(trabajadorFiltro);
+    
+    // Filtrar por fecha
+    const coincideFecha = filtrarPorFecha(item, fechaInicio, fechaFin);
+    
+    // El item debe cumplir con todos los filtros
+    return coincideEstado && coincideTrabajador && coincideFecha;
   });
+  
+  // Función para filtrar por rango de fechas
+  
+  console.log(itemsFiltrados, fechaFin);
+  
+  // Limpiar filtros
+  const limpiarFiltros = () => {
+    setEstadoFiltro('');
+    setTrabajadorFiltro('');
+    setFechaInicio('');
+    setFechaFin('');
+    setSearch('');
+  };
   
   const {
     marcados,
@@ -198,38 +243,50 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
           )}
         </div>
         
-        <div className="">
-          {/* Header de la tabla con buscador */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <div className="">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow">
+          {/* Header con filtros */}
+          <div className="flex flex-col p-4 gap-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                 Lista de items
               </h2>
+              <button
+                onClick={limpiarFiltros}
+                className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Filtro por estado */}
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Filtrar por estado:
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Estado:
                 </label>
                 <select
                   value={estadoFiltro}
                   onChange={(e) => setEstadoFiltro(e.target.value)}
-                  className="border rounded-lg px-2 py-1 text-sm dark:bg-gray-800 dark:text-white"
+                  className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 >
-                  <option value="">Todos</option>
+                  <option value="">Todos los estados</option>
                   <option value="pendiente">Pendiente</option>
                   <option value="en proceso">En proceso</option>
                   <option value="completado">Completado</option>
                 </select>
               </div>
+
+              {/* Filtro por trabajador */}
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Filtrar por trabajador:
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Trabajador:
                 </label>
                 <select
                   value={trabajadorFiltro}
                   onChange={(e) => setTrabajadorFiltro(e.target.value)}
-                  className="border rounded-lg px-2 py-1 text-sm dark:bg-gray-800 dark:text-white"
+                  className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 >
-                  <option value="">Seleccionar trabajador</option>
+                  <option value="">Todos los trabajadores</option>
                   {buttonUser.map((trabajador) => (
                     <option key={trabajador.id} value={trabajador.id}>
                       {trabajador.name}
@@ -237,31 +294,74 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
                   ))}
                 </select>
               </div>
+
+              {/* Filtro por fecha inicio */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Fecha inicio:
+                </label>
+                <input
+                  type="date"
+                  value={fechaInicio}
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                />
+              </div>
+
+              {/* Filtro por fecha fin */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Fecha fin:
+                </label>
+                <input
+                  type="date"
+                  value={fechaFin}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                />
+              </div>
             </div>
-            <div className="relative w-full sm:w-72">
-              <svg
-                className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M15.5 10.5a5 5 0 11-10 0 5 5 0 0110 0z" />
-              </svg>
+
+            {/* Búsqueda general */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M15.5 10.5a5 5 0 11-10 0 5 5 0 0110 0z" />
+                </svg>
+              </div>
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm text-gray-900 border border-gray-200 rounded-lg bg-white dark:bg-gray-900 dark:border-gray-700 dark:placeholder-gray-400 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-                placeholder="Buscar producto..."
+                className="w-full pl-10 pr-4 py-2 text-sm text-gray-900 border border-gray-200 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                placeholder="Buscar en todos los campos..."
               />
             </div>
+
+            {/* Info de filtros aplicados */}
+            {(estadoFiltro || trabajadorFiltro || fechaInicio || fechaFin) && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Filtros aplicados: 
+                {estadoFiltro && <span className="ml-2 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">Estado: {estadoFiltro}</span>}
+                {trabajadorFiltro && <span className="ml-2 bg-green-100 dark:bg-green-900 px-2 py-1 rounded">Trabajador: {buttonUser.find(t => t.id === parseInt(trabajadorFiltro))?.name}</span>}
+                {fechaInicio && <span className="ml-2 bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded">Desde: {new Date(fechaInicio).toLocaleDateString()}</span>}
+                {fechaFin && <span className="ml-2 bg-purple-100 dark:bg-purple-900 px-2 py-1 rounded">Hasta: {new Date(fechaFin).toLocaleDateString()}</span>}
+              </div>
+            )}
           </div>
 
-
-          {/* Contenedor de la tabla */}
+          {/* Tabla con los datos filtrados */}
           <div className="overflow-x-auto">
-            <TablaMarcacionBL itemsPedidos={itemsFiltrados} search={search} estadoFiltro={estadoFiltro}/>
+            <TablaMarcacionBL 
+              itemsPedidos={itemsFiltrados} 
+              search={search} 
+            />
           </div>
         </div>
    
