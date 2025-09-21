@@ -12,6 +12,7 @@ import { router } from '@inertiajs/react';
 import { Toast } from "flowbite-react";
 import { useEffect } from 'react';
 import { HiCheck, HiX, HiDownload } from "react-icons/hi";
+import * as XLSX from 'xlsx';
 
 export default function TablaMarcacionBL({itemsPedidos, search}) {
   const { props } = usePage();
@@ -31,6 +32,7 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
       return () => clearTimeout(timer);
     }
   }, [toast]);
+  
   const exportToExcel = () => {
     if (itemsPedidos.length === 0) {
       setToast({ show: true, success: false, message: "No hay datos para exportar" });
@@ -59,7 +61,8 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
     { accessorKey: 'pedido.cliente.nombre', header: 'cliente' },
     {
       header: 'pedido',
-      accessorFn: (row) => 'PED #' + (row.pedido_id ? row.pedido_id : '') +' - ' + (row.empaque?.producto?.descripcion ?? '—') ?? '—'
+      accessorFn: (row) =>
+        `PED #${row.pedido_id ?? ''} - ${row.empaque?.producto?.descripcion ?? '—'}`
     },
     { accessorKey: 'cantidad_empaques', header: 'cantidad' },
     { accessorKey: 'nota', header: 'nota' },
@@ -194,37 +197,47 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row, index) => (
-            <tr
-              key={row.id}
-              className={`${
-                index % 2 === 0
-                  ? 'bg-white dark:bg-gray-800'
-                  : 'bg-gray-50 dark:bg-gray-700'
-              } hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors`}
-            >
-              {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {table.getRowModel().rows.map((row, index) => {
+            const marcacion = row.original.marcaciones?.[0]; // accede al primer elemento
+            const estaPagado = marcacion?.pagado === 1;
+
+            return (
+              <tr
+                key={row.id}
+                className={`
+                  ${estaPagado
+                    ? 'bg-white border-l-4 border-green-400   dark:bg-gray-800 dark:border-l-4 dark:border-green-700' 
+                    : !estaPagado ? 'bg-white border-l-4 border-red-400   dark:bg-gray-800 dark:border-l-4 dark:border-red-700' : index % 2 === 0 
+                      ? 'bg-white dark:bg-gray-800' 
+                      : 'bg-gray-50 dark:bg-gray-700'
+                  }
+                  hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors
+                `}
+              >
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
+
       </table>
       {toast.show && (
-            <div className="fixed bottom-6 right-6 z-51">
-            <Toast>
-                <div
-                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                    toast.success ? "bg-green-100 text-green-500" : "bg-red-100 text-red-500"
-                }`}
-                >
-                {toast.success ? <HiCheck className="h-5 w-5" /> : <HiX className="h-5 w-5" />}
-                </div>
-                <div className="ml-3 text-sm font-normal">{toast.message}</div>
-            </Toast>
+        <div className="fixed bottom-6 right-6 z-51">
+        <Toast>
+            <div
+            className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                toast.success ? "bg-green-100 text-green-500" : "bg-red-100 text-red-500"
+            }`}
+            >
+            {toast.success ? <HiCheck className="h-5 w-5" /> : <HiX className="h-5 w-5" />}
             </div>
+            <div className="ml-3 text-sm font-normal">{toast.message}</div>
+        </Toast>
+        </div>
       )}
     </>
   );

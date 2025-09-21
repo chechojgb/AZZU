@@ -1,22 +1,23 @@
-// resources/js/components/BLHistorico/ClienteSelector.jsx
 const ClienteSelector = ({ 
   nuevo, 
   handleChange, 
   sugerencias, 
-  seleccionarCliente, 
-  orderCustomer 
+  seleccionarCliente 
 }) => {
+  // Asegurar que nuevo.cliente siempre sea string
+  const clienteValue = nuevo.cliente || '';
+  
   return (
     <div className="relative">
       <input
         type="text"
         name="cliente"
         placeholder="Cliente"
-        value={nuevo.cliente}
+        value={clienteValue}
         onChange={handleChange}
         className="border rounded-lg p-2 w-full"
       />
-      {sugerencias.length > 0 && (
+      {sugerencias && sugerencias.length > 0 && (
         <ul className="absolute z-10 bg-white dark:bg-gray-800 border rounded-lg shadow-md mt-1 w-full max-h-40 overflow-y-auto">
           {sugerencias.map((c) => (
             <li

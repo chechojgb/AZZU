@@ -1,4 +1,3 @@
-// resources/js/components/BLHistorico/TrabajadorSelector.jsx
 import { Select } from "flowbite-react";
 
 const TrabajadorSelector = ({ 
@@ -8,26 +7,32 @@ const TrabajadorSelector = ({
   itemsDisponibles, 
   setPrecios 
 }) => {
+  // Asegurarse de que todas las variables sean válidas
+  const trabajadores = Array.isArray(buttonUser) ? buttonUser : [];
+  const items = Array.isArray(itemsDisponibles) ? itemsDisponibles : [];
+  
   return (
     <div>
       <Select
         name="trabajador"
         value={nuevo.trabajadorId || ""}
         onChange={(e) => {
-          const user = buttonUser.find(u => u.id == e.target.value);
+          const user = trabajadores.find(u => u && u.id == e.target.value);
           if (user) {
             setNuevo(prev => ({
               ...prev,
-              trabajador: user.name,
-              trabajadorId: user.id,
-              proyecto: user.proyecto,
+              trabajador: user.name || '',
+              trabajadorId: user.id || '',
+              proyecto: user.proyecto || '',
             }));
 
             // inicializar precios si es Button LoversMN
             if (user.proyecto === "Button LoversMN") {
               const preciosIniciales = {};
-              itemsDisponibles.forEach(i => {
-                preciosIniciales[i.id] = "";
+              items.forEach(i => {
+                if (i && i.id) {
+                  preciosIniciales[i.id] = "";
+                }
               });
               setPrecios(preciosIniciales);
             }
@@ -36,14 +41,16 @@ const TrabajadorSelector = ({
         className="w-full text-sm bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
       >
         <option value="">Seleccionar Trabajador</option>
-        {buttonUser.map((u) => (
-          <option 
-            key={u.id} 
-            value={u.id} 
-            className="text-gray-700 dark:text-gray-200"
-          >
-            {u.name}
-          </option>
+        {trabajadores.map((u) => (
+          u && u.id && (
+            <option 
+              key={u.id} 
+              value={u.id} 
+              className="text-gray-700 dark:text-gray-200"
+            >
+              {u.name || 'Sin nombre'}
+            </option>
+          )
         ))}
       </Select>
     </div>
