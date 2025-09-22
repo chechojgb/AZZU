@@ -4,13 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\BlCuentaCobro;
 use App\Models\BlCuentaCobroItem;
+use App\Models\BLCliente;
 use App\Models\BLMarcacion;
+use App\Models\BLPedido;
+use App\Models\BLPedidoItem;
+use App\Models\User;
 use Illuminate\Http\Request;
-
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class BlCuentaCobroController extends Controller
 {
+    public function index()
+    {
+        $user = Auth::user();
+        return Inertia::render('BLCuentaCobro', [
+            'user' => $user,
+        ]);
+    }
+
     public function pasarPagados(Request $request)
     {
         $items = $request->input('items', []);

@@ -18,12 +18,8 @@ import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function TablaMarcacionBL({itemsPedidos, search}) {
   const [openModal, setOpenModal] = useState(false);
-  console.log(itemsPedidos);
-  
   const { props } = usePage();
   const [selectedItems, setSelectedItems] = useState([]);
-  console.log(selectedItems.map(item => item.nombre_trabajador));
-  
   const proyecto = props?.auth?.user?.proyecto || 'AZZU';
   const theme = themeByProject[proyecto];
   const [toast, setToast] = useState({
@@ -54,7 +50,10 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
       'Nota': item.nota || '',
       'Estado': item.estado,
       'Completado por': item.marcaciones?.[0]?.trabajador?.name || 'Sin asignar',
-      'Fecha': item.fecha ? new Date(item.fecha).toLocaleDateString() : ''
+      'Fecha de creacion': item.created_at ? new Date(item.created_at).toLocaleDateString() : '',
+      'Fecha de ultima actualizacion': item.updated_at ? new Date(item.updated_at).toLocaleDateString() : '',
+      'estado': item.marcaciones?.[0]?.pagado === 1 ? 'pagado' : 'pendiente',
+      'costo': item.marcaciones?.[0]?.costo_total || 'Sin costo',
     }));
     
     const wb = XLSX.utils.book_new();
@@ -81,6 +80,14 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
         const value = row.getValue("estado"); // estado actual
         const itemId = row.original.id;       // ID del item
         const handleChange = (nuevoEstado) => {
+          if (value === "completado") {
+            setToast({
+              show: true,
+              success: false,
+              message: "Este item ya está completado y no se puede modificar."
+            });
+            return; // salir sin ejecutar el patch
+          }
           router.patch(route('bl-historicos.actualizar-estado', itemId), { estado: nuevoEstado }, {
             preserveState: true,
             onSuccess: () => {

@@ -4,11 +4,6 @@ import { Head, router } from "@inertiajs/react";
 import { Button } from "flowbite-react";
 import { useState } from "react";
 // Componentes
-import ClienteSelector from "@/components/BLHistorico/ClienteSelector";
-import PedidoSelector from "@/components/BLHistorico/PedidoSelector";
-import TrabajadorSelector from "@/components/BLHistorico/TrabajadorSelector";
-import FechaSelector from "@/components/BLHistorico/FechaSelector";
-import ItemsTable from "@/components/BLHistorico/ItemsTable";
 import TablaMarcacionBL from "@/components/BL/tablaMarcacionBL";
 import { Toast } from "flowbite-react";
 import { HiCheck, HiX } from "react-icons/hi";
@@ -18,9 +13,6 @@ import {
     SaveAll
 } from 'lucide-react';
 import MarcacionForm from "@/components/BLHistorico/marcarProceso";
-
-// Hooks
-import { useMarcaciones } from "@/components/BLHistorico/hooks/useMarcaciones";
 
 const breadcrumbs = [
   { title: "Marcacion BL", href: "/BLproductosInventario/BLMarcacion" }
@@ -46,7 +38,6 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
       return () => clearTimeout(timer);
     }
   }, [toast]);
-  
   const filtrarPorFecha = (item, inicio, fin) => {
     if (!inicio && !fin) return true; // Si no hay filtros de fecha
     
@@ -73,25 +64,13 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
     return true;
   };
   const itemsFiltrados = itemsPedidos.filter((item) => {
-    // Filtrar por estado
-    const coincideEstado = estadoFiltro === "" ? true : item.estado === estadoFiltro;
-    
-    // Filtrar por trabajador
+    const coincideEstado = estadoFiltro === "" ? true : item.estado?.toLowerCase() === estadoFiltro.toLowerCase();
     const coincideTrabajador = trabajadorFiltro === "" ? true : 
     item.marcaciones?.[0]?.trabajador?.id === parseInt(trabajadorFiltro);
-    
-    // Filtrar por fecha
     const coincideFecha = filtrarPorFecha(item, fechaInicio, fechaFin);
-    
-    // El item debe cumplir con todos los filtros
     return coincideEstado && coincideTrabajador && coincideFecha;
   });
-  
-  // Función para filtrar por rango de fechas
-  
-  // console.log(itemsFiltrados, fechaFin);
-  
-  // Limpiar filtros
+  console.log(itemsFiltrados);
   const limpiarFiltros = () => {
     setEstadoFiltro('');
     setTrabajadorFiltro('');
@@ -99,138 +78,6 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
     setFechaFin('');
     setSearch('');
   };
-  
-  const {
-    marcados,
-    seleccionados,
-    setSeleccionados,
-    precios,
-    setPrecios,
-    nuevo,
-    setNuevo,
-    sugerencias,
-    setSugerencias,
-    pedidosDisponibles,
-    setPedidosDisponibles,
-    itemsDisponibles,
-    setItemsDisponibles
-  } = useMarcaciones();
-
-  // --- Cliente ---
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNuevo({ ...nuevo, [name]: value });
-
-    if (name === "cliente") {
-      if (value.length > 0) {
-        const filtrados = orderCustomer.filter((c) =>
-          c.nombre.toLowerCase().includes(value.toLowerCase())
-        );
-        setSugerencias(filtrados);
-      } else {
-        setSugerencias([]);
-      }
-    }
-  };
-
-  const seleccionarCliente = (cliente) => {
-    setNuevo({
-      ...nuevo,
-      cliente: cliente.nombre,
-      clienteId: cliente.id,
-      pedido: "",
-      pedidoId: null,
-      trabajador: "",
-      trabajadorId: null,
-      fecha: "",
-    });
-    setPedidosDisponibles(cliente.pedidos || []);
-    setItemsDisponibles([]);
-    setSugerencias([]);
-    setSeleccionados([]);
-  };
-
-  // --- Pedido ---
-  const seleccionarPedido = (pedido) => {
-    setNuevo({
-      ...nuevo,
-      pedido: `#${pedido.id} - ${pedido.estado}`,
-      pedidoId: pedido.id,
-    });
-    setItemsDisponibles(pedido.items || []);
-    setSeleccionados([]);
-  };
-
-  // --- Guardar todo ---
-  const guardarMarcaciones = () => {
-    if (!nuevo.clienteId || !nuevo.pedidoId || !nuevo.trabajadorId || !nuevo.fecha) {
-      // alert("Debes seleccionar cliente, pedido, trabajador y fecha antes de marcar.");
-      setToast({
-        show: true,
-        success: false,
-        message: "Debes seleccionar cliente, pedido, trabajador y fecha antes de marcar."
-      });
-      return;
-      
-    }
-
-    if (seleccionados.length === 0) {
-      // alert("Debes seleccionar al menos un item.");
-      setToast({
-        show: true,
-        success: false,
-        message: "Debes seleccionar al menos un item.."
-      });
-      return;
-    }
-
-    const payload = seleccionados.map((itemId) => {
-      const item = itemsDisponibles.find(i => i.id === itemId);
-      return {
-        pedido_item_id: item.id,
-        user_id: nuevo.trabajadorId,
-        cantidad: item.cantidad_empaques,
-        fecha: nuevo.fecha,
-        pedido_id: nuevo.pedidoId,
-        precio_unitario: nuevo.proyecto === "Button LoversMN" ? precios[itemId] || 0 : null, 
-      };
-    });
-
-    router.post(route('bl_marcaciones.store'), { marcaciones: payload }, {
-      preserveState: true,
-      onSuccess: () => {
-        setToast({
-          show: true,
-          success: true,
-          message: "Marcacion guardada correctamente"
-        });
-
-        // Refrescar la lista de productos
-        // router.visit(route('productos.index'));
-      },
-      onError: (errors) => {
-      const primerError = Object.values(errors)[0];
-      setToast({
-        show: true,
-        success: false,
-        message: primerError || "Error al guardar la marcacion"
-      });
-      },
-      onFinish: (visit) => {
-        // Si hubo error de servidor (status 500 o más)
-        if (visit.response?.status >= 500) {
-          const msg = visit.response?.data?.message || "Error interno del servidor";
-          setToast({
-            show: true,
-            success: false,
-            message: msg
-          });
-        }
-      }
-    });
-
-  };
-
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Histórico de Productos" />
