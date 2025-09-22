@@ -9,14 +9,15 @@ import PedidoSelector from "@/components/BLHistorico/PedidoSelector";
 import TrabajadorSelector from "@/components/BLHistorico/TrabajadorSelector";
 import FechaSelector from "@/components/BLHistorico/FechaSelector";
 import ItemsTable from "@/components/BLHistorico/ItemsTable";
-import ResultTable from "@/components/BLHistorico/ResultTable";
-import FiltrosMarcaciones from "@/components/BLHistorico/FiltrosMarcaciones";
-import FiltroUsuario from "@/components/BLHistorico/FiltroUsuario";
 import TablaMarcacionBL from "@/components/BL/tablaMarcacionBL";
+import { Toast } from "flowbite-react";
+import { HiCheck, HiX } from "react-icons/hi";
+import { useEffect } from "react";
 import {
     BookText,
     SaveAll
 } from 'lucide-react';
+import MarcacionForm from "@/components/BLHistorico/marcarProceso";
 
 // Hooks
 import { useMarcaciones } from "@/components/BLHistorico/hooks/useMarcaciones";
@@ -31,6 +32,20 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
   const [trabajadorFiltro, setTrabajadorFiltro] = useState("");
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
+  const [toast, setToast] = useState({
+        show: false,
+        success: false,
+        message: "",
+  });
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast({ show: false, success: false, message: '' });
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   
   const filtrarPorFecha = (item, inicio, fin) => {
     if (!inicio && !fin) return true; // Si no hay filtros de fecha
@@ -74,7 +89,7 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
   
   // Función para filtrar por rango de fechas
   
-  console.log(itemsFiltrados, fechaFin);
+  // console.log(itemsFiltrados, fechaFin);
   
   // Limpiar filtros
   const limpiarFiltros = () => {
@@ -149,12 +164,23 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
   // --- Guardar todo ---
   const guardarMarcaciones = () => {
     if (!nuevo.clienteId || !nuevo.pedidoId || !nuevo.trabajadorId || !nuevo.fecha) {
-      alert("Debes seleccionar cliente, pedido, trabajador y fecha antes de marcar.");
+      // alert("Debes seleccionar cliente, pedido, trabajador y fecha antes de marcar.");
+      setToast({
+        show: true,
+        success: false,
+        message: "Debes seleccionar cliente, pedido, trabajador y fecha antes de marcar."
+      });
       return;
+      
     }
 
     if (seleccionados.length === 0) {
-      alert("Debes seleccionar al menos un item.");
+      // alert("Debes seleccionar al menos un item.");
+      setToast({
+        show: true,
+        success: false,
+        message: "Debes seleccionar al menos un item.."
+      });
       return;
     }
 
@@ -170,12 +196,39 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
       };
     });
 
-    router.post("/BLproductosInventario/bl_marcaciones", { marcaciones: payload }, {
+    router.post(route('bl_marcaciones.store'), { marcaciones: payload }, {
+      preserveState: true,
       onSuccess: () => {
-        console.log("Marcaciones guardadas:", payload);
-        setSeleccionados([]);
+        setToast({
+          show: true,
+          success: true,
+          message: "Marcacion guardada correctamente"
+        });
+
+        // Refrescar la lista de productos
+        // router.visit(route('productos.index'));
       },
+      onError: (errors) => {
+      const primerError = Object.values(errors)[0];
+      setToast({
+        show: true,
+        success: false,
+        message: primerError || "Error al guardar la marcacion"
+      });
+      },
+      onFinish: (visit) => {
+        // Si hubo error de servidor (status 500 o más)
+        if (visit.response?.status >= 500) {
+          const msg = visit.response?.data?.message || "Error interno del servidor";
+          setToast({
+            show: true,
+            success: false,
+            message: msg
+          });
+        }
+      }
     });
+
   };
 
   return (
@@ -185,63 +238,7 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
         <h1 className="text-lg font-semibold border-b border-gray-300 dark:border-gray-600 pb-2 mb-2 flex items-center gap-2"><BookText/> Registro de Marcado</h1>
 
         {/* Formulario */}
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Agregar Marcado</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            <ClienteSelector
-              nuevo={nuevo}
-              handleChange={handleChange}
-              sugerencias={sugerencias}
-              seleccionarCliente={seleccionarCliente}
-              orderCustomer={orderCustomer}
-            />
-
-            <PedidoSelector
-              nuevo={nuevo}
-              pedidosDisponibles={pedidosDisponibles}
-              seleccionarPedido={seleccionarPedido}
-            />
-
-            <TrabajadorSelector
-              nuevo={nuevo}
-              buttonUser={buttonUser}
-              setNuevo={setNuevo}
-              itemsDisponibles={itemsDisponibles}
-              setPrecios={setPrecios}
-            />
-
-            <FechaSelector
-              nuevo={nuevo}
-              handleChange={handleChange}
-            />
-          </div>
-
-          {/* Items del pedido */}
-          {itemsDisponibles.length > 0 && (
-            <div className="mt-4 overflow-x-auto">
-              <ItemsTable
-                itemsDisponibles={itemsDisponibles}
-                seleccionados={seleccionados}
-                setSeleccionados={setSeleccionados}
-                nuevo={nuevo}
-                precios={precios}
-                setPrecios={setPrecios}
-              />
-
-              {/* Save button */}
-              <div className="mt-4 flex justify-end">
-                <Button
-                  color="blue"
-                  disabled={seleccionados.length === 0}
-                  onClick={guardarMarcaciones}
-                >
-                  <SaveAll/> Guardar Marcaciones
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+        <MarcacionForm orderCustomer={orderCustomer} buttonUser={buttonUser} itemsPedidos={itemsPedidos}/>
         
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow">
           {/* Header con filtros */}
@@ -364,7 +361,20 @@ export default function MarcadoPage({ orderCustomer, buttonUser, itemsPedidos })
             />
           </div>
         </div>
-   
+        {toast.show && (
+          <div className="fixed bottom-6 right-6 z-51">
+          <Toast>
+              <div
+              className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                  toast.success ? "bg-green-100 text-green-500" : "bg-red-100 text-red-500"
+              }`}
+              >
+              {toast.success ? <HiCheck className="h-5 w-5" /> : <HiX className="h-5 w-5" />}
+              </div>
+              <div className="ml-3 text-sm font-normal">{toast.message}</div>
+          </Toast>
+          </div>
+        )}
       </div>
     </AppLayout>
   );

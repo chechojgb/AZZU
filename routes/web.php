@@ -3,6 +3,7 @@
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\BLanalisisController;
 use App\Http\Controllers\BLClientesController;
+use App\Http\Controllers\BlCuentaCobroController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -15,6 +16,7 @@ use App\Http\Controllers\BlMovimientoController;
 use App\Http\Controllers\BLPedidosController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MarcacionController;
+use App\Models\BlCuentaCobro;
 use App\Models\BLPedido;
 use App\Models\BlProducto;
 use App\Models\SshSession;
@@ -178,6 +180,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('BLMarcacion', [BLMarcacionController::class, 'index'])->name('marcacion.index');
         Route::post('/bl_marcaciones', [BLMarcacionController::class, 'store'])->name('bl_marcaciones.store');
         Route::patch('/actualizar-estado/{item}', [BLMarcacionController::class, 'actualizarEstado'])->name('bl-historicos.actualizar-estado');
+        Route::post('/bl_cuentas_cobro', [BlCuentaCobroController::class, 'pasarPagados'])->name('bl-cuentas-cobro.pasar-pagados');
+        
     });
 });
 

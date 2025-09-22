@@ -1,11 +1,10 @@
-// resources/js/components/BLHistorico/FechaSelector.jsx
-const FechaSelector = ({ nuevo, handleChange }) => {
+const FechaSelector = ({ fecha, setFecha, nuevo }) => {
   return (
     <input
       type="date"
       name="fecha"
-      value={nuevo.fecha}
-      onChange={handleChange}
+      value={fecha}
+      onChange={(e) => setFecha(e.target.value)}
       className="border rounded-lg p-2 w-full"
     />
   );

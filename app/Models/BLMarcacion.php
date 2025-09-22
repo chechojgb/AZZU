@@ -38,4 +38,8 @@ class BLMarcacion extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function itemsCuenta()
+    {
+        return $this->hasMany(BlCuentaCobroItem::class, 'marcacion_id');
+    }
 }
