@@ -80,11 +80,11 @@ const ItemsTable = ({
                 {/* Acción */}
                 <td className="px-2 py-1 text-center">
                   {esMarcado ? (
-                    <span className="text-green-100/60 font-semibold">
+                    <span className="dark:text-green-100/60 font-semibold">
                       Marcado por: {trabajador}
                     </span>
                   ) : esProceso ? (
-                    <span className="text-yellow-100/70 font-semibold">
+                    <span className="dark:text-yellow-100/70 font-semibold">
                       En proceso por: {trabajador}
                     </span>
                   ) : (
