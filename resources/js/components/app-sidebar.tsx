@@ -113,15 +113,15 @@ const staticNavItems = [
         icon: BadgeCheck,
         proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
     },
-    {
-        title: 'Inventario de Desempaque',
-        href: '/BLproductosInventario/BLMarcacion',
-        icon: PcCase,
-        proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
-    },
+    // {
+    //     title: 'Inventario de Desempaque',
+    //     href: '/BLproductosInventario/BLMarcacion',
+    //     icon: PcCase,
+    //     proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
+    // },
     {
         title: 'Cuentas de cobro',
-        href: '/BLproductosInventario/BLMarcacion',
+        href: '/BLproductosInventario/BLCuentaCobro',
         icon: BadgeDollarSign,
         proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
     }

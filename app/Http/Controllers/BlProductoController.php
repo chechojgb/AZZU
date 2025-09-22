@@ -154,11 +154,12 @@ class BlProductoController extends Controller
 
         
         BlMovimiento::create([
-            'empaque_id' => $empaque->id, // aqui debe ir el id del empaque creado mas no del producto
+            'movible_id' => $empaque->id, 
+            'movible_type' => \App\Models\BLEmpaque::class,
             'tipo' => 'entrada',
             'cantidad' => 1,
             'motivo' => 'compra',
-            'usuario_id' => $request->user()->id, // Asegúrate de que el usuario esté autenticado
+            'usuario_id' => $request->user()->id,
         ]);
 
         return redirect()->back()->with([
