@@ -11,6 +11,7 @@ use App\Http\Controllers\PostProxyController;
 use App\Http\Controllers\SshSessionController;
 use App\Http\Controllers\BlProductoController;
 use App\Http\Controllers\BlEmpaqueController;
+use App\Http\Controllers\BLInventarioController;
 use App\Http\Controllers\BLMarcacionController;
 use App\Http\Controllers\BlMovimientoController;
 use App\Http\Controllers\BLPedidosController;
@@ -165,6 +166,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('BLProductos', [BlProductoController::class, 'index'])->name('productos.index');
         Route::get('colores', [BlProductoController::class, 'index'])->name('colores.index');
         Route::get('BLCuentaCobro', [BlCuentaCobroController::class, 'index'])->name('BLCuentaCobro.index');
+        Route::get('BLInventario', [BLInventarioController::class, 'index'])->name('BLInventario');
         Route::get('BLPedidos', [BLPedidosController::class, 'index'])->name('pedidos.index');
         Route::get('BLClientes', [BLClientesController::class, 'index'])->name('clientes.index');
         Route::get('BLAnalisis', [BLanalisisController::class, 'index'])->name('analisis.index');

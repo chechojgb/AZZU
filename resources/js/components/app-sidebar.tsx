@@ -8,7 +8,7 @@ import {
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
-    SidebarMenuItem
+    SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
 import {
@@ -26,7 +26,8 @@ import {
     ListOrderedIcon,
     BadgeCheck,
     BadgeDollarSign,
-    PcCase
+    PcCase,
+    BookMarked
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { userHasArea } from '@/components/utils/useAuthUtils';
@@ -123,6 +124,12 @@ const staticNavItems = [
         title: 'Cuentas de cobro',
         href: '/BLproductosInventario/BLCuentaCobro',
         icon: BadgeDollarSign,
+        proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
+    },
+    {
+        title: 'Inventario',
+        href: '/BLproductosInventario/BLInventario',
+        icon: BookMarked,
         proyectosPermitidos: ['Button Lovers', 'AZZU', 'Button LoversM'],
     }
 

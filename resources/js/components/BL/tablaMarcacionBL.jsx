@@ -165,7 +165,7 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
         const marcacion = row.original.marcaciones?.[0];
         const tieneUsuario = marcacion?.trabajador;
         const esCompletado = row.original.estado === "completado";
-        const noEsPagado = marcacion?.pagado  === 0;
+        const noEsPagado = !marcacion?.pagado;
         const esElegible = tieneUsuario && esCompletado && noEsPagado;
 
         return (

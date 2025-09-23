@@ -21,6 +21,8 @@ const breadcrumbs = [
 ];
 
 export default function BLProductos({productos, colores}) {
+  console.log(productos);
+  
     const [modalOpen, setModalOpen] = useState(false);
     const [modalOpenColores, setModalOpenColores] = useState(false);
     const [modalOpenEdit, setModalOpenEdit] = useState(false);

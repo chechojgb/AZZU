@@ -35,18 +35,18 @@ export default function EntradaBL({ historico }) {
               >
                 <div className="space-y-1">
                   <p className="font-semibold ">
-                    {item.producto || "No existe"} - {item.tamanio} - {item.color}
+                    {item.movible.producto.descripcion || "No existe"}
                   </p>
                   <p className="text-xs ">
-                    {item.fecha} — {item.tipo || "sin tipo"} —{" "}
-                    <span className="font-medium">{item.usuario}</span>
+                    {format(new Date(item.updated_at), "dd-MM-yyyy HH:mm")} — {item.tipo || "sin tipo"} —{" "}
+                    <span className="font-medium">{item.usuario.name}</span>
                   </p>
                 </div>
                 <Badge
                   variant="outline"
                   className="text-sm  border-green-300 text-green-600"
                 >
-                  {item.cantidad_por_empaque} und
+                  {item.movible.cantidad_por_empaque} und
                 </Badge>
               </div>
             ))
