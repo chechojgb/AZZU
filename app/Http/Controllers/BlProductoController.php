@@ -22,18 +22,18 @@ class BlProductoController extends Controller
 {
     public function index()
     {
-        $productos = BlProducto::with(['color', 'empaques.movimientos'])
+        $productos = BlProducto::with(['color', 'empaques'])
             ->get()
             ->map(function ($producto) {
                 return [
                     'id' => $producto->id,
                     'tipo_producto' => $producto->tipo_producto,
                     'tamanio' => $producto->tamanio,
-                    'color_nombre' => $producto->color->codigo,
+                    'color_nombre' => $producto->color->nombre,
                     'descripcion' => $producto->descripcion,
-                    'stock_total' => $producto->empaques->sum(function ($empaque) {
-                        return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
-                    }),
+                    'stock_total' => $producto->empaques
+                        ->where('estado', 'disponible') 
+                        ->sum('cantidad_por_empaque'), 
                 ];
             });
         // dd($productos->pluck('descripcion'));
@@ -62,32 +62,8 @@ class BlProductoController extends Controller
                 }),
             ];
         });
-        $entrada = BlMovimiento::with(['movible.empaque.producto.color', 'usuario'])
-        ->where('tipo', 'entrada')
-        ->get()
-        ->map(function ($movimiento) {
-            if ($movimiento->movible instanceof \App\Models\BLPedidoItem) {
-                $item = $movimiento->movible;
-                $producto = $item->empaque->producto;
-
-                return [
-                    'id' => $movimiento->id,
-                    'pedido_id' => $item->pedido_id,
-                    'producto' => $producto->tipo_producto,
-                    'tamanio' => $producto->tamanio,
-                    'color' => $producto->color->nombre,
-                    'cantidad_empaques' => $item->cantidad_empaques,
-                    'cantidad' => $movimiento->cantidad,
-                    'motivo' => $movimiento->motivo,
-                    'usuario' => $movimiento->usuario->name,
-                    'fecha' => $movimiento->created_at->format('d-m-Y H:i'),
-                    'tipo' => $movimiento->tipo,
-                ];
-            }
-
-            return null; // si el movible no es un BLPedidoItem
-        })
-        ->filter();
+        $entrada = BlMovimiento::with(['movible.producto', 'usuario'])
+        ->where('tipo', 'entrada')->get();
         $marcacion = BlMovimiento::with(['movible', 'usuario'])
             ->where('tipo', 'pedido')
             ->whereIn('motivo', [

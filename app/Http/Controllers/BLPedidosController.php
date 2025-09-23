@@ -26,7 +26,7 @@ class BLPedidosController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $productos = BlProducto::with(['color', 'empaques.movimientos'])
+        $productos = BlProducto::with(['color', 'empaques'])
             ->get()
             ->map(function ($producto) {
                 return [
@@ -36,10 +36,8 @@ class BLPedidosController extends Controller
                     'color_nombre' => $producto->color->nombre,
                     'descripcion' => $producto->descripcion,
                     'stock_total' => $producto->empaques
-                        ->where('estado', 'disponible') // Filtra solo empaques disponibles
-                        ->sum(function ($empaque) {
-                            return $empaque->movimientos->sum('cantidad') * $empaque->cantidad_por_empaque;
-                    }),
+                        ->where('estado', 'disponible') // ✅ solo empaques disponibles
+                        ->sum('cantidad_por_empaque'), // ✅ sumamos directamente la cantidad
                 ];
             })
             ->filter(function ($producto) {
