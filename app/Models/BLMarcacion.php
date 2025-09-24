@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BLMarcacion extends Model
+class BlMarcacion extends Model
 {
     protected $table = 'bl_marcacion';
 
