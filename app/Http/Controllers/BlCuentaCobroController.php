@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BlCuentaCobro;
 use App\Models\BlCuentaCobroItem;
 use App\Models\BLCliente;
-use App\Models\BLMarcacion;
+use App\Models\BlMarcacion;
 use App\Models\BLPedido;
 use App\Models\BLPedidoItem;
 use App\Models\User;
@@ -45,7 +45,7 @@ class BlCuentaCobroController extends Controller
                     'cuenta_cobro_id' => $cuenta->id,
                     'marcacion_id' => $item['marcacion_id'],
                 ]);
-                BLMarcacion::where('id', $item['marcacion_id'])->update(['pagado' => 1]);
+                BlMarcacion::where('id', $item['marcacion_id'])->update(['pagado' => 1]);
             }
         });
         return back()->with('success', 'Cuenta de cobro creada y items marcados como pagados.');
