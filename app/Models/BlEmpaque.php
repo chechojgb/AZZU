@@ -39,4 +39,52 @@ class BlEmpaque extends Model
     {
         return $this->hasMany(BLPedidoItem::class, 'empaque_id');
     }
+    public function inventarioDetalle()
+    {
+        return $this->hasMany(BlInventarioDetalle::class, 'empaque_id');
+    }
+
+    // Relación directa con posiciones a través de inventario_detalle
+    public function posiciones()
+    {
+        return $this->belongsToMany(BlPosicion::class, 'bl_inventario_detalle', 'empaque_id', 'posicion_id')
+                    ->withPivot('cantidad_actual', 'estado', 'fecha_ubicacion')
+                    ->withTimestamps();
+    }
+
+    // Scope para empaques disponibles
+    public function scopeDisponibles($query)
+    {
+        return $query->where('estado', 'disponible');
+    }
+
+    // Scope para empaques sin ubicación
+    public function scopeSinUbicacion($query)
+    {
+        return $query->whereDoesntHave('inventarioDetalle');
+    }
+
+    // Scope para empaques con ubicación
+    public function scopeConUbicacion($query)
+    {
+        return $query->whereHas('inventarioDetalle');
+    }
+
+    // Método para verificar si tiene ubicación
+    public function getTieneUbicacionAttribute()
+    {
+        return $this->inventarioDetalle()->exists();
+    }
+
+    // Método para obtener la ubicación actual (si tiene)
+    public function getUbicacionActualAttribute()
+    {
+        return $this->inventarioDetalle()->first();
+    }
+
+    // Método para obtener la cantidad total en inventario
+    public function getCantidadEnInventarioAttribute()
+    {
+        return $this->inventarioDetalle()->sum('cantidad_actual');
+    }
 }
