@@ -13,9 +13,10 @@ use Illuminate\Support\Facades\DB;
 class BlCuentaCobroController extends Controller
 {
     public function index()
-    {
+    {   
+        // .marcacion.pedido.items.empaque.producto
         $user = Auth::user();
-        $cuentas = BlCuentaCobro::with(['items.marcacion.pedido.items.empaque.producto', 'usuario'])->get();
+        $cuentas = BlCuentaCobro::with(['items', 'usuario'])->get();
         return Inertia::render('BLCuentaCobro', [
             'user' => $user,
             'cuentasCobro' => $cuentas,
@@ -37,7 +38,7 @@ class BlCuentaCobroController extends Controller
                 'total' => $total,
             ]);
             foreach ($items as $item) {
-                BLCuentaCobroItem::create([
+                BlCuentaCobroItem::create([
                     'cuenta_cobro_id' => $cuenta->id,
                     'marcacion_id' => $item['marcacion_id'],
                 ]);
