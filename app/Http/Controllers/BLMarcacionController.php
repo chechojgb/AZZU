@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BLCliente;
-use App\Models\BLMarcacion;
+use App\Models\BlMarcacion;
 use App\Models\BLPedido;
 use App\Models\BLPedidoItem;
 use App\Models\User;
@@ -48,7 +48,7 @@ class BLMarcacionController extends Controller
             $data['costo_total'] = $data['cantidad'] * $data['precio_unitario'];
 
             // 1️⃣ Guardar la marcación
-            BLMarcacion::create($data);
+            BlMarcacion::create($data);
 
             // 2️⃣ Actualizar estado del item a "en_proceso"
             DB::table('bl_pedido_items')
@@ -61,7 +61,7 @@ class BLMarcacionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $registro = BLMarcacion::findOrFail($id);
+        $registro = BlMarcacion::findOrFail($id);
 
         $request->validate([
             'cantidad' => 'required|integer|min:1',
@@ -79,7 +79,7 @@ class BLMarcacionController extends Controller
 
     public function destroy($id)
     {
-        $registro = BLMarcacion::findOrFail($id);
+        $registro = BlMarcacion::findOrFail($id);
         $registro->delete();
 
         return response()->json([
