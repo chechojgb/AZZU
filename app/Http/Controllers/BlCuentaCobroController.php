@@ -4,11 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlCuentaCobro;
 use App\Models\BlCuentaCobroItem;
-use App\Models\BLCliente;
 use App\Models\BlMarcacion;
-use App\Models\BLPedido;
-use App\Models\BLPedidoItem;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +31,7 @@ class BlCuentaCobroController extends Controller
         $trabajadorId = $items[0]['user_id'];
         $total = collect($items)->sum('total');
         DB::transaction(function () use ($trabajadorId, $total, $items) {
-            $cuenta = BLCuentaCobro::create([
+            $cuenta = BlCuentaCobro::create([
                 'user_id' => $trabajadorId,
                 'fecha' => now(),
                 'total' => $total,
@@ -50,14 +46,4 @@ class BlCuentaCobroController extends Controller
         });
         return back()->with('success', 'Cuenta de cobro creada y items marcados como pagados.');
     }
-    // public function update($items)
-    // {
-    //     foreach ($items as $item) {
-    //         $registro = BLMarcacion::findOrFail($item['marcacion_id']);
-    //         $registro->validate([
-    //             'marcacion_id' => 'required|integer|min:1'
-    //         ]);
-    //         $registro->update(['pagado' => 1]);
-    //     }
-    // }
 }
