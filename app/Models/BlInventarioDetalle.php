@@ -11,8 +11,13 @@ class BlInventarioDetalle extends Model
 
     protected $table = 'bl_inventario_detalle';
     protected $fillable = [
-        'empaque_id', 'posicion_id', 'cantidad_actual', 
-        'fecha_ubicacion', 'fecha_vencimiento', 'estado', 'notas'
+        'empaque_id', 
+        'zona_id', // Cambiado: posicion_id → zona_id
+        'cantidad_actual', 
+        'fecha_ubicacion', 
+        'fecha_vencimiento', 
+        'estado', 
+        'notas'
     ];
 
     protected $dates = ['fecha_ubicacion', 'fecha_vencimiento'];
@@ -23,10 +28,10 @@ class BlInventarioDetalle extends Model
         return $this->belongsTo(BlEmpaque::class, 'empaque_id');
     }
 
-    // Relación con posición
-    public function posicion()
+    // NUEVA RELACIÓN con zona (reemplaza posicion)
+    public function zona()
     {
-        return $this->belongsTo(BlPosicion::class, 'posicion_id');
+        return $this->belongsTo(BlZonaNivel::class, 'zona_id');
     }
 
     // Relación con producto (a través de empaque)
@@ -42,7 +47,7 @@ class BlInventarioDetalle extends Model
         );
     }
 
-    // Scopes útiles
+    // Scopes útiles ACTUALIZADOS
     public function scopeDisponibles($query)
     {
         return $query->where('estado', 'disponible');
@@ -50,9 +55,14 @@ class BlInventarioDetalle extends Model
 
     public function scopeEnEstanteria($query, $estanteriaId)
     {
-        return $query->whereHas('posicion.nivel.estanteria', function($q) use ($estanteriaId) {
+        return $query->whereHas('zona.nivel.estanteria', function($q) use ($estanteriaId) {
             $q->where('id', $estanteriaId);
         });
+    }
+
+    public function scopeEnZona($query, $zonaId)
+    {
+        return $query->where('zona_id', $zonaId);
     }
 
     public function scopeConProducto($query, $productoId)
@@ -60,5 +70,20 @@ class BlInventarioDetalle extends Model
         return $query->whereHas('empaque', function($q) use ($productoId) {
             $q->where('producto_id', $productoId);
         });
+    }
+
+    // Nuevo scope para buscar por código de zona
+    public function scopeEnZonaCodigo($query, $codigoZona)
+    {
+        return $query->whereHas('zona', function($q) use ($codigoZona) {
+            $q->where('codigo_completo', $codigoZona);
+        });
+    }
+
+    // Scope para productos próximos a vencer
+    public function scopeProximosAVencer($query, $dias = 30)
+    {
+        return $query->whereDate('fecha_vencimiento', '<=', now()->addDays($dias))
+                    ->where('estado', 'disponible');
     }
 }
