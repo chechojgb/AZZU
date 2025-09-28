@@ -493,7 +493,7 @@ export default function CuentasCobroCards({ user, cuentas = datosPrueba, cuentas
                                         <p className="text-xs text-gray-500 mb-2">Items incluidos:</p>
                                         <div className="space-y-1">
                                             {cuenta.items.slice(0, 30).map((item, index) => {
-                                                const descripcion = item.marcacion.pedido.items[0]?.empaque?.producto?.descripcion ?? "Sin descripción";
+                                                const descripcion = item?.marcacion?.pedido?.items[0]?.empaque?.producto?.descripcion ?? "Sin descripción";
                                                 const cantidad = item.marcacion.cantidad ?? 'sin cantidad'
                                                 const total = item.marcacion.costo_total ?? 'Sin costo total'
                                                 
