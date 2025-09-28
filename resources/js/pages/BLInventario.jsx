@@ -4,8 +4,8 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import ListaInventario from '@/components/BL/ListaInventario';
 import PlanoAlmacen from '@/components/BL/PlanoAlmacen';
-import { useDispositivo } from '@/components/BL/Hooks/useDispositivo';
-import { useFiltrosInventario } from '@/components/BL/Hooks/useFiltrosInventario';
+import { useDispositivo } from '@/components/BL/hooks/useDispositivo';
+import { useFiltrosInventario } from '@/components/BL/hooks/useFiltrosInventario';
 
 const breadcrumbs = [
     {
