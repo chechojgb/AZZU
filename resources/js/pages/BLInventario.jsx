@@ -15,6 +15,8 @@ const breadcrumbs = [
 ];
 
 export default function PlanoInventario({ productos }) {
+    console.log(productos);
+    
     const { isMobile } = useDispositivo();
     
     const {
