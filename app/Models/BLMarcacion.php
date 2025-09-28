@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BlMarcacion extends Model
 {
-    protected $table = 'bl_marcacion';
+        protected $table = 'bl_marcacion';
 
     protected $fillable = [
         'pedido_id',
@@ -19,7 +19,7 @@ class BlMarcacion extends Model
     ];
 
     protected $casts = [
-        'items_marcados' => 'array', // para que se convierta automáticamente a array
+        'items_marcados' => 'array', 
         'fecha' => 'date',
     ];
 
