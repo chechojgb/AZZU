@@ -15,6 +15,6 @@ class BlCuentaCobroItem extends Model
 
     public function marcacion()
     {
-        return $this->belongsTo(BlMarcacion::class, 'marcacion_id');
+        return $this->belongsTo(BlMarcaciones::class, 'marcacion_id');
     }
 }

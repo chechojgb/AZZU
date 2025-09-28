@@ -14,7 +14,7 @@ class BlCuentaCobro extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function items()
+    public function itemsMarcacion()
     {
         return $this->hasMany(BlCuentaCobroItem::class, 'cuenta_cobro_id');
     }

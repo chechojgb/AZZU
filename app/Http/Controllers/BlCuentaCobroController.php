@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BlCuentaCobro;
 use App\Models\BlCuentaCobroItem;
 use App\Models\BlMarcacion;
+use App\Models\BlMarcaciones;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class BlCuentaCobroController extends Controller
     {   
         // .producto
         $user = Auth::user();
-        $cuentas = BlCuentaCobro::with(['items.marcacion.pedido.items.empaque', 'usuario'])->get();
+        $cuentas = BlCuentaCobro::with(['itemsMarcacion.marcacion.pedido.items.empaque', 'usuario'])->get();
         return Inertia::render('BLCuentaCobro', [
             'user' => $user,
             'cuentasCobro' => $cuentas,
@@ -42,7 +43,7 @@ class BlCuentaCobroController extends Controller
                     'cuenta_cobro_id' => $cuenta->id,
                     'marcacion_id' => $item['marcacion_id'],
                 ]);
-                BlMarcacion::where('id', $item['marcacion_id'])->update(['pagado' => 1]);
+                BlMarcaciones::where('id', $item['marcacion_id'])->update(['pagado' => 1]);
             }
         });
         return back()->with('success', 'Cuenta de cobro creada y items marcados como pagados.');
