@@ -32,7 +32,7 @@ class BLPedidoItem extends Model
     
     public function marcaciones()
     {
-        return $this->hasMany(BlMarcacion::class, 'pedido_item_id');
+        return $this->hasMany(BlMarcaciones::class, 'pedido_item_id');
     }
 
     public function movimientos(): MorphMany
