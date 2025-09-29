@@ -90,7 +90,7 @@ export default function ModalPedidosBL({ onClose, onSave, clientes, productos, s
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({ ...formData, productos: productosSeleccionados });
-    onClose();
+    // onClose();
   };
 
   const clienteSeleccionado = clientes.find(

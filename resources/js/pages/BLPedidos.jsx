@@ -37,6 +37,7 @@ export default function BLPedidos({ user, productos, colores, clientes, pedidos 
           success: true,
           message: "Producto guardado correctamente"
         });
+        setModalOpen(false);
         // Refrescar la lista de productos
         // router.visit(route('clientes.index'));
       },
@@ -52,11 +53,11 @@ export default function BLPedidos({ user, productos, colores, clientes, pedidos 
         // Si hubo error de servidor (status 500 o más)
         if (visit.response?.status >= 500) {
           const msg = visit.response?.data?.message || "Error interno del servidor";
-          setToast({
-            show: true,
-            success: false,
-            message: msg
-          });
+          // setToast({
+          //   show: true,
+          //   success: false,
+          //   message: msg
+          // });
         }
       }
     });

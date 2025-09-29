@@ -62,12 +62,12 @@ const ModalUbicacion = ({
             {/* Header */}
             <div className="border-b border-gray-200 p-6">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-semibold text-gray-800">
+                    <h3 className="text-xl font-semibold ">
                         📍 Gestionar Ubicación
                     </h3>
                     <button 
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 text-2xl p-1 rounded-full hover:bg-gray-100 transition"
+                        className="text-gray-400 hover:text-gray-600 text-2xl p-1 rounded-full hover:bg-gray-100 transition dark:hover:bg-gray-600 dark:text-gray-200"
                     >
                         ×
                     </button>
@@ -76,7 +76,7 @@ const ModalUbicacion = ({
                     <p className="text-lg font-medium text-gray-800">
                         {producto.descripcion || `${producto.tipo_producto} ${producto.color_nombre} ${producto.tamanio}`}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm mt-1">
                         Stock: <span className="font-semibold">{producto.stock_total} unidades</span>
                     </p>
                 </div>
@@ -86,17 +86,17 @@ const ModalUbicacion = ({
             <div className="p-6 space-y-6">
                 {/* Estantería */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium mb-3">
                         Estantería/Rack
                     </label>
                     <select 
                         value={estanteriaSeleccionada}
                         onChange={(e) => handleEstanteriaChange(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base "
                     >
-                        <option value="">Seleccionar estantería...</option>
+                        <option value="" className="dark:bg-gray-800">Seleccionar estantería...</option>
                         {estanterias.map(est => (
-                            <option key={est.codigo} value={est.codigo}>
+                            <option key={est.codigo} value={est.codigo} className="dark:bg-gray-800">
                                 {est.nombre} ({est.tipo}) - {est.zona}
                             </option>
                         ))}
@@ -105,18 +105,18 @@ const ModalUbicacion = ({
 
                 {/* Nivel */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium mb-3">
                         Nivel
                     </label>
                     <select 
                         value={nivelSeleccionado}
                         onChange={(e) => handleNivelChange(e.target.value)}
                         disabled={!estanteriaSeleccionada}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-800"
                     >
-                        <option value="">Seleccionar nivel...</option>
+                        <option value="" className="dark:bg-gray-800">Seleccionar nivel...</option>
                         {nivelesDisponibles.map(nivel => (
-                            <option key={nivel.id} value={nivel.nivel}>
+                            <option key={nivel.id} value={nivel.nivel} className="dark:bg-gray-800">
                                 {nivel.nivel}
                             </option>
                         ))}
@@ -125,7 +125,7 @@ const ModalUbicacion = ({
 
                 {/* Zona */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium mb-3">
                         Zona
                     </label>
                     <div className="grid grid-cols-2 gap-4">
@@ -141,9 +141,9 @@ const ModalUbicacion = ({
                                     disabled={!tieneEspacio}
                                     className={`p-4 border-2 rounded-xl text-center transition-all duration-200 ${
                                         zonaSeleccionada == zona.id
-                                            ? 'bg-blue-500 text-white border-blue-500 shadow-lg scale-105'
+                                            ? 'bg-blue-500 text-white border-blue-500 shadow-lg scale-105 dark:bg-gray-900 dark:border-gray-700'
                                             : tieneEspacio
-                                                ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-blue-300 hover:shadow-md'
+                                                ? '  border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-400 hover:border-blue-300 dark:hover:border-black hover:shadow-md'
                                                 : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                                     }`}
                                     title={!tieneEspacio ? `Espacio insuficiente. Disponible: ${espacioDisponible}` : ''}
@@ -161,7 +161,7 @@ const ModalUbicacion = ({
                                         )}
                                     </div>
                                     {zona.descripcion && (
-                                        <div className="text-xs text-gray-500 mt-1">
+                                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                             {zona.descripcion}
                                         </div>
                                     )}
@@ -173,15 +173,15 @@ const ModalUbicacion = ({
 
                 {/* Vista previa */}
                 {estanteriaSeleccionada && nivelSeleccionado && zonaSeleccionada && (
-                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
-                        <p className="text-sm font-semibold text-blue-800 mb-2">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:bg-none dark:bg-gray-900 border border-blue-200 dark:border-gray-600 rounded-xl p-4">
+                        <p className="text-sm font-semibold text-blue-800 dark:text-white mb-2">
                             ✅ Ubicación seleccionada:
                         </p>
-                        <p className="text-lg text-blue-700 font-medium">
+                        <p className="text-lg text-blue-700 font-medium dark:text-white">
                             {estanterias.find(e => e.codigo === estanteriaSeleccionada)?.nombre} - {nivelSeleccionado} - Zona {zonasDisponibles.find(z => z.id == zonaSeleccionada)?.zona}
                         </p>
-                        <p className="text-sm text-blue-600 mt-1">
-                            Código: <span className="font-mono">{zonasDisponibles.find(z => z.id == zonaSeleccionada)?.codigo_completo}</span>
+                        <p className="text-sm text-blue-600 mt-1 dark:text-white">
+                            Código: <span className="font-mono dark:text-blue-500/80">{zonasDisponibles.find(z => z.id == zonaSeleccionada)?.codigo_completo}</span>
                         </p>
                     </div>
                 )}
