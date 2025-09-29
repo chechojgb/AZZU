@@ -17,6 +17,8 @@ import { Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function TablaMarcacionBL({itemsPedidos, search}) {
+  console.log(itemsPedidos);
+  
   const [openModal, setOpenModal] = useState(false);
   const { props } = usePage();
   const [selectedItems, setSelectedItems] = useState([]);
@@ -133,7 +135,7 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
             `}
           >
             <option value="pendiente">Pendiente</option>
-            <option value="en proceso">En proceso</option>
+            <option value="en_proceso">En proceso</option>
             <option value="completado">Completado</option>
           </select>
         );
@@ -275,7 +277,7 @@ export default function TablaMarcacionBL({itemsPedidos, search}) {
         <tbody>
           {table.getRowModel().rows.map((row, index) => {
             const marcacion = row.original.marcaciones?.[0]; // accede al primer elemento
-            const estaPagado = marcacion?.pagado === 1;
+            const estaPagado = marcacion?.pagado === true || marcacion?.pagado === 1;
 
             return (
               <tr
