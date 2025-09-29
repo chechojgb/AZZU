@@ -19,9 +19,9 @@ class BlNivelEstanteria extends Model
     }
 
     // Relación con posiciones
-    public function posiciones()
+    public function zonaNivel()
     {
-        return $this->hasMany(BlPosicion::class, 'nivel_id');
+        return $this->hasMany(BlZonaNivel::class, 'nivel_id');
     }
 
     // Relación con inventario detalle (a través de posiciones)

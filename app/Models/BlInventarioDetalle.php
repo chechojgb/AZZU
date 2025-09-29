@@ -10,42 +10,32 @@ class BlInventarioDetalle extends Model
     use HasFactory;
 
     protected $table = 'bl_inventario_detalle';
+
     protected $fillable = [
-        'empaque_id', 
-        'zona_id', // Cambiado: posicion_id → zona_id
-        'cantidad_actual', 
-        'fecha_ubicacion', 
-        'fecha_vencimiento', 
-        'estado', 
+        'producto_id',   // 🔄 antes era empaque_id
+        'zona_id',
+        'cantidad_actual',
+        'fecha_ubicacion',
+        'fecha_vencimiento',
+        'estado',
         'notas'
     ];
 
     protected $dates = ['fecha_ubicacion', 'fecha_vencimiento'];
 
-    // Relación con empaque
-    public function empaque()
+    // Relación directa con producto (nuevo)
+    public function producto()
     {
-        return $this->belongsTo(BlEmpaque::class, 'empaque_id');
+        return $this->belongsTo(BlProducto::class, 'producto_id');
     }
 
-    // NUEVA RELACIÓN con zona (reemplaza posicion)
+    // Relación con zona (reemplaza posición)
     public function zona()
     {
         return $this->belongsTo(BlZonaNivel::class, 'zona_id');
     }
 
-    // Relación con producto (a través de empaque)
-    public function producto()
-    {
-        return $this->hasOneThrough(
-            BlProducto::class, 
-            BlEmpaque::class,
-            'id', // Foreign key on bl_empaques table
-            'id', // Foreign key on bl_productos table  
-            'empaque_id', // Local key on bl_inventario_detalle table
-            'producto_id' // Local key on bl_empaques table
-        );
-    }
+    // 🔥 Elimino la relación con empaque porque ya no aplica
 
     // Scopes útiles ACTUALIZADOS
     public function scopeDisponibles($query)
@@ -67,9 +57,7 @@ class BlInventarioDetalle extends Model
 
     public function scopeConProducto($query, $productoId)
     {
-        return $query->whereHas('empaque', function($q) use ($productoId) {
-            $q->where('producto_id', $productoId);
-        });
+        return $query->where('producto_id', $productoId);
     }
 
     // Nuevo scope para buscar por código de zona
@@ -84,6 +72,6 @@ class BlInventarioDetalle extends Model
     public function scopeProximosAVencer($query, $dias = 30)
     {
         return $query->whereDate('fecha_vencimiento', '<=', now()->addDays($dias))
-                    ->where('estado', 'disponible');
+                     ->where('estado', 'disponible');
     }
 }

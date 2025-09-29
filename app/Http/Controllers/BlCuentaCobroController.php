@@ -17,7 +17,7 @@ class BlCuentaCobroController extends Controller
     {   
         // .producto
         $user = Auth::user();
-        $cuentas = BlCuentaCobro::with(['itemsMarcacion.marcacion.pedido.items.empaque', 'usuario'])->get();
+        $cuentas = BlCuentaCobro::with(['itemsMarcacion.marcacion.pedido.items.empaque.producto', 'usuario'])->get();
         return Inertia::render('BLCuentaCobro', [
             'user' => $user,
             'cuentasCobro' => $cuentas,

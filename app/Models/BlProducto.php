@@ -23,6 +23,12 @@ class BlProducto extends Model
         return $this->hasMany(BlEmpaque::class, 'producto_id');
     }
 
+    // ✅ Relación DIRECTA con inventarioDetalle (usando producto_id)
+    public function inventarioDetalle(): HasMany
+    {
+        return $this->hasMany(BlInventarioDetalle::class, 'producto_id');
+    }
+
     // Accesor: Descripción automática (ej: "BT 20MM Dorado")
     public function getDescripcionAttribute(): string
     {

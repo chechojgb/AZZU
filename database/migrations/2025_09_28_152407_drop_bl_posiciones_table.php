@@ -8,13 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Eliminar la tabla de manera segura
+        // 1. Eliminar la foreign key en bl_inventario_detalle
+        Schema::table('bl_inventario_detalle', function (Blueprint $table) {
+            // Si se creó con foreignId('posicion_id')->constrained('bl_posiciones')
+            // Laravel por defecto crea la llave con el nombre: bl_inventario_detalle_posicion_id_foreign
+            $table->dropForeign(['posicion_id']); 
+        });
+
+        // 2. Ahora sí eliminar la tabla
         Schema::dropIfExists('bl_posiciones');
     }
 
     public function down(): void
     {
-        // En caso de rollback, recrea la tabla si es necesario
+        // 1. Restaurar la tabla
         Schema::create('bl_posiciones', function (Blueprint $table) {
             $table->id();
             $table->foreignId('nivel_id')->constrained('bl_niveles_estanteria');
@@ -27,6 +34,14 @@ return new class extends Migration
             $table->boolean('ocupada')->default(false);
             $table->boolean('activa')->default(true);
             $table->timestamps();
+        });
+
+        // 2. Restaurar la foreign key en bl_inventario_detalle
+        Schema::table('bl_inventario_detalle', function (Blueprint $table) {
+            $table->foreign('posicion_id')
+                ->references('id')
+                ->on('bl_posiciones')
+                ->onDelete('cascade');
         });
     }
 };

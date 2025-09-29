@@ -35,7 +35,7 @@ export default function EntradaBL({ historico }) {
               >
                 <div className="space-y-1">
                   <p className="font-semibold ">
-                    {item.movible.producto.descripcion || "No existe"}
+                    {item?.movible?.producto?.descripcion || "No existe"}
                   </p>
                   <p className="text-xs ">
                     {format(new Date(item.updated_at), "dd-MM-yyyy HH:mm")} — {item.tipo || "sin tipo"} —{" "}
