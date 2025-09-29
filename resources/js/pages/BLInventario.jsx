@@ -14,8 +14,8 @@ const breadcrumbs = [
     },
 ];
 
-export default function PlanoInventario({ productos }) {
-    console.log(productos);
+export default function PlanoInventario({ productos, estanterias }) {
+    console.log('estanterias:',estanterias);
     
     const { isMobile } = useDispositivo();
     
@@ -53,6 +53,7 @@ export default function PlanoInventario({ productos }) {
                         onCategoriaChange={setCategoriaFiltro}
                         onLimpiarFiltros={limpiarFiltros}
                         onEstanteriaClick={handleEstanteriaClick}
+                        estanterias={estanterias}
                     />
                 </div>
             </AppLayout>
@@ -84,6 +85,7 @@ export default function PlanoInventario({ productos }) {
                     onCategoriaChange={setCategoriaFiltro}
                     onLimpiarFiltros={limpiarFiltros}
                     onEstanteriaClick={handleEstanteriaClick}
+                    estanterias={estanterias}
                 />
             </div>
         </AppLayout>
