@@ -39,14 +39,14 @@ export default function EntradaBL({ historico }) {
                   </p>
                   <p className="text-xs ">
                     {format(new Date(item.updated_at), "dd-MM-yyyy HH:mm")} — {item.tipo || "sin tipo"} —{" "}
-                    <span className="font-medium">{item.usuario.name}</span>
+                    <span className="font-medium">{item?.usuario?.name}</span>
                   </p>
                 </div>
                 <Badge
                   variant="outline"
                   className="text-sm  border-green-300 text-green-600"
                 >
-                  {item.movible.cantidad_por_empaque} und
+                  {item?.movible?.cantidad_por_empaque} und
                 </Badge>
               </div>
             ))
