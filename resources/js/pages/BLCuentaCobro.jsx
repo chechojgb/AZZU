@@ -129,6 +129,7 @@ export default function CuentasCobroCards({ user, cuentas = datosPrueba, cuentas
                     return 0;
             }
         });
+    
 
     // Estadísticas
     const estadisticas = {
@@ -437,6 +438,8 @@ export default function CuentasCobroCards({ user, cuentas = datosPrueba, cuentas
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
                     {cuentasCobro.map((cuenta) => (
+                        console.log(cuenta),
+                        
                         <div key={cuenta.id} className={`rounded-xl shadow-lg border-l-4 transition-all duration-300 hover:shadow-xl hover:scale-105 ${getEstadoColor(cuenta.estado)}`}>
                             <div className="p-6">
                                 {/* Header de la Tarjeta */}
@@ -488,11 +491,11 @@ export default function CuentasCobroCards({ user, cuentas = datosPrueba, cuentas
                                 </div>
 
                                 {/* Items (Preview) */}
-                                {cuenta.items && cuenta.items.length > 0 && (
+                                {cuenta.items_marcacion && cuenta.items_marcacion.length > 0 && (
                                     <div className="mb-4">
                                         <p className="text-xs text-gray-500 mb-2">Items incluidos:</p>
                                         <div className="space-y-1">
-                                            {cuenta.items.slice(0, 30).map((item, index) => {
+                                            {cuenta.items_marcacion.slice(0, 30).map((item, index) => {
                                                 const descripcion = item?.marcacion?.pedido?.items[0]?.empaque?.producto?.descripcion ?? "Sin descripción";
                                                 const cantidad = item.marcacion.cantidad ?? 'sin cantidad'
                                                 const total = item.marcacion.costo_total ?? 'Sin costo total'
@@ -508,7 +511,7 @@ export default function CuentasCobroCards({ user, cuentas = datosPrueba, cuentas
                                                 );
                                             })}
 
-                                            {cuenta.items.length > 7 && (
+                                            {cuenta.items_marcacion.length > 7 && (
                                                 <div className="text-xs text-gray-500 text-center">
                                                     +{cuenta.items.length - 2} items más
                                                 </div>
